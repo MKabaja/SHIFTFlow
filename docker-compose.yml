@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+    app:
+        build: ./backend
+        container_name: shiftflow_app
+        restart: unless-stopped
+        working_dir: /var/www
+        volumes:
+            - ./backend:/var/www
+        ports:
+            - '8000:8000'
+        depends_on:
+            - db
+        networks:
+            - shiftflow_network
+        environment:
+            DB_HOST: db
+            DB_PORT: 3306
+            DB_DATABASE: shiftflow_db
+            DB_USERNAME: shiftflow_user
+            DB_PASSWORD: shiftflow_pass
+
+    db:
+        image: mysql:8.0
+        container_name: shiftflow_db
+        restart: unless-stopped
+        ports:
+            - '3306:3306'
+        environment:
+            MYSQL_DATABASE: shiftflow_db
+            MYSQL_USER: shiftflow_user
+            MYSQL_PASSWORD: shiftflow_pass
+            MYSQL_ROOT_PASSWORD: root
+        volumes:
+            - db_data:/var/lib/mysql
+        networks:
+            - shiftflow_network
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: shiftflow_phpmyadmin
+        restart: unless-stopped
+        ports:
+            - '8080:80'
+        environment:
+            PMA_HOST: db
+            PMA_PORT: 3306
+            PMA_USER: root
+            PMA_PASSWORD: root
+        networks:
+            - shiftflow_network
+
+volumes:
+    db_data:
+
+networks:
+    shiftflow_network:
+        driver: bridge
