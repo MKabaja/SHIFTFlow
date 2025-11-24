@@ -6,8 +6,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Tymon\JWTAuth\JWT;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -44,5 +46,25 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    /**
+     * ========== JWT METHODS ==========
+     * 
+     * Te dwie metody są wymagane przez JWTSubject
+     * Mówią JWT'owi jak identyfikować usera w tokenie
+     */
+
+    /**
+     * Zwróć ID usera (do JWT payload)
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    //zwróć custom claims do JWT
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }
