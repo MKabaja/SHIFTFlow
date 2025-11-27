@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Tymon\JWTAuth\JWT;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -18,11 +20,23 @@ class User extends Authenticatable implements JWTSubject
      * The attributes that are mass assignable.
      *
      * @var list<string>
+     * @property string $name
+     * @property string $email
+     * @property string $positions
+     * @property float $hourly_rate
+     * @property int $max_hours_per_month
+     * @property int $min_break_hours
+     * @property string $contract_type
      */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'positions',
+        'hourly_rate',
+        'max_hours_per_month',
+        'min_break_hours',
+        'contract_type',
     ];
 
     /**
@@ -33,6 +47,7 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
+        'pin_hashed'
     ];
 
     /**
@@ -45,7 +60,30 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'positions' => 'array',
+            'hourly_rate' => 'decimal:2',
+            'is_active' => 'boolean',
+            'max_hours_per_month' => 'integer',
+            'min_break_hours' => 'integer',
+            'role' => 'string',
+            'contract_type' => 'string',
+            
         ];
+    }
+    protected function pinHashed():Attribute
+    {
+        return Attribute::make(
+            set: fn($value) => $value ? Hash::make($value) : null,
+        );
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
+    }
+    public function availabilities()
+    {
+        return $this->hasMany(Availability::class);
     }
     /**
      * ========== JWT METHODS ==========

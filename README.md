@@ -55,11 +55,13 @@ Database (Users, Schedules, Availabilities)
 - email (string, unique, nullable) — dla kierownika/admina
 - password (string, hashed)
 - role (enum: employee, manager, admin)
-- pin (string, nullable, hashed) — dla pracownika
-- positions (json) — ["B1", "B2", "PW", "WR"] — uprawnienia
+- pin_hashed (string, 60, nullable, hashed) — dla pracownika (PIN login)
+- is_active (boolean, default: true) — czy pracownik aktywny
+- positions (json, nullable) — ["B1", "B2", "PW", "WR"] — uprawnienia
 - hourly_rate (decimal 8,2, nullable) — domyślna stawka
-- max_hours_per_month (int) — limit godzin/miesiąc
-- min_break_hours (int) — min przerwa między zmianami
+- max_hours_per_month (unsignedSmallInteger, nullable) — limit godzin/miesiąc
+- min_break_hours (unsignedSmallInteger, default: 11) — min przerwa między zmianami
+- contract_type (enum: uop, zlecenie, default: uop) — rodzaj umowy
 - created_at, updated_at
 ```
 
@@ -83,11 +85,13 @@ Database (Users, Schedules, Availabilities)
 
 ```
 - id (PK)
-- user_id (FK → users)
-- date (date)
-- available_from (time, nullable)
-- available_to (time, nullable)
+- user_id (FK → users, on delete cascade)
+- date (date) — konkretny dzień, którym pracownik chce/nie chce pracować
+- is_available (boolean) — TRUE = chce pracować, FALSE = nie chce (dyspozycja/urlop)
+- submission_date (date, nullable) — kiedy pracownik złożył dyspozycję (dla audytu)
+- notes (text, nullable) — powód (urlop, choroba, itp.)
 - created_at, updated_at
+- Indeks: unique (user_id, date) — jeden rekord per dzień per pracownik
 ```
 
 ---
@@ -120,7 +124,7 @@ Database (Users, Schedules, Availabilities)
 
 ### Availabilities (Pracownik)
 
--   `GET /api/availabilities/{user_id}` — dyspozycje pracownika
+-   `GET /api/availabilities?user_id=1` — dyspozycje pracownika
 -   `POST /api/availabilities` — dodawanie dyspozycji (pracownik na siebie)
 -   `DELETE /api/availabilities/{id}` — usunięcie dyspozycji
 
@@ -147,8 +151,11 @@ Przed zapisaniem Schedule musisz sprawdzić:
 2. **Dostępność pracownika**
 
     - Input: user_id, date
-    - Logic: Sprawdź czy istnieje Availability dla tego user_id i date
-    - Return: True (dostępny) / False (ma dyspozycję/urlop)
+    - Logic:
+        - Query: SELECT \* FROM availabilities WHERE user_id=? AND date=?
+        - Jeśli znaleziony rekord I is_available=false → BŁĄD: "User is unavailable on {date}"
+        - Jeśli nie ma rekordu → OK (domyślnie pracownik dostępny)
+    - Return: True (dostępny) / False (brak dostępności)
 
 3. **Konflikt czasowy**
 
@@ -167,10 +174,20 @@ Przed zapisaniem Schedule musisz sprawdzić:
     - Logic: Oblicz hours_worked = (shift_end - shift_start) / 60. Pobierz wszystkie Schedule dla user_id w bieżącym miesiącu i zsumuj hours_worked. Sprawdź czy (suma + nowe godziny) <= max_hours_per_month
     - Return: True (OK) / False (przekroczenie) + error message z liczbą
 
+### Logika domyślna dostępności
+
+Pracownik jest domyślnie dostępny na każdy dzień, chyba że:
+
+1. Wyraźnie złożył dyspozycję: `is_available = false` dla danego dnia
+2. Brak rekordu w availabilities → brak danych o niedostępności
+
+To oznacza, że kierownik MOŻE przypisać zmianę pracownikowi nawet bez jego zgody,
+ale JEŚLI pracownik złożył dyspozycję `is_available=false` → przypisanie zmiany będzie zablokowane.
+
 ### PIN Login Validation
 
 1. Rate limiting: max 5 prób / 15 minut z tego IP
-2. PIN comparison: porównaj hashed PIN z bazą
+2. PIN comparison: porównaj hashed PIN z bazą (Hash::check($request->pin, $user->pin_hashed))
 
 ---
 
@@ -180,7 +197,7 @@ Przed zapisaniem Schedule musisz sprawdzić:
 laravel-schedule-app/
 ├── app/
 │   ├── Models/
-│   │   ├── User.php (rozszerzony o role, positions, hourly_rate)
+│   │   ├── User.php (rozszerzony o role, positions, pin_hashed, contract_type)
 │   │   ├── Schedule.php
 │   │   ├── Availability.php
 │   ├── Http/
@@ -238,9 +255,9 @@ laravel-schedule-app/
 -   https://laravel.com/docs/11/installation
 -   https://laravel.com/docs/11/starter-kits#breeze
 
--   [ ] Utwórz nowy projekt Laravel: `composer create-project laravel/laravel schedule-app`
--   [ ] Zainstaluj Breeze: `composer require laravel/breeze && php artisan breeze:install`
--   [ ] Sprawdź czy logowanie działa: `php artisan serve` → localhost:8000/login
+-   [x] Utwórz nowy projekt Laravel: `composer create-project laravel/laravel schedule-app`
+-   [x] Zainstaluj Breeze: `composer require laravel/breeze && php artisan breeze:install`
+-   [x] Sprawdź czy logowanie działa: `php artisan serve` → localhost:8000/login
 
 #### Zadanie 1.2: Docker Setup
 
@@ -305,14 +322,14 @@ laravel-schedule-app/
 
 Funkcja `up()` powinna:
 
--   [x] Dodać kolumnę `role` (enum: employee, manager, admin, default: employee)
--   [x] Dodać kolumnę `pin_hashed` (string, nullable)
--   [x] Dodać kolumnę `positions` (json, nullable) — lista stanowisk
--   [x] Dodać kolumnę `hourly_rate` (decimal 8,2, nullable)
--   [x] Dodać kolumnę `max_hours_per_month` (unsignedSmallInteger, default: 160)
--   [x] Dodać kolumnę `min_break_hours` (unsignedSmallInteger, default: 11),
--   [x] Dodać kolumnę `contract_type` (enum: uop,zlecenie),
--   [x] Dodać kolumnę `is_active` (true),
+-   Dodać kolumnę `pin_hashed` (string 60, nullable) — hashed PIN dla pracownika
+-   Dodać kolumnę `is_active` (boolean, default: true) — czy pracownik aktywny
+-   Dodać kolumnę `role` (enum: employee, manager, admin, default: employee)
+-   Dodać kolumnę `positions` (json, nullable) — lista stanowisk
+-   Dodać kolumnę `hourly_rate` (decimal 8,2, nullable)
+-   Dodać kolumnę `max_hours_per_month` (unsignedSmallInteger, nullable)
+-   Dodać kolumnę `min_break_hours` (unsignedSmallInteger, default: 11)
+-   Dodać kolumnę `contract_type` (enum: uop, zlecenie, default: uop)
 
 Funkcja `down()` powinna usunąć wszystkie dodane kolumny.
 
@@ -328,12 +345,15 @@ Funkcja `down()` powinna usunąć wszystkie dodane kolumny.
 
 W modelu dodaj:
 
--   `$fillable` array — dodaj nowe kolumny
--   `$hidden` — dodaj 'pin' (nigdy nie zwracaj PIN w API!)
--   `$casts` — rzutuj 'positions' na 'array' (automatyczne JSON ↔ Array konwersje)
+-   `$fillable` array — wszystkie nowe kolumny (name, email, password, pin_hashed, is_active, role, positions, hourly_rate, max_hours_per_month, min_break_hours, contract_type)
+-   `$hidden` — dodaj 'pin_hashed' (nigdy nie zwracaj PIN w API!)
+-   `$casts` — rzutuj 'positions' na 'array', 'is_active' na 'boolean', 'hourly_rate' na 'decimal:2'
 -   Relacje:
     -   `schedules()` — hasMany Schedule
     -   `availabilities()` — hasMany Availability
+-   JWT Methods (jeśli używasz Tymon/JWT-Auth):
+    -   `getJWTIdentifier()` — zwróć getKey()
+    -   `getJWTCustomClaims()` — zwróć ['role' => $this->role, 'is_active' => $this->is_active]
 
 #### Zadanie 5.3: Uruchom migrację
 
@@ -344,7 +364,7 @@ W modelu dodaj:
 -   [ ] `php artisan migrate`
 -   [ ] Sprawdź w PhpMyAdmin że kolumny dodane w users
 
-**Commit:** `:wrench: feat(models): Extend User model with role, positions, hourly_rate`
+**Commit:** `:wrench: feat(models): Extend User model with role, positions, pin_hashed, contract_type`
 
 ---
 
@@ -393,16 +413,17 @@ Migracja `create_availabilities_table` powinna:
 -   `id` (PK)
 -   `user_id` (FK → users, on delete cascade)
 -   `date` (date)
--   `available_from` (time, nullable)
--   `available_to` (time, nullable)
+-   `is_available` (boolean, default: true) — TRUE = chce pracować, FALSE = nie chce (dyspozycja/urlop)
+-   `submission_date` (date, nullable) — kiedy pracownik złożył dyspozycję
+-   `notes` (text, nullable) — powód (urlop, choroba, itp.)
 -   `timestamps`
--   Indeks: na (user_id, date)
+-   Indeks: unique na (user_id, date) — jeden rekord per dzień per pracownik
 
 Model `app/Models/Availability.php`:
 
 -   Relacja: `user()` — belongsTo User
--   `$fillable` — user_id, date, available_from, available_to
--   `$casts` — rzutuj date na Carbon
+-   `$fillable` — user_id, date, is_available, submission_date, notes
+-   `$casts` — rzutuj date i submission_date na Carbon, is_available na boolean
 
 #### Zadanie 7.3: Uruchom migracje
 
@@ -448,7 +469,7 @@ Metoda `loginPin()`:
 -   Accept: `POST /api/auth/login-pin` → JSON body: {employee_id, pin}
 -   Validuj input (employee_id required, pin required)
 -   Sprawdź czy user istnieje i role === 'employee'
--   Porównaj PIN (hashed): Hash::check($pin, $user->pin)
+-   Porównaj PIN (hashed): Hash::check($pin, $user->pin_hashed)
 -   Rate limiting: max 5 prób / 15 minut (użyj RateLimiter)
 -   Jeśli OK: wygeneruj JWT token
 -   Return: 200 JSON: {token, user: {id, name, role}}
@@ -732,10 +753,10 @@ Metoda `index()`:
 
 Metoda `store()`:
 
--   Accept: `POST /api/employees` → JSON body: {name, email, pin, positions, hourly_rate, max_hours_per_month, min_break_hours}
+-   Accept: `POST /api/employees` → JSON body: {name, email, pin, positions, hourly_rate, max_hours_per_month, min_break_hours, contract_type}
 -   Autoryzacja: tylko admin
 -   Validuj input (Form Request)
--   Hash PIN: `Hash::make($pin)`
+-   Hash PIN: `Hash::make($pin)` i zapisz do `pin_hashed`
 -   Create User z role='employee'
 -   Return 201 {user}
 
@@ -749,7 +770,7 @@ Metoda `store()`:
 
 Metoda `update(User $user, Request $request)`:
 
--   Accept: `PUT /api/employees/{id}` → JSON body: {positions, hourly_rate, ...}
+-   Accept: `PUT /api/employees/{id}` → JSON body: {positions, hourly_rate, contract_type, ...}
 -   Autoryzacja: tylko admin
 -   Update user
 -   Return 200 {user}
@@ -807,7 +828,7 @@ Metoda `parseCSV(UploadedFile $file)`:
     -   Dla każdego pracownika:
         -   Zbierz wszystkie pozycje gdzie wartość = "TAK" (lub 1)
         -   Utwórz array positions: ["B1", "B2", ...]
-        -   Hash PIN
+        -   Hash PIN do `pin_hashed`
         -   Create User z role='employee'
 -   Return: array{success: count, errors: []}
 
@@ -875,8 +896,14 @@ Metoda `index()`:
 
 Metoda `store()`:
 
--   Accept: `POST /api/availabilities` → JSON body: {date, available_from, available_to}
--   Jeśli employee: na siebie. Jeśli manager/admin: może na kogośkolwiek (+ user_id w body)
+-   Accept: `POST /api/availabilities` → JSON body: {date, is_available, notes}
+-   Jeśli employee: pracownik dodaje sam na siebie (user_id = auth()->id())
+-   Jeśli manager/admin: może dodać dla kogokolwiek (+ user_id w body)
+-   Validuj input:
+    -   date: required, date, unique per (user_id, date)
+    -   is_available: required, boolean
+    -   notes: optional, string, max 255
+-   submission_date: automatycznie ustawia się na dzisiejszą datę
 -   Create Availability
 -   Return 201 {availability}
 
@@ -1093,11 +1120,13 @@ Factory powinien generować:
 -   email: unique fake()->email()
 -   password: Hash::make('password')
 -   role: fake()->randomElement(['employee', 'manager', 'admin'])
--   pin: Hash::make(fake()->numerify('####')) (jeśli role=employee)
+-   pin_hashed: Hash::make(fake()->numerify('####')) (jeśli role=employee)
+-   is_active: true
 -   positions: (jeśli role=employee) fake()->randomElements(['B1', 'B2', 'PW', 'WR', 'WS', 'TGT', ...], fake()->numberBetween(2, 5))
 -   hourly_rate: fake()->numberBetween(15, 30)
 -   max_hours_per_month: 160
 -   min_break_hours: 11
+-   contract_type: fake()->randomElement(['uop', 'zlecenie'])
 
 #### Zadanie 27.2: UserSeeder
 
@@ -1292,7 +1321,7 @@ Przykłady:
 ```
 :tada: feat(setup): Laravel Breeze initial setup with Docker
 :lock: feat(auth): JWT authentication setup
-:wrench: feat(models): Extend User model with role, positions
+:wrench: feat(models): Extend User model with role, positions, pin_hashed, contract_type
 :database: feat(models): Schedule & Availability models
 :lock: feat(auth): Login endpoints (email & PIN)
 :shield: feat(middleware): Role-based access control
@@ -1320,4 +1349,4 @@ Przykłady:
 
 **Ty samy napiszesz kod, będziesz rozumieć każdy kawałek, i nauczysz się Laravela na praktyce!** 🚀
 
-Powodzenia! Jeśli będziesz miał pytania na temat specyfikacji zadań — pytaj w osobnej przestrzeni z prompt-asystent.md!
+Powodzenia! Jeśli będziesz miał pytania na temat specyfikacji zadań — pytaj!
