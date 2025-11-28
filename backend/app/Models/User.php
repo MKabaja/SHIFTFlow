@@ -32,11 +32,13 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'pin_hashed',
         'positions',
         'hourly_rate',
         'max_hours_per_month',
         'min_break_hours',
         'contract_type',
+        'role',
     ];
 
     /**

@@ -569,9 +569,9 @@ Utwórz routes:
 
 #### Zadanie 9.5: Testuj w Postmanie
 
--   [ ] POST /api/auth/login z email admina + password (z Breeze seedera) → powinna zwrócić token
--   [ ] Copy token, ustawie header: `Authorization: Bearer {token}`
--   [ ] GET /api/auth/me → powinna zwrócić dane użytkownika
+-   [x] POST /api/auth/login z email admina + password (z Breeze seedera) → powinna zwrócić token
+-   [x] Copy token, ustawie header: `Authorization: Bearer {token}`
+-   [x] GET /api/auth/me → powinna zwrócić dane użytkownika
 
 **Commit:** `:lock: feat(auth): Login endpoints (email & PIN)`
 

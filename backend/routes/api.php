@@ -20,9 +20,19 @@ Route::prefix('auth')->controller(AuthController::class)->group(function() {
         Route::get('/me', 'me');
 
         Route::post('/logout','logout');
+
+        
     });
 });
+
+Route::middleware('auth:api') -> group(function() {
+    Route::get('/admin-only',function() {
+            return ['message' => 'welcome admin!'];
+        })->middleware('role:admin');
+});
+
    
+
 
 
     
