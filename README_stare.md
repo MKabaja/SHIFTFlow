@@ -40,7 +40,7 @@ Laravel Controllers (Auth, Schedules, Employees, Reports)
     ↓
 Service Layer (Business Logic, Validations)
     ↓
-Database (Users, Schedules, Availabilities, Positions)
+Database (Users, Schedules, Availabilities)
 ```
 
 ---
@@ -57,21 +57,11 @@ Database (Users, Schedules, Availabilities, Positions)
 - role (enum: employee, manager, admin)
 - pin_hashed (string, 60, nullable, hashed) — dla pracownika (PIN login)
 - is_active (boolean, default: true) — czy pracownik aktywny
-- positions (json, nullable) — relacja do positions → array position_id — uprawnienia
+- positions (json, nullable) — ["B1", "B2", "PW", "WR"] — uprawnienia
 - hourly_rate (decimal 8,2, nullable) — domyślna stawka
 - max_hours_per_month (unsignedSmallInteger, nullable) — limit godzin/miesiąc
 - min_break_hours (unsignedSmallInteger, default: 11) — min przerwa między zmianami
 - contract_type (enum: uop, zlecenie, default: uop) — rodzaj umowy
-- created_at, updated_at
-```
-
-### Position Model (NEW - 28.11.2025)
-
-```
-- id (PK)
-- name (string, unique) — np. "B1", "B2", "PW", "WR", "WS", "TGT"
-- description (text, nullable) — np. "Bileter jeden"
-- created_by (FK → users, nullable) — kto dodał pozycję
 - created_at, updated_at
 ```
 
@@ -80,8 +70,8 @@ Database (Users, Schedules, Availabilities, Positions)
 ```
 - id (PK)
 - user_id (FK → users)
-- position_id (FK → positions) — zamiast enum position
 - date (date)
+- position (string) — np. "B1", "WR", "TGT"
 - shift_start (time)
 - shift_end (time)
 - hours_worked (smallint) — wyliczone lub ręczne
@@ -114,14 +104,6 @@ Database (Users, Schedules, Availabilities, Positions)
 -   `POST /api/auth/login-pin` — pracownik (id + pin)
 -   `POST /api/auth/logout` — wylogowanie
 -   `GET /api/auth/me` — dane zalogowanego użytkownika
-
-### Positions (Admin/Manager)
-
--   `GET /api/positions` — lista wszystkich stanowisk
--   `POST /api/positions` — dodawanie stanowiska (admin)
--   `GET /api/positions/{id}` — szczegóły stanowiska
--   `PUT /api/positions/{id}` — edycja stanowiska (admin)
--   `DELETE /api/positions/{id}` — usunięcie stanowiska (admin)
 
 ### Employees (Admin/Manager)
 
@@ -162,8 +144,8 @@ Przed zapisaniem Schedule musisz sprawdzić:
 
 1. **Uprawnienia do stanowiska**
 
-    - Input: user_id, position_id
-    - Logic: Sprawdź czy position_id ∈ user.positions (array position_ids)
+    - Input: user_id, position
+    - Logic: Pobierz user.positions (JSON array) i sprawdź czy position ∈ user.positions
     - Return: True/False lub throw ValidationException
 
 2. **Dostępność pracownika**
@@ -218,12 +200,10 @@ laravel-schedule-app/
 │   │   ├── User.php (rozszerzony o role, positions, pin_hashed, contract_type)
 │   │   ├── Schedule.php
 │   │   ├── Availability.php
-│   │   ├── Position.php (NEW - 28.11.2025)
 │   ├── Http/
 │   │   ├── Controllers/
 │   │   │   ├── Api/
 │   │   │   │   ├── AuthController.php
-│   │   │   │   ├── PositionController.php (NEW - 28.11.2025)
 │   │   │   │   ├── EmployeeController.php
 │   │   │   │   ├── ScheduleController.php
 │   │   │   │   ├── AvailabilityController.php
@@ -244,12 +224,10 @@ laravel-schedule-app/
 ├── database/
 │   ├── migrations/
 │   │   ├── 2024_01_01_000001_extend_users_table.php
-│   │   ├── 2024_01_01_000002_create_positions_table.php (NEW - 28.11.2025)
-│   │   ├── 2024_01_01_000003_create_schedules_table.php (ZMIENIONA - position_id FK)
-│   │   ├── 2024_01_01_000004_create_availabilities_table.php
+│   │   ├── 2024_01_01_000002_create_schedules_table.php
+│   │   ├── 2024_01_01_000003_create_availabilities_table.php
 │   ├── seeders/
 │   │   ├── UserSeeder.php
-│   │   ├── PositionSeeder.php (NEW - 28.11.2025)
 │   │   ├── ScheduleSeeder.php
 ├── routes/
 │   ├── api.php (wszystkie endpointy /api)
@@ -258,7 +236,6 @@ laravel-schedule-app/
 │   │   ├── AuthTest.php
 │   │   ├── ScheduleTest.php
 │   │   ├── EmployeeTest.php
-│   │   ├── PositionTest.php (NEW - 28.11.2025)
 ├── .env.example
 ├── docker-compose.yml
 ├── Dockerfile
@@ -310,7 +287,7 @@ laravel-schedule-app/
 -   https://jwt-auth.readthedocs.io/en/develop/
 
 -   [x] `composer require tymon/jwt-auth`
--   [x] `php artisan vendor:publish --provider="Tymon\\JWTAuth\\Providers\\JWTAuthServiceProvider"`
+-   [x] `php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\JWTAuthServiceProvider"`
 -   [x] `php artisan jwt:secret` (generator klucza)
 -   [x] W `config/auth.php` dodaj guard 'api' z JWT driver:
     -   Typ: `jwt`
@@ -348,7 +325,7 @@ Funkcja `up()` powinna:
 -   Dodać kolumnę `pin_hashed` (string 60, nullable) — hashed PIN dla pracownika
 -   Dodać kolumnę `is_active` (boolean, default: true) — czy pracownik aktywny
 -   Dodać kolumnę `role` (enum: employee, manager, admin, default: employee)
--   Dodać kolumnę `positions` (json, nullable) — lista position_ids (FK → positions.id)
+-   Dodać kolumnę `positions` (json, nullable) — lista stanowisk
 -   Dodać kolumnę `hourly_rate` (decimal 8,2, nullable)
 -   Dodać kolumnę `max_hours_per_month` (unsignedSmallInteger, nullable)
 -   Dodać kolumnę `min_break_hours` (unsignedSmallInteger, default: 11)
@@ -384,8 +361,8 @@ W modelu dodaj:
 
 -   https://laravel.com/docs/11/migrations#running-migrations
 
--   [x] `php artisan migrate`
--   [x] Sprawdź w PhpMyAdmin że kolumny dodane w users
+-   [ ] `php artisan migrate`
+-   [ ] Sprawdź w PhpMyAdmin że kolumny dodane w users
 
 **Commit:** `:wrench: feat(models): Extend User model with role, positions, pin_hashed, contract_type`
 
@@ -406,8 +383,8 @@ Migracja `create_schedules_table` powinna:
 
 -   `id` (PK)
 -   `user_id` (FK → users, on delete cascade)
--   `position_id` (FK → positions, on delete cascade) — zamiast enum position
 -   `date` (date)
+-   `position` (string) — stanowisko
 -   `shift_start` (time)
 -   `shift_end` (time)
 -   `hours_worked` (unsignedSmallInteger)
@@ -420,7 +397,6 @@ Migracja `create_schedules_table` powinna:
 Model `app/Models/Schedule.php`:
 
 -   Relacja: `user()` — belongsTo User
--   Relacja: `position()` — belongsTo Position (NEW - 28.11.2025)
 -   `$fillable` — wszystkie kolumny
 -   `$casts` — rzutuj date i times na Carbon
 
@@ -446,55 +422,15 @@ Migracja `create_availabilities_table` powinna:
 Model `app/Models/Availability.php`:
 
 -   Relacja: `user()` — belongsTo User
--   `$fillable` — user_id, date, is_available, notes (submission_date BEZ $fillable!)
+-   `$fillable` — user_id, date, is_available, submission_date, notes
 -   `$casts` — rzutuj date i submission_date na Carbon, is_available na boolean
-
-#### Zadanie 7.2.5: Position Model i migracja (NEW - 28.11.2025)
-
-**Problem rozwiązany:** Zamiast enum position w schedules, mamy osobną tabelę positions dla elastyczności.
-
-**Dokumentacja:**
-
--   https://laravel.com/docs/11/eloquent#generating-model-classes
--   https://laravel.com/docs/11/migrations#creating-tables
-
-**Polecenie:** `php artisan make:model Position -m`
-
-Migracja `create_positions_table` powinna:
-
--   `id` (PK)
--   `name` (string, unique) — np. "B1", "B2", "PW", "WR", "WS", "TGT"
--   `description` (text, nullable) — np. "Bileter jeden"
--   `created_by` (FK → users, nullable, on delete set null)
--   `timestamps`
-
-Model `app/Models/Position.php`:
-
--   Relacja: `creator()` — belongsTo User, 'created_by'
--   Relacja: `schedules()` — hasMany Schedule (NEW)
--   `$fillable` — ['name', 'description', 'created_by']
--   `$casts` — brak specjalnych rzutów
-
-**Migracja pozycji w kolejności:**
-
-1. `create_positions_table` (PIERWSZA - 2024_01_01_000002)
-2. `create_schedules_table` (z position_id FK - 2024_01_01_000003) — ZMIENIONA!
-3. `create_availabilities_table` (2024_01_01_000004)
-
-**Dlaczego ta zmiana:**
-
--   ✅ **Dynamiczność** – dodawanie/usuwanie stanowisk bez kodu
--   ✅ **Skalowalność** – łatwe rozbudowywanie + archiwizowanie
--   ✅ **Bezpieczeństwo** – walidacja przez FK, brak "orphan" rekordów
--   ✅ **Audyt** – wiemy kto dodał daną pozycję (created_by)
--   ✅ **Best practice** – relacyjne rozdzielenie odpowiedzialności
 
 #### Zadanie 7.3: Uruchom migracje
 
--   [x] `php artisan migrate`
--   [x] Sprawdź strukturę tabel w PhpMyAdmin
+-   [ ] `php artisan migrate`
+-   [ ] Sprawdź strukturę tabel w PhpMyAdmin
 
-**Commit:** `:database: feat(models): Schedule, Availability & Position models (position_id FK)`
+**Commit:** `:database: feat(models): Schedule & Availability models with migrations`
 
 ---
 
@@ -609,7 +545,7 @@ Middleware `RoleMiddleware`:
 W `routeMiddleware` dodaj:
 
 ```
-'role' => \\App\\Http\\Middleware\\RoleMiddleware::class,
+'role' => \App\Http\Middleware\RoleMiddleware::class,
 ```
 
 #### Zadanie 11.3: Testuj middleware
@@ -642,9 +578,9 @@ Metoda `index()`:
     -   Jeśli role === 'employee': pokaż tylko grafiki zalogowanego użytkownika
     -   Jeśli role === 'manager' lub 'admin': pokaż wszystkie, ale jeśli user_id w query → filtruj po user_id
     -   Jeśli date w query: filtruj po date
-    -   Eager load user i position (with(['user', 'position']))
+    -   Eager load user (with('user'))
     -   Sortuj po date DESC
--   Return: 200 JSON array Schedule'ów z user i position details
+-   Return: 200 JSON array Schedule'ów z user details
 
 #### Zadanie 13.2: ScheduleController - Store
 
@@ -657,7 +593,7 @@ Metoda `index()`:
 
 Metoda `store()`:
 
--   Accept: `POST /api/schedules` → JSON body: {user_id, date, position_id, shift_start, shift_end}
+-   Accept: `POST /api/schedules` → JSON body: {user_id, date, position, shift_start, shift_end}
 -   Validuj input (Form Request: StoreScheduleRequest)
 -   Sprawdź autoryzację: tylko manager/admin mogą tworzyć dla innych
 -   Oblicz hours_worked = (shift_end - shift_start) w godzinach
@@ -680,7 +616,7 @@ Metoda `store()`:
 
 Metoda `update(Schedule $schedule, Request $request)`:
 
--   Accept: `PUT /api/schedules/{id}` → JSON body: {position_id, shift_start, shift_end, notes}
+-   Accept: `PUT /api/schedules/{id}` → JSON body: {position, shift_start, shift_end, notes}
 -   Autoryzacja: tylko creator/manager/admin mogą edytować
 -   Validuj input (UpdateScheduleRequest)
 -   Powtórz walidacje biznesowe (jak w store)
@@ -716,8 +652,8 @@ Form Request do validacji:
 -   `authorize()`: sprawdź czy user jest manager lub admin
 -   `rules()`:
     -   user_id: required, exists:users,id
-    -   position_id: required, exists:positions,id
     -   date: required, date, date_format:Y-m-d
+    -   position: required, string
     -   shift_start: required, date_format:H:i
     -   shift_end: required, date_format:H:i, after:shift_start
 
@@ -735,7 +671,7 @@ Route::middleware(['auth:api', 'role:manager,admin'])->group(function () {
 });
 ```
 
-**Commit:** `:calendar: feat(api): Schedule CRUD operations (position_id)`
+**Commit:** `:calendar: feat(api): Schedule CRUD operations`
 
 ---
 
@@ -754,12 +690,12 @@ Polecenie: `php artisan make:class Services/ValidationService`
 
 Klasa z metodami do walidacji (patrz sekcja 6. WALIDACJE BIZNESOWE):
 
-Metoda `validateScheduleCreation($userId, $date, $shiftStart, $shiftEnd, $positionId)`:
+Metoda `validateScheduleCreation($userId, $date, $shiftStart, $shiftEnd, $position)`:
 
 -   Sprawdzenie 1: Uprawnienia do stanowiska
-    -   Pobierz user.positions (array position_ids)
-    -   Sprawdź czy position_id ∈ positions
-    -   Throw: "User does not have permission for position: {positionId}"
+    -   Pobierz user.positions
+    -   Sprawdź czy position ∈ positions
+    -   Throw: "User does not have permission for position: {position}"
 -   Sprawdzenie 2: Dostępność
     -   Query Availability gdzie user_id i date
     -   Throw: "User is unavailable on {date}"
@@ -791,95 +727,9 @@ Jeśli wszystkie OK: return true
 
 ---
 
-### SESJA 17-18: Position CRUD (NEW - 28.11.2025)
+### SESJA 17-18: Employee Management (CRUD)
 
-#### Zadanie 17.1: PositionController - Index
-
-**Dokumentacja:**
-
--   https://laravel.com/docs/11/eloquent#retrieving-multiple-models
-
-**Plik:** `app/Http/Controllers/Api/PositionController.php`
-
-Polecenie: `php artisan make:controller Api/PositionController --api`
-
-Metoda `index()`:
-
--   Accept: `GET /api/positions` (protected: manager/admin)
--   Return: 200 JSON array wszystkich Positions z creator info (eager load creator)
--   Include: id, name, description, created_by (user.name), created_at
-
-#### Zadanie 17.2: PositionController - Store
-
-**Dokumentacja:**
-
--   https://laravel.com/docs/11/eloquent#inserting-models
-
-**Plik:** `app/Http/Controllers/Api/PositionController.php`
-
-Metoda `store()`:
-
--   Accept: `POST /api/positions` → JSON body: {name, description}
--   Autoryzacja: tylko admin
--   Validuj input: name (required, string, unique:positions,name)
--   Set created_by = auth()->id()
--   Create Position
--   Return 201 {position}
-
-#### Zadanie 17.3: PositionController - Update
-
-**Dokumentacja:**
-
--   https://laravel.com/docs/11/eloquent#updating-models
-
-**Plik:** `app/Http/Controllers/Api/PositionController.php`
-
-Metoda `update(Position $position, Request $request)`:
-
--   Accept: `PUT /api/positions/{id}` → JSON body: {name, description}
--   Autoryzacja: tylko admin
--   Validuj input: name (required, string, unique:positions,name,{id})
--   Update position
--   Return 200 {position}
-
-#### Zadanie 17.4: PositionController - Delete
-
-**Dokumentacja:**
-
--   https://laravel.com/docs/11/eloquent#deleting-models
-
-**Plik:** `app/Http/Controllers/Api/PositionController.php`
-
-Metoda `destroy(Position $position)`:
-
--   Accept: `DELETE /api/positions/{id}`
--   Autoryzacja: tylko admin
--   Sprawdź czy pozycja nie jest używana w Schedule (query count)
--   Jeśli używana: return 422 {error: "Cannot delete position - used in schedules"}
--   Delete position
--   Return 200 {message: "Position deleted"}
-
-#### Zadanie 17.5: Routes
-
-**Dokumentacja:**
-
--   https://laravel.com/docs/11/routing#resource-controllers
-
-**Plik:** `routes/api.php`
-
-```
-Route::middleware(['auth:api', 'role:admin'])->group(function () {
-    Route::apiResource('positions', PositionController::class);
-});
-```
-
-**Commit:** `:package: feat(api): Position management CRUD endpoints`
-
----
-
-### SESJA 19-20: Employee Management (CRUD) - ZMIENIONA
-
-#### Zadanie 19.1: EmployeeController - Index
+#### Zadanie 17.1: EmployeeController - Index
 
 **Dokumentacja:**
 
@@ -891,10 +741,9 @@ Metoda `index()`:
 
 -   Accept: `GET /api/employees` (protected: only manager/admin)
 -   Return: 200 JSON array wszystkich Users role=employee
--   Include positions (jako position objects - eager load), hourly_rate
--   Eager load: with('positions') - relacja many-to-many (jeśli użyjesz pivot table, albo json array z IDs)
+-   Include positions, hourly_rate
 
-#### Zadanie 19.2: EmployeeController - Store
+#### Zadanie 17.2: EmployeeController - Store
 
 **Dokumentacja:**
 
@@ -904,17 +753,14 @@ Metoda `index()`:
 
 Metoda `store()`:
 
--   Accept: `POST /api/employees` → JSON body: {name, email, pin, position_ids (array), hourly_rate, max_hours_per_month, min_break_hours, contract_type}
+-   Accept: `POST /api/employees` → JSON body: {name, email, pin, positions, hourly_rate, max_hours_per_month, min_break_hours, contract_type}
 -   Autoryzacja: tylko admin
--   Validuj input (Form Request):
-    -   position_ids: required, array, each ID exists:positions,id
+-   Validuj input (Form Request)
 -   Hash PIN: `Hash::make($pin)` i zapisz do `pin_hashed`
--   Validate position_ids exist
 -   Create User z role='employee'
--   Set positions = $position_ids (jako JSON array lub relacja)
 -   Return 201 {user}
 
-#### Zadanie 19.3: EmployeeController - Update
+#### Zadanie 17.3: EmployeeController - Update
 
 **Dokumentacja:**
 
@@ -924,12 +770,12 @@ Metoda `store()`:
 
 Metoda `update(User $user, Request $request)`:
 
--   Accept: `PUT /api/employees/{id}` → JSON body: {position_ids, hourly_rate, contract_type, ...}
+-   Accept: `PUT /api/employees/{id}` → JSON body: {positions, hourly_rate, contract_type, ...}
 -   Autoryzacja: tylko admin
 -   Update user
 -   Return 200 {user}
 
-#### Zadanie 19.4: EmployeeController - Delete
+#### Zadanie 17.4: EmployeeController - Delete
 
 **Dokumentacja:**
 
@@ -944,7 +790,7 @@ Metoda `destroy(User $user)`:
 -   Delete user (cascade usunie schedules)
 -   Return 200 {message}
 
-#### Zadanie 19.5: Routes
+#### Zadanie 17.5: Routes
 
 **Dokumentacja:**
 
@@ -962,9 +808,9 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
 
 ---
 
-### SESJA 21-22: CSV Import
+### SESJA 19-20: CSV Import
 
-#### Zadanie 21.1: ImportService
+#### Zadanie 19.1: ImportService
 
 **Dokumentacja:**
 
@@ -981,14 +827,12 @@ Metoda `parseCSV(UploadedFile $file)`:
     -   Kolumny: name, email, pin, B1, B2, B3, ..., PW, PW2, WR, WS, TGT, ...
     -   Dla każdego pracownika:
         -   Zbierz wszystkie pozycje gdzie wartość = "TAK" (lub 1)
-        -   Query positions by name i zbierz position_ids
-        -   Utwórz array positions: [id1, id2, ...]
+        -   Utwórz array positions: ["B1", "B2", ...]
         -   Hash PIN do `pin_hashed`
         -   Create User z role='employee'
-        -   Set positions = array position_ids
 -   Return: array{success: count, errors: []}
 
-#### Zadanie 21.2: EmployeeController - Import endpoint
+#### Zadanie 19.2: EmployeeController - Import endpoint
 
 **Dokumentacja:**
 
@@ -1005,7 +849,7 @@ Metoda `import()`:
 -   Inject ImportService i parse CSV
 -   Return 200 {imported: count, errors: [...]}
 
-#### Zadanie 21.3: Routes
+#### Zadanie 19.3: Routes
 
 **Dokumentacja:**
 
@@ -1022,9 +866,9 @@ Route::post('/employees/import', [EmployeeController::class, 'import'])
 
 ---
 
-### SESJA 23-24: Availability API
+### SESJA 21-22: Availability API
 
-#### Zadanie 23.1: AvailabilityController - Index
+#### Zadanie 21.1: AvailabilityController - Index
 
 **Dokumentacja:**
 
@@ -1042,7 +886,7 @@ Metoda `index()`:
     -   Jeśli manager/admin: pokaż wszystkie (opcjonalnie filtruj po user_id)
 -   Return: 200 JSON array Availabilities
 
-#### Zadanie 23.2: AvailabilityController - Store
+#### Zadanie 21.2: AvailabilityController - Store
 
 **Dokumentacja:**
 
@@ -1056,15 +900,14 @@ Metoda `store()`:
 -   Jeśli employee: pracownik dodaje sam na siebie (user_id = auth()->id())
 -   Jeśli manager/admin: może dodać dla kogokolwiek (+ user_id w body)
 -   Validuj input:
-    -   user_id: required, exists:users,id
     -   date: required, date, unique per (user_id, date)
     -   is_available: required, boolean
     -   notes: optional, string, max 255
--   submission_date: automatycznie ustawia się na dzisiejszą datę (NIE w $fillable!)
--   Create Availability (updateOrCreate dla existing)
--   Return 201 {availability} lub 200 {availability} (jeśli update)
+-   submission_date: automatycznie ustawia się na dzisiejszą datę
+-   Create Availability
+-   Return 201 {availability}
 
-#### Zadanie 23.3: AvailabilityController - Delete
+#### Zadanie 21.3: AvailabilityController - Delete
 
 **Dokumentacja:**
 
@@ -1079,7 +922,7 @@ Metoda `destroy(Availability $availability)`:
 -   Delete
 -   Return 200 {message}
 
-#### Zadanie 23.4: Routes
+#### Zadanie 21.4: Routes
 
 **Dokumentacja:**
 
@@ -1097,9 +940,9 @@ Route::middleware('auth:api')->group(function () {
 
 ---
 
-### SESJA 25-26: Reports API
+### SESJA 23-24: Reports API
 
-#### Zadanie 25.1: ReportController - Hours Report
+#### Zadanie 23.1: ReportController - Hours Report
 
 **Dokumentacja:**
 
@@ -1121,7 +964,7 @@ Metoda `hours($userId)`:
     -   Hours per day
 -   Return: 200 JSON {user, month, year, total_hours, by_position: {...}, by_date: {...}}
 
-#### Zadanie 25.2: ReportController - Payroll Report
+#### Zadanie 23.2: ReportController - Payroll Report
 
 **Dokumentacja:**
 
@@ -1139,7 +982,7 @@ Metoda `payroll()`:
 -   Aggregate: total cost per employee, total cost per position, total cost
 -   Return: 200 JSON {month, year, employees: [{name, hours, rate, cost}], by_position: {...}, total_cost}
 
-#### Zadanie 25.3: ReportController - Coverage Report
+#### Zadanie 23.3: ReportController - Coverage Report
 
 **Dokumentacja:**
 
@@ -1155,7 +998,7 @@ Metoda `coverage()`:
 -   Group by position: ile osób na każdym stanowisku?
 -   Return: 200 JSON {date, positions: {B1: 2, B2: 3, WR: 1, ...}}
 
-#### Zadanie 25.4: Routes
+#### Zadanie 23.4: Routes
 
 **Dokumentacja:**
 
@@ -1175,9 +1018,9 @@ Route::middleware(['auth:api', 'role:manager,admin'])->group(function () {
 
 ---
 
-### SESJA 27-28: Feature Tests
+### SESJA 25-26: Feature Tests
 
-#### Zadanie 27.1: ScheduleTest
+#### Zadanie 25.1: ScheduleTest
 
 **Dokumentacja:**
 
@@ -1216,10 +1059,10 @@ Test 4: `test_employee_sees_only_own_schedules()`
 
 Test 5: `test_schedule_requires_position_permission()`
 
--   Stwórz employee z positions: [position_B1.id]
--   Spróbuj dodać Schedule na position_WR → 422
+-   Stwórz employee z positions: ["B1"]
+-   Spróbuj dodać Schedule na "WR" → 422
 
-#### Zadanie 27.2: AuthTest
+#### Zadanie 25.2: AuthTest
 
 **Dokumentacja:**
 
@@ -1246,37 +1089,7 @@ Test 4: `test_get_current_user()`
 -   Zaloguj się
 -   GET /api/auth/me → 200 + user data
 
-#### Zadanie 27.3: PositionTest (NEW - 28.11.2025)
-
-**Dokumentacja:**
-
--   https://laravel.com/docs/11/testing#creating-tests
-
-**Plik:** `tests/Feature/PositionTest.php`
-
-Polecenie: `php artisan make:test PositionTest --type=Feature`
-
-Test 1: `test_admin_can_create_position()`
-
--   POST /api/positions {name: "B9", description: "New position"} → 201
--   Assert Position created
-
-Test 2: `test_cannot_create_duplicate_position()`
-
--   Create Position "B1"
--   Try POST /api/positions {name: "B1"} → 422 (unique constraint)
-
-Test 3: `test_cannot_delete_position_in_use()`
-
--   Create Position i Schedule z tą position_id
--   Try DELETE /api/positions/{id} → 422
-
-Test 4: `test_employee_cannot_manage_positions()`
-
--   Zaloguj się jako employee
--   POST /api/positions → 403 Forbidden
-
-#### Zadanie 27.4: Run tests
+#### Zadanie 25.3: Run tests
 
 **Dokumentacja:**
 
@@ -1289,25 +1102,9 @@ Test 4: `test_employee_cannot_manage_positions()`
 
 ---
 
-### SESJA 29-30: Seeders & Factories
+### SESJA 27-28: Seeders & Factories
 
-#### Zadanie 29.1: PositionSeeder (NEW - 28.11.2025)
-
-**Dokumentacja:**
-
--   https://laravel.com/docs/11/seeding#writing-seeders
-
-**Plik:** `database/seeders/PositionSeeder.php`
-
-Polecenie: `php artisan make:seeder PositionSeeder`
-
-Seeder powinien utworzyć:
-
--   Default pozycje: B1, B2, B3, B4, B5, B6, B7, B8, PW, WR, WS, TGT
--   Dla każdej: Position::create(['name' => 'B1', 'description' => 'Bileter jeden', 'created_by' => 1])
--   created_by = admin user (ID 1)
-
-#### Zadanie 29.2: UserFactory (ZMIENIONA)
+#### Zadanie 27.1: UserFactory
 
 **Dokumentacja:**
 
@@ -1325,13 +1122,13 @@ Factory powinien generować:
 -   role: fake()->randomElement(['employee', 'manager', 'admin'])
 -   pin_hashed: Hash::make(fake()->numerify('####')) (jeśli role=employee)
 -   is_active: true
--   positions: (jeśli role=employee) Query Position::whereIn('name', fake()->randomElements(['B1', 'B2', 'PW', 'WR', 'WS', 'TGT'], 3))->pluck('id')->toArray()
+-   positions: (jeśli role=employee) fake()->randomElements(['B1', 'B2', 'PW', 'WR', 'WS', 'TGT', ...], fake()->numberBetween(2, 5))
 -   hourly_rate: fake()->numberBetween(15, 30)
 -   max_hours_per_month: 160
 -   min_break_hours: 11
 -   contract_type: fake()->randomElement(['uop', 'zlecenie'])
 
-#### Zadanie 29.3: UserSeeder (ZMIENIONA)
+#### Zadanie 27.2: UserSeeder
 
 **Dokumentacja:**
 
@@ -1343,11 +1140,11 @@ Polecenie: `php artisan make:seeder UserSeeder`
 
 Seeder powinien utworzyć:
 
--   1 admin: email=admin@example.com, password=password, positions=all position_ids
--   2 managers: names=Kierownik 1 & 2, emails=manager1@, manager2@, positions=random 5 positions
--   20 employees: random names, pins, positions (2-4 losowe), rates, contracts
+-   1 admin: email=admin@example.com, password=password
+-   2 managers: names=Kierownik 1 & 2, emails=manager1@, manager2@
+-   20 employees: random names, pins, positions, rates
 
-#### Zadanie 29.4: ScheduleSeeder
+#### Zadanie 27.3: ScheduleSeeder
 
 **Dokumentacja:**
 
@@ -1364,7 +1161,7 @@ Seeder powinien:
 -   Każdy Schedule: random date, random position (z user.positions), random shift (08:00-17:00 lub 09:00-18:00), auto-calc hours
 -   Validuj że nie ma konfliktów/naruszenia walidacji biznesowych
 
-#### Zadanie 29.5: DatabaseSeeder
+#### Zadanie 27.4: DatabaseSeeder
 
 **Dokumentacja:**
 
@@ -1376,13 +1173,12 @@ Main seeder powinien call:
 
 ```
 $this->call([
-    PositionSeeder::class,   // FIRST!
     UserSeeder::class,
     ScheduleSeeder::class,
 ]);
 ```
 
-#### Zadanie 29.6: Run seeders
+#### Zadanie 27.5: Run seeders
 
 **Dokumentacja:**
 
@@ -1391,15 +1187,14 @@ $this->call([
 -   [ ] `php artisan migrate:fresh --seed`
 -   [ ] Sprawdź w PhpMyAdmin że dane dodane
 -   [ ] Sprawdź w API: GET /api/employees z tokenem managera → powinno zwrócić 20 employees
--   [ ] Sprawdź: GET /api/positions → powinno zwrócić 12 default positions
 
-**Commit:** `:seedling: test(seeders): Database seeders with positions`
+**Commit:** `:seedling: test(seeders): Database seeders & factories`
 
 ---
 
-### SESJA 31-32: Documentation & README
+### SESJA 29-30: Documentation & README
 
-#### Zadanie 31.1: README.md
+#### Zadanie 29.1: README.md
 
 **Dokumentacja:**
 
@@ -1420,12 +1215,12 @@ README powinno zawierać:
 
 3. **API Documentation** — tabela endpointów:
 
-    - Metoda, Path, Description, Auth required?
+    - Metoda, Path, Descripción, Auth required?
     - Przykład request/response dla kilku kluczowych endpointów
 
 4. **Architecture** — diagram: Frontend → API → Database
 
-5. **Database schema** — opis tabel i kolumn (including Position table)
+5. **Database schema** — opis tabel i kolumn
 
 6. **Authentication** — jak JWT działa, jak się zalogować
 
@@ -1435,7 +1230,7 @@ README powinno zawierać:
 
 9. **Troubleshooting** — typowe problemy
 
-#### Zadanie 31.2: Environment variables
+#### Zadanie 29.2: Environment variables
 
 **Dokumentacja:**
 
@@ -1449,7 +1244,7 @@ Powinno zawierać wszystkie zmienne:
 -   DB_CONNECTION, DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
 -   JWT_SECRET (albo wygeneruj przy setup)
 
-#### Zadanie 31.3: API endpoints listing
+#### Zadanie 29.3: API endpoints listing
 
 **Plik:** `API_ENDPOINTS.md` (opcjonalnie)
 
@@ -1472,25 +1267,18 @@ Listing wszystkich endpointów w formacie:
 - **Body:** {employee_id, pin}
 - **Response:** 200 {token, user}
 
-## Positions (NEW)
+## Employees
 
 ### List All
 - **Method:** GET
-- **Path:** /api/positions
+- **Path:** /api/employees
 - **Auth:** Yes (manager/admin)
-- **Response:** 200 [{id, name, description, created_by, ...}]
-
-### Create
-- **Method:** POST
-- **Path:** /api/positions
-- **Auth:** Yes (admin)
-- **Body:** {name, description}
-- **Response:** 201 {id, name, ...}
+- **Response:** 200 [{id, name, positions, hourly_rate, ...}]
 
 ... (itd dla wszystkich endpointów)
 ```
 
-**Commit:** `:memo: docs(readme): API documentation & setup guide (with Positions)`
+**Commit:** `:memo: docs(readme): API documentation & setup guide`
 
 ---
 
@@ -1502,23 +1290,21 @@ Listing wszystkich endpointów w formacie:
 | 3-4   | JWT        | Auth config, test endpoint       | 4h        |
 | 5-6   | Models     | User extend, migrations          | 4h        |
 | 7-8   | Models     | Schedule & Availability          | 4h        |
-| 7.2.5 | Models     | Position model & migration       | 2h        |
 | 9-10  | Auth       | Login endpoints, Postman test    | 4h        |
 | 11-12 | Middleware | RoleMiddleware, autoryzacja      | 3h        |
 | 13-14 | CRUD       | Schedule CRUD, walidacje input   | 5h        |
 | 15-16 | Services   | ValidationService, biznes logic  | 5h        |
-| 17-18 | CRUD       | Position management              | 3h        |
-| 19-20 | CRUD       | Employee management              | 4h        |
-| 21-22 | Import     | CSV parser, ImportService        | 4h        |
-| 23-24 | API        | Availability endpoints           | 3h        |
-| 25-26 | Reports    | Hours, payroll, coverage reports | 5h        |
-| 27-28 | Tests      | Feature tests                    | 5h        |
-| 29-30 | Seeders    | Factories, seeders, data         | 4h        |
-| 31-32 | Docs       | README, documentation            | 3h        |
-| —     | Buffer     | Bugfixes, debugging              | 5h        |
-|       | **TOTAL**  |                                  | **~67h**  |
+| 17-18 | CRUD       | Employee management              | 4h        |
+| 19-20 | Import     | CSV parser, ImportService        | 4h        |
+| 21-22 | API        | Availability endpoints           | 3h        |
+| 23-24 | Reports    | Hours, payroll, coverage reports | 5h        |
+| 25-26 | Tests      | Feature tests                    | 5h        |
+| 27-28 | Seeders    | Factories, seeders, data         | 4h        |
+| 29-30 | Docs       | README, documentation            | 3h        |
+| —     | Buffer     | Bugfixes, debugging              | 4h        |
+|       | **TOTAL**  |                                  | **~60h**  |
 
-**Realistycznie: ~3 tygodnie (2 sesje/dzień × 6 dni/tydzień)**
+**Realistycznie: ~2.5-3 tygodnie (2 sesje/dzień × 6 dni/tydzień)**
 
 ---
 
@@ -1536,18 +1322,17 @@ Przykłady:
 :tada: feat(setup): Laravel Breeze initial setup with Docker
 :lock: feat(auth): JWT authentication setup
 :wrench: feat(models): Extend User model with role, positions, pin_hashed, contract_type
-:database: feat(models): Schedule, Availability & Position models (position_id FK)
+:database: feat(models): Schedule & Availability models
 :lock: feat(auth): Login endpoints (email & PIN)
 :shield: feat(middleware): Role-based access control
-:calendar: feat(api): Schedule CRUD operations (position_id)
+:calendar: feat(api): Schedule CRUD operations
 :mag: feat(services): Business logic validation
-:package: feat(api): Position management CRUD endpoints
 :bust_in_silhouette: feat(api): Employee management
 :inbox_tray: feat(import): CSV employee import
 :calendar: feat(api): Availability endpoints
 :bar_chart: feat(api): Reports endpoints
 :test_tube: test(feature): Feature tests
-:seedling: test(seeders): Database seeders with positions
+:seedling: test(seeders): Database seeders
 :memo: docs(readme): API documentation
 ```
 
@@ -1555,10 +1340,10 @@ Przykłady:
 
 ## 11. PODSUMOWANIE
 
--   **Estymacja:** ~67 godzin (32 sesje po 2h)
+-   **Estymacja:** ~60 godzin (30 sesji po 2h)
 -   **Stack:** Laravel 11 + Breeze + JWT + Docker
--   **Approach:** TDD-style — opisane zadania zamiast gotowych snippetów
--   **Struktura:** 32 sesji, każda atomic + commit
+-   **Aproach:** TDD-style — opisane zadania zamiast gotowych snippetów
+-   **Struktura:** 30 sesji, każda atomic + commit
 -   **Focus:** Nauczenie się zamiast copy-paste
 -   **Dokumentacja:** Linki do Laravel docs przy każdym zadaniu
 

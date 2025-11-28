@@ -16,12 +16,14 @@ return new class extends Migration
 
             $table->foreignId('user_id')
                   ->constrained()
-                  ->cascadeOnDelete()
-                  ->comment('creates a user_id column as a Foreign Key (FK) linking the current tables record to the users table');
+                  ->cascadeOnDelete();
+                  
             $table->date('date');
 
-            $table->enum('position',['B1','B2','B3','B4','B5','B6','B7','B8','PW','PW2','WR','WR2','WR3','WS','WS2','SR','K1','K2','TGT','TG','PTG','PTG2','OTG','OTG2','BT'])
-            ->comment('Salt mine position/location (B1-B8, PW, WR, WS, etc.)');;
+            $table->foreignId('position_id')
+                  ->constrained('positions')
+                  ->cascadeOnDelete();
+            
 
             $table->time('shift_start');
 

@@ -22,7 +22,7 @@ class User extends Authenticatable implements JWTSubject
      * @var list<string>
      * @property string $name
      * @property string $email
-     * @property string $positions
+     * @property array<string> $positions
      * @property float $hourly_rate
      * @property int $max_hours_per_month
      * @property int $min_break_hours
@@ -79,11 +79,11 @@ class User extends Authenticatable implements JWTSubject
 
     public function schedules()
     {
-        return $this->hasMany(Schedule::class);
+        return $this->hasMany(Schedule::class,'user_id');
     }
     public function availabilities()
     {
-        return $this->hasMany(Availability::class);
+        return $this->hasMany(Availability::class,'user_id');
     }
     /**
      * ========== JWT METHODS ==========
