@@ -4,21 +4,27 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
-});
+
 
 
 //===============================================
 //prefix('auth') — wszystkie routy zaczynają się od /api/auth
 
 //group() — grupujemy razem
-Route::prefix('auth')->group(function() {
-    Route::get('/test',[AuthController::class,'test']);
+Route::prefix('auth')->controller(AuthController::class)->group(function() {
+    Route::post('/login','login');
 
-    Route::post('/login',[AuthController::class,'login']);
+    Route::post('/login-pin','loginPin');
 
-    Route::post('/logout',[AuthController::class,'logout'])->middleware('auth:api');
+    Route::middleware('auth:api')->group(function() {
+        Route::get('/me', 'me');
 
-    // middleware('auth:api')-Wymaga JWT tokenu w headzie Authorization: Bearer <token>
+        Route::post('/logout','logout');
+    });
 });
+   
+
+
+    
+
+    
