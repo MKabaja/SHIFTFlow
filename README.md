@@ -614,9 +614,9 @@ W `routeMiddleware` dodaj:
 
 #### Zadanie 11.3: Testuj middleware
 
--   [ ] W `routes/api.php` dodaj testowy route: `Route::get('/admin-only', [...])->middleware('auth:api', 'role:admin')`
--   [ ] Zaloguj się jako employee → 403
--   [ ] Zaloguj się jako admin → 200
+-   [x] W `routes/api.php` dodaj testowy route: `Route::get('/admin-only', [...])->middleware('auth:api', 'role:admin')`
+-   [x] Zaloguj się jako employee → 403
+-   [x] Zaloguj się jako admin → 200
 
 **Commit:** `:shield: feat(middleware): Role-based access control middleware`
 
