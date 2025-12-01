@@ -19,24 +19,36 @@ class ScheduleController extends Controller
 
         $query= Schedule::with(['user','position']);
         
-        if ($user->role === 'employee') {
-            $query->where('user_id', $user->id);
+        $userIsEmployee = $user->role === 'employee';
 
-        } elseif ($request->has('user_id')) {
-            
-                $query->where('user_id', $request ->user_id);
-            }
+        $requestUserId = $request->input('user_id');
+        $requestDate = $request->input('date');
 
         
-        if ($request ->has('date')) {
-            $query->whereDate('date', $request->date);
+        if($userIsEmployee) {
+         $this->applyUserFilter($query,$user->id);
+        }    
+
+        elseif($requestUserId) {
+            $this->applyUserFilter($query, $requestUserId);
         }
-         
+
+        
+
+        $query->when($requestDate,fn($q)=>
+            $q->whereDate('date',$requestDate));
 
         return response()->json(
-            $query->orderBy('date','desc')->get()
-        );
-}
+                $query->latest('date')->get()
+            );
+        }
+
+        
+        
+        
+
+
+      
 
     public function store(Request $request)
     {
@@ -65,5 +77,9 @@ class ScheduleController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+    private function applyUserFilter($query, $id)
+    {
+        return $query->where('user_id', $id);
     }
 }
