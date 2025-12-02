@@ -27,7 +27,7 @@ Route::prefix('auth')
 
         
 //Crud Grafiku
-Route::middleware('auth:api')
+Route::middleware(['auth:api','role:admin,manager'])
 ->prefix('schedules')
 ->controller(ScheduleController::class)
 ->group(function() {
