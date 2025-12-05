@@ -7,54 +7,103 @@ use Illuminate\Http\Request;
 use App\Models\Schedule;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreScheduleRequest;
+use App\Services\ValidationService;
 
+use Illuminate\Http\JsonResponse;
+use App\Models\User;
+use Carbon\Carbon;
 
 class ScheduleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct(protected ValidationService $service) {}
+
     public function index(Request $request)
     {
         $user = Auth::user();
 
-        $query= Schedule::with(['user','position']);
-        
+        $query = Schedule::with(['user', 'position']);
+
         $userIsEmployee = $user->role === 'employee';
 
         $requestUserId = $request->input('user_id');
         $requestDate = $request->input('date');
 
-        
-        if($userIsEmployee) {
-         $this->applyUserFilter($query,$user->id);
-        }    
 
-        elseif($requestUserId) {
+        if ($userIsEmployee) {
+            $this->applyUserFilter($query, $user->id);
+        } elseif ($requestUserId) {
             $this->applyUserFilter($query, $requestUserId);
         }
 
-        
 
-        $query->when($requestDate,fn($q)=>
-            $q->whereDate('date',$requestDate));
+
+        $query->when($requestDate, fn($q) =>
+        $q->whereDate('date', $requestDate));
 
         return response()->json(
-                $query->latest('date')->get()
-            );
-        }
-
-        
-        
-        
-
-
-      
-
-    public function store(StoreScheduleRequest $request,ValidationService $validationService)
-    {
-        $validated = $request->validated();
+            $query->latest('date')->get()
+        );
     }
+
+
+
+
+
+
+
+    /**
+     * Summary of store
+     * @param StoreScheduleRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(StoreScheduleRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+        $result = null;
+
+        $uId = $data['user_id'];
+        $start = $data['shift_start'];
+        $end = $data['shift_end'];
+        $p = $data['position_id'];
+        $date = $data['date'];
+
+        $user = User::findOrFail($uId);
+
+        $this->service->validateScheduleCreation(
+            $user,
+            $p,
+            $date,
+            $start,
+            $end,
+        );
+
+        $result = $this->calculateMinutes($date, $start, $end);
+
+        $schedule = Schedule::create([
+            ...$data,
+            'hours_worked' => $result ?? null,
+            'status' => 'scheduled'
+        ]);
+
+        return response()->json([
+
+
+            'message' => 'Schedule created Successfully',
+            'schedule' => $schedule
+        ], 201);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Display the specified resource.
@@ -82,5 +131,27 @@ class ScheduleController extends Controller
     private function applyUserFilter($query, $id)
     {
         return $query->where('user_id', $id);
+    }
+
+
+
+
+    /**
+     * Summary of calculateMinutes
+     * @param string $date date form data
+     * @param string $start shift start
+     * @param string $end shift end
+     * @return int
+     */
+    private function calculateMinutes(string $date, string $start, string $end): int
+    {
+        $startTime = $this->service->getFullDateTime($date, $start);
+        $endTime = $this->service->getFullDateTime($date, $end);
+
+
+        if ($endTime->lessThan($startTime)) {
+            $endTime->addDay();
+        }
+        return $startTime->diffInMinutes($endTime);
     }
 }
