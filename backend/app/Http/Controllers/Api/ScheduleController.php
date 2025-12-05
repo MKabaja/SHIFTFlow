@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Schedule;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreScheduleRequest;
 
 
 class ScheduleController extends Controller
@@ -50,9 +51,9 @@ class ScheduleController extends Controller
 
       
 
-    public function store(Request $request)
+    public function store(StoreScheduleRequest $request,ValidationService $validationService)
     {
-        //
+        $validated = $request->validated();
     }
 
     /**
