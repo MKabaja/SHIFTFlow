@@ -11,42 +11,37 @@ use App\Http\Controllers\Api\ScheduleController;
 
 //Logowanie
 Route::prefix('auth')
-->controller(AuthController::class)
-->group(function() {
-    Route::post('/login','login');
+    ->controller(AuthController::class)
+    ->group(function () {
+        Route::post('/login', 'login');
 
-    Route::post('/login-pin','loginPin');
+        Route::post('/login-pin', 'loginPin');
 
-    Route::middleware('auth:api')
-    ->group(function() {
-        Route::get('/me', 'me');
+        Route::middleware('auth:api')
+            ->group(function () {
+                Route::get('/me', 'me');
 
-        Route::post('/logout','logout');
+                Route::post('/logout', 'logout');
+            });
     });
-});
 
-        
+
 //Crud Grafiku
-Route::middleware(['auth:api','role:admin,manager'])
-->prefix('schedules')
-->controller(ScheduleController::class)
-->group(function() {
-    Route::get('/','index');
+Route::middleware(['auth:api', 'role:admin,manager'])
+    ->prefix('schedules')
+    ->controller(ScheduleController::class)
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::match(['put', 'patch'], '/{schedule}', 'update');
+        Route::delete('/{schedule}', 'destroy');
+    });
+
+
+
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('/admin-only', function () {
+        return ['message' => 'welcome admin!'];
+    })->middleware('role:admin');
 });
-
-
-
-
-Route::middleware('auth:api') -> group(function() {
-    Route::get('/admin-only',function() {
-            return ['message' => 'welcome admin!'];
-        })->middleware('role:admin');
-});
-
-   
-
-
-
-    
-
-    

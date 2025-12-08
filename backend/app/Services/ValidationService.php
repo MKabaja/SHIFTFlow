@@ -7,6 +7,7 @@ use App\Models\Availability;
 use App\Models\Schedule;
 use Carbon\Carbon;
 
+
 use Illuminate\Validation\ValidationException;
 
 class ValidationService
@@ -18,10 +19,30 @@ class ValidationService
      * @param string $time
      * @return Carbon|null
      */
-    public function getFullDateTime(string $date, string $time): Carbon
+    public function getFullDateTime($date, $time): Carbon
     {
+
+        if ($date instanceof \Carbon\Carbon) {
+            $date = $date->format('Y-m-d');
+        }
+        if (is_string($date) && strlen($date) > 10) {
+            $date = substr($date, 0, 10);
+        }
+
+
+        if ($time instanceof \Carbon\Carbon) {
+            $time = $time->format('H:i');
+        }
+
+
+        if (is_string($time) && strlen($time) > 5) {
+            $time = substr($time, 0, 5);
+        }
+
+
         return Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $time);
     }
+
 
     /**
      * Summary of validateScheduleCreation
@@ -32,7 +53,7 @@ class ValidationService
      * @param string $shiftEnd
      * @return bool
      */
-    public function validateScheduleCreation(User $user, int $positionId, string $date, string $shiftStart, string $shiftEnd): bool
+    public function validateScheduleCreation(User $user, int $positionId, string $date, string $shiftStart, string $shiftEnd, ?int $ignoreScheduleId = null): bool
     {
 
         // taking user date from User OBJ to avoid unnecesary DB requests
@@ -46,13 +67,13 @@ class ValidationService
         $this->validateAvailability($user->id, $date);
 
         //3.TimeConflict
-        $this->validateTimeConflict($user->id, $date, $shiftStart, $shiftEnd);
+        $this->validateTimeConflict($user->id, $date, $shiftStart, $shiftEnd, $ignoreScheduleId);
 
         //4.MinimumBreak ->minBreakHours from user
         $this->validateMinimumBreak($user->id, $date, $shiftStart, $minBreakHours);
 
         //Haourly limit
-        $this->validateMaxHoursPerMonth($user->id, $date, $shiftStart, $shiftEnd, $maxHoursPerMonth);
+        $this->validateMaxHoursPerMonth($user->id, $date, $shiftStart, $shiftEnd, $maxHoursPerMonth, $ignoreScheduleId);
 
         return true;
     }
@@ -109,12 +130,16 @@ class ValidationService
      * @param string $shiftEnd
      * @return bool
      */
-    public function validateTimeConflict(int $userId, string $date, string $shiftStart, string $shiftEnd): bool
+    public function validateTimeConflict(int $userId, string $date, string $shiftStart, string $shiftEnd, ?int $ignoreScheduleId): bool
     {
 
         $conflict =
             Schedule::where('user_id', $userId)
             ->where('date', $date)
+
+            ->when($ignoreScheduleId, function ($query) use ($ignoreScheduleId) {
+                $query->where('id', '!=', $ignoreScheduleId);
+            })
             ->where(function ($query) use ($shiftStart, $shiftEnd) {
                 $query->where('shift_start', '<', $shiftEnd)
                     ->where('shift_end', '>', $shiftStart);
@@ -165,6 +190,7 @@ class ValidationService
         //begining of new shift start 
         $currentShiftStart = $this->getFullDateTime($date, $shiftStart);
 
+
         $breakHours = $prevShiftEnd->diffInMinutes($currentShiftStart, false) / 60;
 
         if ($breakHours < 0) {
@@ -192,7 +218,7 @@ class ValidationService
      * @param int $maxHoursPerMonth
      * @return bool
      */
-    public function validateMaxHoursPerMonth(int $userId, string $date, string $shiftStart, string $shiftEnd, int $maxHoursPerMonth): bool
+    public function validateMaxHoursPerMonth(int $userId, string $date, string $shiftStart, string $shiftEnd, int $maxHoursPerMonth, ?int $ignoreScheduleId): bool
     {
         if (!$maxHoursPerMonth) return true;
         //  beginning and end of the month
@@ -203,6 +229,11 @@ class ValidationService
         $totalMinutesInMonth =
             Schedule::where('user_id', $userId)
             ->whereBetween('date', [$start, $end])
+
+            ->when($ignoreScheduleId, function ($query) use ($ignoreScheduleId) {
+                $query->where('id', '!=', $ignoreScheduleId);
+            })
+
             ->sum('hours_worked');
 
 

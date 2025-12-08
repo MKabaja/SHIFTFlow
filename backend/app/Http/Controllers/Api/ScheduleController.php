@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Schedule;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreScheduleRequest;
+use App\Http\Requests\UpdateScheduleRequest;
 use App\Services\ValidationService;
 
 use Illuminate\Http\JsonResponse;
@@ -116,17 +117,65 @@ class ScheduleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateScheduleRequest $request, Schedule $schedule)
     {
-        //
+        $data = $request->validated();
+        $result = null;
+
+        $oldDate = $schedule->date;
+
+        if ($oldDate instanceof \Carbon\Carbon) {
+            $oldDate = $oldDate->format('Y-m-d');
+        }
+
+        $dataWithFallbacks =
+            [
+                'user_id' => $data['user_id'] ?? $schedule->user_id,
+                'shift_start' => $data['shift_start'] ?? $schedule->shift_start,
+                'shift_end' => $data['shift_end'] ?? $schedule->shift_end,
+                'position_id' => $data['position_id'] ?? $schedule->position_id,
+                'date' => $data['date'] ?? $oldDate,
+                'status' => $data['status'] ?? $schedule->status,
+            ];
+
+
+
+        $targetUser = $schedule->user;
+
+
+        $this->service->validateScheduleCreation(
+            $targetUser,
+            $dataWithFallbacks['position_id'],
+            $dataWithFallbacks['date'],
+            $dataWithFallbacks['shift_start'],
+            $dataWithFallbacks['shift_end'],
+            $schedule->id,
+        );
+
+        $result = $this->calculateMinutes($dataWithFallbacks['date'], $dataWithFallbacks['shift_start'], $dataWithFallbacks['shift_end']);
+
+        $schedule->update([
+            ...$dataWithFallbacks,
+            'hours_worked' => $result,
+
+        ]);
+        return response()->json([
+
+
+            'message' => 'Schedule updated Successfully',
+            'schedule' => $schedule
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Schedule $schedule)
     {
-        //
+        $schedule->delete();
+        return response()->json([
+            'message' => 'Schedule deleted Successfully',
+        ]);
     }
     private function applyUserFilter($query, $id)
     {
