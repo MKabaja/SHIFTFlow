@@ -4,12 +4,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ScheduleController;
+use App\Http\Controllers\Api\PositionController;
 
 
 //===============================================
-//prefix('auth') — wszystkie routy zaczynają się od /api/auth
 
-//Logowanie
+
+//Login
 Route::prefix('auth')
     ->controller(AuthController::class)
     ->group(function () {
@@ -26,7 +27,8 @@ Route::prefix('auth')
     });
 
 
-//Crud Grafiku
+//Schedule Crud
+
 Route::middleware(['auth:api', 'role:admin,manager'])
     ->prefix('schedules')
     ->controller(ScheduleController::class)
@@ -35,7 +37,30 @@ Route::middleware(['auth:api', 'role:admin,manager'])
         Route::post('/', 'store');
         Route::match(['put', 'patch'], '/{schedule}', 'update');
         Route::delete('/{schedule}', 'destroy');
+        Route::get('/{schedule}', 'show');
     });
+
+//Positions G1
+Route::middleware(['auth:api', 'role:admin,manager'])
+    ->prefix('positions')
+    ->controller(PositionController::class)
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{position}', 'show');
+    });
+//Positions G2
+Route::middleware(['auth:api', 'role:admin'])
+    ->prefix('positions')
+    ->controller(PositionController::class)
+    ->group(function () {
+        Route::post('/', 'store');
+        Route::match(['put', 'patch'], '/{position}', 'update');
+        Route::delete('/{position}', 'destroy');
+    });
+
+
+
+
 
 
 

@@ -106,4 +106,31 @@ class ScheduleTest extends TestCase
             'hours_worked' => 480
         ]);
     }
+    public function test_manager_can_delete_schedule()
+    {
+
+        $manager = User::factory()->create(['role' => 'manager']);
+        $position = Position::create([
+            'name' => 'B2',
+            'description' => 'Bileter drugi',
+        ]);
+        $employee = User::factory()->create([
+            'role' => 'employee',
+            'positions' => [$position->id],
+            'max_hours_per_month' => 200
+        ]);
+        $schedule = Schedule::create([
+            'user_id' => $employee->id,
+            'position_id' => $position->id,
+            'date' => '2025-10-08',
+            'shift_start' => '10:00',
+            'shift_end' => '18:00',
+        ]);
+        $response = $this->actingAs($manager)
+            ->deleteJson("/api/schedules/{$schedule->id}");
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseMissing('schedules', ['id' => $schedule->id]);
+    }
 }

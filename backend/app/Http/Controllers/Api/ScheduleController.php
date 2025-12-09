@@ -16,9 +16,13 @@ use Carbon\Carbon;
 
 class ScheduleController extends Controller
 {
+    /**
+     * Summary of __construct
+     * @param ValidationService $service My validation service
+     */
     public function __construct(protected ValidationService $service) {}
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
 
@@ -54,7 +58,7 @@ class ScheduleController extends Controller
 
     /**
      * Summary of store
-     * @param StoreScheduleRequest $request
+     * @param StoreScheduleRequest $request My custom request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreScheduleRequest $request): JsonResponse
@@ -96,34 +100,25 @@ class ScheduleController extends Controller
 
 
 
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Schedule $schedule): Schedule
     {
-        //
+        return $schedule->load(['user', 'position']);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Summary of update
+     * @param UpdateScheduleRequest $request my custom update request
+     * @param Schedule $schedule schedule that was created
+     * @return JsonResponse
      */
-    public function update(UpdateScheduleRequest $request, Schedule $schedule)
+    public function update(UpdateScheduleRequest $request, Schedule $schedule): JsonResponse
     {
         $data = $request->validated();
         $result = null;
 
         $oldDate = $schedule->date;
 
+        //make sure right format to avoid Carbon issues
         if ($oldDate instanceof \Carbon\Carbon) {
             $oldDate = $oldDate->format('Y-m-d');
         }
@@ -167,9 +162,7 @@ class ScheduleController extends Controller
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(Schedule $schedule)
     {
         $schedule->delete();
