@@ -7,16 +7,23 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * MIGRATION SUMMARY: Customizing the 'users' table for internal system requirements.
+     *
+     * - The 'email' column is optional (nullable).
+     * - 'login' is the primary login credential.
+     * - 'password'  column is optional we use PIN instead.
+     *
+     * @return void
      */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email')->nullable()->unique();
+            $table->string('login')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

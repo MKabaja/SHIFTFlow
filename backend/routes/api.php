@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\PositionController;
+use App\Http\Controllers\Api\EmployeeController;
 
 
 //===============================================
@@ -56,6 +57,14 @@ Route::middleware(['auth:api', 'role:admin'])
         Route::post('/', 'store');
         Route::match(['put', 'patch'], '/{position}', 'update');
         Route::delete('/{position}', 'destroy');
+    });
+
+//Employee Management (CRUD)
+Route::middleware(['auth:api', 'role:admin'])
+    ->prefix('employees')
+    ->controller(EmployeeController::class)
+    ->group(function () {
+        Route::post('/', 'store');
     });
 
 

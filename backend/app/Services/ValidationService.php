@@ -88,11 +88,12 @@ class ValidationService
 
     {
 
-        //get positions from JSON
-        $userPositions = $user->positions ?? [];
+        //get positions  collection from relation
+        //pluck - takes only id column
+        $userPositionIds = $user->positions->pluck('id')->toArray();
 
         //Check if user has permission for this position
-        if (!in_array($positionId, $userPositions,)) {
+        if (!in_array($positionId, $userPositionIds,)) {
 
             throw ValidationException::withMessages([
                 'position_id' => ["User does not have permission for this position (ID: $positionId)"]

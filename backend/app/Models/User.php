@@ -10,6 +10,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Tymon\JWTAuth\JWT;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Position;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -22,24 +23,25 @@ class User extends Authenticatable implements JWTSubject
      * @var list<string>
      * @property string $name
      * @property string $email
-     * @property array<string> $positions
      * @property float $hourly_rate
      * @property int $max_hours_per_month
      * @property int $min_break_hours
      * @property string $contract_type
      */
+
     protected $fillable = [
         'name',
         'email',
         'password',
+        'login',
         'pin_hashed',
-        'positions',
         'hourly_rate',
         'max_hours_per_month',
         'min_break_hours',
         'contract_type',
         'role',
     ];
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -62,30 +64,48 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'positions' => 'array',
+
             'hourly_rate' => 'decimal:2',
             'is_active' => 'boolean',
             'max_hours_per_month' => 'integer',
             'min_break_hours' => 'integer',
             'role' => 'string',
             'contract_type' => 'string',
-            
+
         ];
     }
-    protected function pinHashed():Attribute
+    protected function pinHashed(): Attribute
     {
         return Attribute::make(
             set: fn($value) => $value ? Hash::make($value) : null,
         );
     }
-
+    /**
+     * Summary of schedules
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Schedule, User>
+     * User may have multiple schedules
+     */
     public function schedules()
     {
-        return $this->hasMany(Schedule::class,'user_id');
+        return $this->hasMany(Schedule::class, 'user_id');
     }
+    /**
+     * Summary of availabilities
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Availability, User>
+     * User may have multiple availabilities
+     */
     public function availabilities()
     {
-        return $this->hasMany(Availability::class,'user_id');
+        return $this->hasMany(Availability::class, 'user_id');
+    }
+    /**
+     * Summary of positions
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Position, User, \Illuminate\Database\Eloquent\Relations\Pivot>
+     * user many belong to many Positions
+     */
+    public function positions()
+    {
+        return $this->belongsToMany(Position::class);
     }
     /**
      * ========== JWT METHODS ==========

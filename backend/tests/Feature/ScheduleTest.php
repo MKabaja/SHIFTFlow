@@ -31,9 +31,10 @@ class ScheduleTest extends TestCase
         // Tworzymy Pracownika (któremu ustawiamy grafik)
         $employee = User::factory()->create([
             'role' => 'employee',
-            'positions' => [$position->id], // Ważne: dajemy mu uprawnienia!
             'max_hours_per_month' => 160
         ]);
+        $employee->positions()->attach($position->id);
+
 
         // Przygotowujemy dane (Payload), które normalnie wpisałbyś w Postmanie
         $payload = [
@@ -77,9 +78,10 @@ class ScheduleTest extends TestCase
         ]);
         $employee = User::factory()->create([
             'role' => 'employee',
-            'positions' => [$position->id],
             'max_hours_per_month' => 200
         ]);
+        $employee->positions()->attach($position->id);
+
 
         $schedule = Schedule::create([
             'user_id' => $employee->id,
@@ -116,9 +118,10 @@ class ScheduleTest extends TestCase
         ]);
         $employee = User::factory()->create([
             'role' => 'employee',
-            'positions' => [$position->id],
             'max_hours_per_month' => 200
         ]);
+        $employee->positions()->attach($position->id);
+
         $schedule = Schedule::create([
             'user_id' => $employee->id,
             'position_id' => $position->id,

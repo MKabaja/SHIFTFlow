@@ -23,9 +23,10 @@ class PositionTest extends TestCase
 
         $employee = User::factory()->create([
             'role' => 'employee',
-            'positions' => $WR2->id,
             'max_hours_per_month' => 180
         ]);
+        $employee->positions()->attach($WR2->id);
+
 
         $schedule = Schedule::create([
             'user_id' => $employee->id,
