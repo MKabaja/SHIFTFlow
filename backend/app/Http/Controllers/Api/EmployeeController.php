@@ -9,11 +9,22 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\StoreEmployeeRequest;
+use App\Http\Requests\UpdateEmployeeRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Services\EmployeeService;
+use App\Services\ImportService;
 
 class EmployeeController extends Controller
 {
+    protected $employeeService;
+    protected $importService;
+
+    public function __construct(EmployeeService $employeeService, ImportService $importService)
+    {
+        $this->employeeService = $employeeService;
+        $this->importService = $importService;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -32,8 +43,8 @@ class EmployeeController extends Controller
     public function store(StoreEmployeeRequest $request)
     {
         $employee = DB::transaction(function () use ($request) {
-            $baseLogin = $this->createLogin($request->name, 5);
-            $checkedLogin = $this->findUniqueLogin($baseLogin);
+            $baseLogin = $this->employeeService->createLogin($request->name, 5);
+            $checkedLogin = $this->employeeService->findUniqueLogin($baseLogin);
 
             $payload = [
                 'pin_hashed' => Hash::make($request->pin),
@@ -57,72 +68,63 @@ class EmployeeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $employee): User
     {
-        //
+        return $employee->load('positions');
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateEmployeeRequest $request, User $employee): JsonResponse
     {
-        //
+        $data = $request->validated();
+
+        if ($request->filled('pin')) {
+            $data['pin_hashed'] = Hash::make($data['pin']);
+            unset($data['pin']);
+        };
+        if (isset($data['positions'])) {
+            $positionsData = $data['positions'];
+            unset($data['positions']);
+        } else {
+            $positionsData = null;
+        }
+
+
+        $employee->update($data);
+
+        if ($positionsData !== null) {
+            $employee->positions()->sync($positionsData);
+        }
+
+
+        return response()->json([
+            'message' => 'Employee updated successfully',
+            'employee' => $employee->load('positions')
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $employee)
     {
-        //
+        $employee->delete();
+        return response()->json(['message' => 'Employee deleted successfully'], 200);
     }
 
-    private function createLogin($fullName, $length)
+    public function import(Request $request)
     {
-
-        $length = max(1, $length);
-
-        $parts = explode(' ', trim($fullName));
-
-        if (count($parts) < 2) {
-            $maxLoginLength = 10;
-            return mb_substr($parts[0], 0, $maxLoginLength, 'UTF-8');
-        }
-
-        $firstName = $parts[0];
-        $lastName = $parts[1];
-
-        $firstLetter = mb_substr($firstName, 0, 1, 'UTF-8');
-
-        $lastNameLength = mb_strlen($lastName, 'UTF-8');
+        // 1. Walidacja, czy plik w ogóle jest
+        // $request->validate([
+        //     'file' => 'required|file|mimes:csv,txt'
+        // ]);
 
 
+        // 2. Wywołanie serwisu (który zaraz napiszesz)
+        $stats = $this->importService->importEmployeesFromCSV($request->file('file'));
 
-        if ($lastNameLength <= $length) {
-            $lastNameFragment = $lastName;
-        } else {
-            $lastNameFragment = mb_substr($lastName, 0, $length, 'UTF-8');
-        }
-        $login = $firstLetter . $lastNameFragment;
-
-        return mb_strtolower($login, 'UTF-8');
-    }
-
-    private function findUniqueLogin(string $baseLogin): string
-    {
-        if (User::where('login', $baseLogin)->doesntExist()) {
-            return $baseLogin;
-        }
-
-
-        $i = 1;
-        $uniqueLogin = $baseLogin . $i;
-
-        while (User::where('login', $uniqueLogin)->exists()) {
-            $i++;
-            $uniqueLogin = $baseLogin . $i;
-        }
-        return $uniqueLogin;
+        return response()->json($stats);
     }
 }

@@ -65,17 +65,11 @@ Route::middleware(['auth:api', 'role:admin'])
     ->controller(EmployeeController::class)
     ->group(function () {
         Route::post('/', 'store');
+        Route::match(['put', 'patch'], '/{employee}', 'update');
+        Route::delete('/{employee}', 'destroy');
+        Route::get('/{employee}', 'show');
+        Route::post('/import', 'import');
     });
 
 
-
-
-
-
-
-
-Route::middleware('auth:api')->group(function () {
-    Route::get('/admin-only', function () {
-        return ['message' => 'welcome admin!'];
-    })->middleware('role:admin');
-});
+Route::post('/import', [EmployeeController::class, 'import']);
