@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\EmployeeService;
 
+
 class ImportService
 {
     protected $employeeService;
-    private const EXCEL_TO_DATEBASE_POSITIONS_MAP = [
+    private const EXCEL_TO_DATABASE_POSITIONS_MAP = [
         'PW' => ['PW', 'PW2'],
         'B' => ['B1', 'B2', 'B3', 'B4', 'B5', 'B5', 'B6', 'B7', 'B8'],
         'K' => ['K1', 'K2'],
@@ -26,9 +27,21 @@ class ImportService
         'TG' => 'TG',
         'TGT' => 'TGT',
         'BT' => 'BT'
-
-
     ];
+    private const KEYWORDS_MANDATE = [
+        'ZLEC',
+        'UZ',
+        'CONTRACT',
+        'MANDATE'
+    ];
+    private const KEYWORDS_EMPLOYMENT = [
+        'ETAT',
+        'PRAC',
+        'UOP',
+        'EMPLOY'
+    ];
+
+
 
     public function __construct(EmployeeService $employeeService)
     {
@@ -46,9 +59,9 @@ class ImportService
 
         $headerToIndexMap = $this->mapRowHeadersToIndexes($fileResource, $separator);
 
-        $nameAndPositionIndexes = $this->readCsvRows($fileResource, $separator);
+        $result = $this->readEmployeesDataFromCsv($fileResource, $separator);
 
-        $employeesByNameAndPosition = $this->assembleEmployeeNameAndPositions($headerToIndexMap, $nameAndPositionIndexes);
+        $employeesByNameAndPositionCode = $this->assembleEmployeeNameAndPositions($headerToIndexMap, $result['parsedEmployees']);
 
 
 
@@ -63,9 +76,11 @@ class ImportService
 
         return [
             'message' => 'Podgląd pliku CSV',
-            'rows' => $headerToIndexMap,
-            'separator' => $separator,
-            'Employes' => $employeesByNameAndPosition,
+            'parsedEmployees' => $employeesByNameAndPositionCode,
+            'errors' => $result['errors']
+
+
+
         ];
     }
     /**
@@ -97,13 +112,16 @@ class ImportService
         return  array_flip($cellNameToIndex);
     }
 
-    private function readCsvRows($fileResource, $separator)
+    private function readEmployeesDataFromCsv($fileResource, $separator)
     {
         $keyAndPositionsArray = [];
+        $errors = [];
+        $rowNumber = 1;
 
-        $contract_type = 'uop';
+        $contract_type = 'employment_contract';
 
         while (($currentRow = fgetcsv($fileResource, 0, $separator)) !== false) {
+            ++$rowNumber;
 
             $newType = $this->detectContractTypeChange($currentRow);
 
@@ -120,17 +138,57 @@ class ImportService
 
             $nameKey = $this->checkRightNameFormat($cell);
             $positionIndexes = $this->mapRowToEmloyeeData($currentRow);
-            $keyAndPositionsArray[$contract_type][$nameKey] = $positionIndexes;
+
+            if ($nameKey === false) {
+                $errors[$rowNumber][] = "Invalid employee name format:{$cell}";
+                continue;
+            }
+
+            if (empty($positionIndexes)) {
+                $errors[$rowNumber][] = "No positions selected for:{$cell}";
+                continue;
+            }
+            $keyAndPositionsArray[$nameKey] = [
+                'positions' => $positionIndexes,
+                'contract_type' => $contract_type
+            ];
         }
+
+
+
+
+
         fclose($fileResource);
-        return $keyAndPositionsArray;
+        return [
+            'parsedEmployees' => $keyAndPositionsArray,
+            'errors' => $errors
+        ];
     }
     private function detectContractTypeChange(array $row): string|null
     {
-        if (in_array('ZLECONE', $row)) return 'zlecenie';
-        if (in_array('ETATY', $row)) return 'uop';
+        foreach ($row as $cell) {
+            $trimmedCell = trim((string)$cell);
+
+            if ($trimmedCell === '' || is_numeric($trimmedCell) || mb_strlen($trimmedCell) < 3) continue;
+
+            $normalizedCell = $this->normalizeText($trimmedCell);
+
+            if (str($normalizedCell)->contains(self::KEYWORDS_MANDATE)) return 'mandate_contract';
+
+            if (str($normalizedCell)->contains(self::KEYWORDS_EMPLOYMENT)) return 'employment_contract';
+        }
         return null;
     }
+    private function normalizeText(string $sample): string
+    {
+        return str($sample)
+            ->ascii()
+            ->upper()
+            ->replace(['-', ',', '.', '(', ')', ':'], ' ')
+            ->squish()
+            ->toString();
+    }
+
     private function mapRowToEmloyeeData(array $currentRow): array
     {
         $positionIndexes = [];
@@ -213,10 +271,20 @@ class ImportService
     {
         $employeeNameAndPositions = [];
 
-        foreach ($nameAndPositionIndexes as $name => $indexes) {
-            $employeeNameAndPositions[$name] = array_map(function ($index) use ($headerToIndexMap) {
-                return $headerToIndexMap[$index] ?? "unknown($index)";
-            }, $indexes);
+        foreach ($nameAndPositionIndexes as $employee => $details) {
+            $positionIndexes = $details['positions'];
+            $contract = $details['contract_type'];
+
+            $mappedPositions = array_map(function ($index) use ($headerToIndexMap) {
+                return $headerToIndexMap[$index] ?? 'unknownPositions';
+            }, $positionIndexes);
+
+
+
+            $employeeNameAndPositions[$employee] = [
+                'positions' => $mappedPositions,
+                'contract_type' => $contract,
+            ];
         }
         return $employeeNameAndPositions;
     }

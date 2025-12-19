@@ -39,8 +39,8 @@ return new class extends Migration
                         ->default(11)
                         ->comment('Minimum rest period between shifts');
 
-                  $table->enum('contract_type', ['uop', 'zlecenie'])
-                        ->default('uop')
+                  $table->enum('contract_type', ['employment_contract', 'mandate_contract'])
+                        ->default('employment_contract')
                         ->comment('Employment contract type');
             });
       }
