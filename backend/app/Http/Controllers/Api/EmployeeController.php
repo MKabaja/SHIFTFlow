@@ -3,21 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-use Illuminate\Http\JsonResponse;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
+use App\Models\User;
+use App\Services\EmployeeService;
+use App\Services\Import\ImportService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Services\EmployeeService;
-use App\Services\ImportService;
 
 class EmployeeController extends Controller
 {
     protected $employeeService;
+
     protected $importService;
 
     public function __construct(EmployeeService $employeeService, ImportService $importService)
@@ -25,12 +24,13 @@ class EmployeeController extends Controller
         $this->employeeService = $employeeService;
         $this->importService = $importService;
     }
+
     /**
      * Display a listing of the resource.
      */
     public function index(): JsonResponse
     {
-        $emplyees = User::where('role',  'employee')
+        $emplyees = User::where('role', 'employee')
             ->with('positions')
             ->get();
 
@@ -50,15 +50,17 @@ class EmployeeController extends Controller
                 'pin_hashed' => Hash::make($request->pin),
                 'role' => 'employee',
                 'login' => $checkedLogin,
-                'name' =>  $request->name,
+                'name' => $request->name,
                 'hourly_rate' => $request->hourly_rate,
                 'email' => null,
             ];
 
             $user = User::create($payload);
             $user->positions()->attach($request->positions);
+
             return $user;
         });
+
         return response()->json([
             'user' => $employee->load('positions'),
             'message' => 'Employee created succesfully',
@@ -83,7 +85,7 @@ class EmployeeController extends Controller
         if ($request->filled('pin')) {
             $data['pin_hashed'] = Hash::make($data['pin']);
             unset($data['pin']);
-        };
+        }
         if (isset($data['positions'])) {
             $positionsData = $data['positions'];
             unset($data['positions']);
@@ -91,17 +93,15 @@ class EmployeeController extends Controller
             $positionsData = null;
         }
 
-
         $employee->update($data);
 
         if ($positionsData !== null) {
             $employee->positions()->sync($positionsData);
         }
 
-
         return response()->json([
             'message' => 'Employee updated successfully',
-            'employee' => $employee->load('positions')
+            'employee' => $employee->load('positions'),
         ], 200);
     }
 
@@ -111,6 +111,7 @@ class EmployeeController extends Controller
     public function destroy(User $employee)
     {
         $employee->delete();
+
         return response()->json(['message' => 'Employee deleted successfully'], 200);
     }
 
@@ -121,9 +122,8 @@ class EmployeeController extends Controller
         //     'file' => 'required|file|mimes:csv,txt'
         // ]);
 
-
         // 2. Wywołanie serwisu (który zaraz napiszesz)
-        $stats = $this->importService->importEmployeesFromCSV($request->file('file'));
+        $stats = $this->importService->import($request->file('file'));
 
         return response()->json($stats);
     }

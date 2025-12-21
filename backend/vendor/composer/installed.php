@@ -419,9 +419,9 @@
             'dev_requirement' => true,
         ),
         'laravel/pint' => array(
-            'pretty_version' => 'v1.25.1',
-            'version' => '1.25.1.0',
-            'reference' => '5016e263f95d97670d71b9a987bd8996ade6d8d9',
+            'pretty_version' => 'v1.26.0',
+            'version' => '1.26.0.0',
+            'reference' => '69dcca060ecb15e4b564af63d1f642c81a241d6f',
             'type' => 'project',
             'install_path' => __DIR__ . '/../laravel/pint',
             'aliases' => array(),

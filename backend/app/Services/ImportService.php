@@ -2,18 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Position;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Services\EmployeeService;
-
 
 class ImportService
 {
     protected $employeeService;
+
     private const EXCEL_TO_DATABASE_POSITIONS_MAP = [
         'PW' => ['PW', 'PW2'],
         'B' => ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
@@ -26,33 +21,37 @@ class ImportService
         'SR' => ['SR'],
         'TG' => ['TG'],
         'TGT' => ['TGT'],
-        'BT' => ['BT']
+        'BT' => ['BT'],
     ];
+
     private const KEYWORDS_MANDATE = [
         'ZLEC',
         'UZ',
         'CONTRACT',
-        'MANDATE'
+        'MANDATE',
     ];
+
     private const KEYWORDS_EMPLOYMENT = [
         'ETAT',
         'PRAC',
         'UOP',
-        'EMPLOY'
+        'EMPLOY',
     ];
 
-
+    private array $codeToIDPositionMap;
 
     public function __construct(EmployeeService $employeeService)
     {
         $this->employeeService = $employeeService;
+        $this->codeToIDPositionMap = Position::pluck('id', 'name')->all();
     }
+
     public function importEmployeesFromCSV(UploadedFile $csvFile)
     {
         $filePath = $csvFile->getRealPath();
         $fileResource = $this->readCsvFile($filePath);
 
-        if (!$fileResource) {
+        if (! $fileResource) {
             return ['error' => 'Could not open file via fopen'];
         }
         $separator = $this->detectCsvSeparator($fileResource);
@@ -65,30 +64,21 @@ class ImportService
 
         $test = $this->formatEmployeeDataViaPositionsMap($parsedEmployeesWithPositionsCode);
 
-
-
-
-
-
-
-
-
-
-
+        dd($this->codeToIDPositionMap);
 
         return [
             'message' => 'Podgląd pliku CSV',
-            'parsedEmployees' => $parsedEmployeesWithPositionsCode,
+
             'errors' => $result['errors'],
-            'test' => $test
-
-
+            'test' => $test['employees'],
 
         ];
     }
+
     /**
      * Summary of readCsvFile
-     * @param string $filePath absolute path
+     *
+     * @param  string  $filePath  absolute path
      * @return bool|resource returns file handeler
      */
     private function readCsvFile(string $filePath)
@@ -98,7 +88,8 @@ class ImportService
 
     /**
      * Summary of mapRowHeadersToIndexes
-     * @param array $firstCsvRow  First Row form excel file
+     *
+     * @param  array  $firstCsvRow  First Row form excel file
      * @return array $cellNameToIndex return array of Key=>index
      */
     private function mapRowHeadersToIndexes($fileResource, $separator): array
@@ -108,11 +99,13 @@ class ImportService
         $cellNameToIndex = [];
 
         foreach ($firstCsvRow as $cellIndex => $cellName) {
-            if ($cellIndex <= 1) continue;
+            if ($cellIndex <= 1) {
+                continue;
+            }
             $cellNameToIndex[trim($cellName)] = $cellIndex;
         }
 
-        return  array_flip($cellNameToIndex);
+        return array_flip($cellNameToIndex);
     }
 
     private function readEmployeesDataFromCsv($fileResource, $separator)
@@ -124,18 +117,19 @@ class ImportService
         $contract_type = 'employment_contract';
 
         while (($currentRow = fgetcsv($fileResource, 0, $separator)) !== false) {
-            ++$rowNumber;
+            $rowNumber++;
 
             $newType = $this->detectContractTypeChange($currentRow);
 
             if ($newType) {
                 $contract_type = $newType;
+
                 continue;
             }
 
-
-            if ($this->shouldSkipEmpty($currentRow)) continue;
-
+            if ($this->shouldSkipEmpty($currentRow)) {
+                continue;
+            }
 
             $cell = trim($currentRow[1] ?? '');
 
@@ -144,43 +138,49 @@ class ImportService
 
             if ($nameKey === false) {
                 $errors[$rowNumber][] = "Invalid employee name format:{$cell}";
+
                 continue;
             }
-
 
             $keyAndPositionsArray[$rowNumber] = [
                 'name' => $nameKey,
                 'positions' => $positionIndexes,
-                'contract_type' => $contract_type
+                'contract_type' => $contract_type,
             ];
         }
 
-
-
-
-
         fclose($fileResource);
+
         return [
             'parsedEmployees' => $keyAndPositionsArray,
             'errors' => $errors,
 
         ];
     }
-    private function detectContractTypeChange(array $row): string|null
+
+    private function detectContractTypeChange(array $row): ?string
     {
         foreach ($row as $cell) {
-            $trimmedCell = trim((string)$cell);
+            $trimmedCell = trim((string) $cell);
 
-            if ($trimmedCell === '' || is_numeric($trimmedCell) || mb_strlen($trimmedCell) < 3) continue;
+            if ($trimmedCell === '' || is_numeric($trimmedCell) || mb_strlen($trimmedCell) < 3) {
+                continue;
+            }
 
             $normalizedCell = $this->normalizeText($trimmedCell);
 
-            if (str($normalizedCell)->contains(self::KEYWORDS_MANDATE)) return 'mandate_contract';
+            if (str($normalizedCell)->contains(self::KEYWORDS_MANDATE)) {
+                return 'mandate_contract';
+            }
 
-            if (str($normalizedCell)->contains(self::KEYWORDS_EMPLOYMENT)) return 'employment_contract';
+            if (str($normalizedCell)->contains(self::KEYWORDS_EMPLOYMENT)) {
+                return 'employment_contract';
+            }
         }
+
         return null;
     }
+
     private function normalizeText(string $sample): string
     {
         return str($sample)
@@ -196,42 +196,46 @@ class ImportService
         $positionIndexes = [];
 
         foreach ($currentRow as $column => $cellValue) {
-            if ($column <= 1) continue;
+            if ($column <= 1) {
+                continue;
+            }
 
             if (trim($cellValue) !== '') {
                 $positionIndexes[] = $column;
             }
         }
+
         return $positionIndexes;
     }
 
-
-
-
     /**
      * Summary of shouldSkipEmptyRow
-     * @param array|string  $value
-     * @return bool  true-> row is empty/ false-> row  has something
+     *
+     * @return bool true-> row is empty/ false-> row  has something
      */
     private function shouldSkipEmpty(array|string $value): bool
     {
         if (is_array($value)) {
             return empty(array_filter($value));
         }
+
         return empty($value);
     }
+
     /**
      * Summary of checkRightNameFormat
-     * @param string $cellValue
-     * @return bool|string  e.g. 'jon Smith' or false
+     *
+     * @return bool|string e.g. 'jon Smith' or false
      */
     private function checkRightNameFormat(string $cellValue): bool|string
     {
         $words = explode(' ', $cellValue);
         $wordsWithoutDoubleSpaces = array_filter($words);
 
-        if (count($wordsWithoutDoubleSpaces) === 2)
-            return mb_strtolower($wordsWithoutDoubleSpaces[0] . ' ' . $wordsWithoutDoubleSpaces[1]);
+        if (count($wordsWithoutDoubleSpaces) === 2) {
+            return mb_strtolower($wordsWithoutDoubleSpaces[0].' '.$wordsWithoutDoubleSpaces[1]);
+        }
+
         return false;
     }
 
@@ -240,13 +244,15 @@ class ImportService
         $allowedCsvSeparators = [',', ';', "\t", '|', ':'];
         $statisics = [];
 
-
-
         for ($i = 0; $i <= 10; $i++) {
             $currentRow = fgets($fileResource);
-            if (!$currentRow) break;
+            if (! $currentRow) {
+                break;
+            }
 
-            if ($this->shouldSkipEmpty($currentRow)) continue;
+            if ($this->shouldSkipEmpty($currentRow)) {
+                continue;
+            }
 
             foreach ($allowedCsvSeparators as $separator) {
                 $statisics[$separator][] = substr_count(trim($currentRow), $separator);
@@ -255,6 +261,7 @@ class ImportService
 
         $winner = $this->chooseSeparatorFromStatisics($statisics);
         rewind($fileResource);
+
         return $winner ?? ';';
     }
 
@@ -266,10 +273,10 @@ class ImportService
             if (count($onlyUniquesValues) === 1 && current($onlyUniquesValues) > 0) {
                 return $separator;
             }
-        };
+        }
     }
 
-    private function assembleEmployeeNameAndPositions(array $headerToIndexMap, array  $nameAndPositionIndexes): array
+    private function assembleEmployeeNameAndPositions(array $headerToIndexMap, array $nameAndPositionIndexes): array
     {
         $employeeNameAndPositions = [];
 
@@ -282,22 +289,21 @@ class ImportService
                 return $headerToIndexMap[$index] ?? 'unknownPositions';
             }, $positionIndexes);
 
-
-
             $employeeNameAndPositions[$employee] = [
                 'name' => $name,
                 'positions' => $mappedPositions,
                 'contract_type' => $contract,
             ];
         }
+
         return $employeeNameAndPositions;
     }
+
     private function formatEmployeeDataViaPositionsMap(array $parsedEmployees)
     {
         $employees = collect($parsedEmployees);
         $dictionary = self::EXCEL_TO_DATABASE_POSITIONS_MAP;
         $issues = [];
-
 
         $mapped = $employees->map(function ($employee, $row) use ($dictionary, &$issues) {
             $mappedPositions = collect($employee['positions'])
@@ -314,12 +320,13 @@ class ImportService
                 ->all();
 
             $employee['positions'] = $mappedPositions;
-            return  $employee;
+
+            return $employee;
         })->values();
 
         return [
             'employees' => $mapped->all(),
-            'issues' => $issues
+            'issues' => $issues,
         ];
     }
 }
