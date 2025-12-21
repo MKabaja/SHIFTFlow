@@ -16,17 +16,17 @@ class ImportService
     protected $employeeService;
     private const EXCEL_TO_DATABASE_POSITIONS_MAP = [
         'PW' => ['PW', 'PW2'],
-        'B' => ['B1', 'B2', 'B3', 'B4', 'B5', 'B5', 'B6', 'B7', 'B8'],
+        'B' => ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
         'K' => ['K1', 'K2'],
         'WS' => ['WS', 'WS2'],
         'WR' => ['WR', 'WR2', 'WR3'],
         'OTG' => ['OTG', 'OTG2'],
         'PTG' => ['PTG', 'PTG2'],
-        'PD' => 'PD',
-        'SR' => 'SR',
-        'TG' => 'TG',
-        'TGT' => 'TGT',
-        'BT' => 'BT'
+        'PD' => ['PD'],
+        'SR' => ['SR'],
+        'TG' => ['TG'],
+        'TGT' => ['TGT'],
+        'BT' => ['BT']
     ];
     private const KEYWORDS_MANDATE = [
         'ZLEC',
@@ -61,7 +61,9 @@ class ImportService
 
         $result = $this->readEmployeesDataFromCsv($fileResource, $separator);
 
-        $employeesByNameAndPositionCode = $this->assembleEmployeeNameAndPositions($headerToIndexMap, $result['parsedEmployees']);
+        $parsedEmployeesWithPositionsCode = $this->assembleEmployeeNameAndPositions($headerToIndexMap, $result['parsedEmployees']);
+
+        $test = $this->formatEmployeeDataViaPositionsMap($parsedEmployeesWithPositionsCode);
 
 
 
@@ -76,8 +78,9 @@ class ImportService
 
         return [
             'message' => 'Podgląd pliku CSV',
-            'parsedEmployees' => $employeesByNameAndPositionCode,
-            'errors' => $result['errors']
+            'parsedEmployees' => $parsedEmployeesWithPositionsCode,
+            'errors' => $result['errors'],
+            'test' => $test
 
 
 
@@ -144,11 +147,9 @@ class ImportService
                 continue;
             }
 
-            if (empty($positionIndexes)) {
-                $errors[$rowNumber][] = "No positions selected for:{$cell}";
-                continue;
-            }
-            $keyAndPositionsArray[$nameKey] = [
+
+            $keyAndPositionsArray[$rowNumber] = [
+                'name' => $nameKey,
                 'positions' => $positionIndexes,
                 'contract_type' => $contract_type
             ];
@@ -161,7 +162,8 @@ class ImportService
         fclose($fileResource);
         return [
             'parsedEmployees' => $keyAndPositionsArray,
-            'errors' => $errors
+            'errors' => $errors,
+
         ];
     }
     private function detectContractTypeChange(array $row): string|null
@@ -272,6 +274,7 @@ class ImportService
         $employeeNameAndPositions = [];
 
         foreach ($nameAndPositionIndexes as $employee => $details) {
+            $name = $details['name'];
             $positionIndexes = $details['positions'];
             $contract = $details['contract_type'];
 
@@ -282,10 +285,41 @@ class ImportService
 
 
             $employeeNameAndPositions[$employee] = [
+                'name' => $name,
                 'positions' => $mappedPositions,
                 'contract_type' => $contract,
             ];
         }
         return $employeeNameAndPositions;
+    }
+    private function formatEmployeeDataViaPositionsMap(array $parsedEmployees)
+    {
+        $employees = collect($parsedEmployees);
+        $dictionary = self::EXCEL_TO_DATABASE_POSITIONS_MAP;
+        $issues = [];
+
+
+        $mapped = $employees->map(function ($employee, $row) use ($dictionary, &$issues) {
+            $mappedPositions = collect($employee['positions'])
+                ->flatMap(
+                    function ($p) use ($dictionary, $row, &$issues, $employee) {
+                        $name = $employee['name'];
+                        if (isset($dictionary[$p])) {
+                            return (array) $dictionary[$p];
+                        }
+                        $issues[$row][] = "Employee {$name} has unknown position code: {$p}";
+                    }
+                )
+                ->unique()
+                ->all();
+
+            $employee['positions'] = $mappedPositions;
+            return  $employee;
+        })->values();
+
+        return [
+            'employees' => $mapped->all(),
+            'issues' => $issues
+        ];
     }
 }
