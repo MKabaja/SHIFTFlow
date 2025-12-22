@@ -200,7 +200,7 @@ class ImportService
                 continue;
             }
 
-            if (trim($cellValue) !== '') {
+            if (trim($cellValue) === 'TAK') {
                 $positionIndexes[] = $column;
             }
         }
