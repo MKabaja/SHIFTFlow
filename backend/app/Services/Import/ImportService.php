@@ -2,6 +2,7 @@
 
 namespace App\Services\Import;
 
+use App\Repositories\EmployeeRepository;
 use Illuminate\Http\UploadedFile;
 
 class ImportService
@@ -10,7 +11,7 @@ class ImportService
         protected EmployeesCsvExtractor $extractor,
         protected EmployeeCsvValidator $validator,
         protected EmployeeDataAssembler $assembler,
-        // protected EmployeeRepository $repository
+        protected EmployeeRepository $repository,
     ) {}
 
     public function import(UploadedFile $file)
@@ -26,10 +27,10 @@ class ImportService
         $validationIssues = $validRowsAndIssues['issues'];
 
         $employeeData = $this->assembler->assemble($validatedRows, $extractedHeader);
-        // $result = $this->repository->saveMany($employeeData);
+        $result = $this->repository->saveMany($employeeData);
 
         // return $this->mergeIssues($validRows->issues, $result->issues);
 
-        return $employeeData;
+        return $result;
     }
 }
