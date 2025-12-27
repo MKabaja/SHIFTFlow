@@ -1,17 +1,14 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ScheduleController;
-use App\Http\Controllers\Api\PositionController;
 use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\PositionController;
+use App\Http\Controllers\Api\ScheduleController;
+use Illuminate\Support\Facades\Route;
 
+// ===============================================
 
-//===============================================
-
-
-//Login
+// Login
 Route::prefix('auth')
     ->controller(AuthController::class)
     ->group(function () {
@@ -27,8 +24,7 @@ Route::prefix('auth')
             });
     });
 
-
-//Schedule Crud
+// Schedule Crud
 
 Route::middleware(['auth:api', 'role:admin,manager'])
     ->prefix('schedules')
@@ -41,7 +37,7 @@ Route::middleware(['auth:api', 'role:admin,manager'])
         Route::get('/{schedule}', 'show');
     });
 
-//Positions G1
+// Positions G1
 Route::middleware(['auth:api', 'role:admin,manager'])
     ->prefix('positions')
     ->controller(PositionController::class)
@@ -49,7 +45,7 @@ Route::middleware(['auth:api', 'role:admin,manager'])
         Route::get('/', 'index');
         Route::get('/{position}', 'show');
     });
-//Positions G2
+// Positions G2
 Route::middleware(['auth:api', 'role:admin'])
     ->prefix('positions')
     ->controller(PositionController::class)
@@ -59,7 +55,7 @@ Route::middleware(['auth:api', 'role:admin'])
         Route::delete('/{position}', 'destroy');
     });
 
-//Employee Management (CRUD)
+// Employee Management (CRUD)
 Route::middleware(['auth:api', 'role:admin'])
     ->prefix('employees')
     ->controller(EmployeeController::class)
@@ -69,7 +65,7 @@ Route::middleware(['auth:api', 'role:admin'])
         Route::delete('/{employee}', 'destroy');
         Route::get('/{employee}', 'show');
         Route::post('/import', 'import');
+        Route::get('/', 'index');
     });
-
 
 Route::post('/import', [EmployeeController::class, 'import']);

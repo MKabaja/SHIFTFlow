@@ -3,6 +3,7 @@
 namespace App\Services\Import;
 
 use App\Repositories\EmployeeRepository;
+use Exception;
 use Illuminate\Http\UploadedFile;
 
 class ImportService
@@ -27,10 +28,22 @@ class ImportService
         $validationIssues = $validRowsAndIssues['issues'];
 
         $employeeData = $this->assembler->assemble($validatedRows, $extractedHeader);
-        $result = $this->repository->saveMany($employeeData);
+        try {
+            $this->repository->saveMany($employeeData);
 
-        // return $this->mergeIssues($validRows->issues, $result->issues);
+            return [
+                'success' => true,
+                'imported' => count($employeeData),
+                'validation_issues' => $validationIssues,
+            ];
 
-        return $result;
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'validation_issues' => $validationIssues,
+            ];
+        }
+
     }
 }

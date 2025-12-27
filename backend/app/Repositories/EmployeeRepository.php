@@ -19,14 +19,15 @@ class EmployeeRepository
     // EmployeeRepository
     public function saveMany(Collection $employeeDataCollection): void
     {
+        $positionsMap = Position::pluck('id', 'name');
 
-        DB::transaction(function () use ($employeeDataCollection): void {
-
+        DB::transaction(function () use ($employeeDataCollection, $positionsMap) {
             foreach ($employeeDataCollection as $data) {
-                $positionIDs = $this->getPositionIds($data->positions);
 
+                $positionIDs = $this->getPositionIds($data->positions, $positionsMap);
                 $payload = $this->prepareEmployeePersistenceData($data);
-                $user = $this->saveEmployee($payload, $positionIDs);
+
+                $this->saveEmployee($payload, $positionIDs);
 
             }
 
@@ -46,9 +47,12 @@ class EmployeeRepository
 
     }
 
-    private function getPositionIds(array $positionNames): Collection
+    private function getPositionIds(array $positionNames, Collection $positionsMap): Collection
     {
-        return Position::whereIn('name', $positionNames)->pluck('id');
+        return collect($positionNames)
+            ->map(fn ($name) => $positionsMap[$name] ?? null)
+            ->filter()
+            ->values();
     }
 
     private function prepareEmployeePersistenceData(EmployeeImportData $data): array
