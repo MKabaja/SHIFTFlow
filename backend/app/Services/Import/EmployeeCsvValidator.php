@@ -24,12 +24,21 @@ class EmployeeCsvValidator
      *   issues: array<int,array<int,string>>
      * }
      */
-    public function validate(array $rawRows)
+    public function validate(array $rawRows): array
     {
         $validRows = [];
         $issues = [];
-
         $contractType = null;
+        $limit = 500;
+
+        if (count($rawRows) > $limit) {
+            return [
+                'valid_rows' => $validRows,
+                'issues' => [
+                    0 => ['Exceeded maximum of 500 rows. Please split the file.'],
+                ],
+            ];
+        }
 
         foreach ($rawRows as $rowNumber => $cells) {
             $nameCell = trim($cells[1] ?? '');

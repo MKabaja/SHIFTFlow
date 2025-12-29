@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\DataTransferObjects\\EmployeeImportData' => $baseDir . '/app/DataTransferObjects/EmployeeImportData.php',
     'App\\Http\\Controllers\\Api\\AuthController' => $baseDir . '/app/Http/Controllers/Api/AuthController.php',
     'App\\Http\\Controllers\\Api\\EmployeeController' => $baseDir . '/app/Http/Controllers/Api/EmployeeController.php',
     'App\\Http\\Controllers\\Api\\PositionController' => $baseDir . '/app/Http/Controllers/Api/PositionController.php',
@@ -32,8 +33,13 @@ return array(
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
     'App\\Providers\\TelescopeServiceProvider' => $baseDir . '/app/Providers/TelescopeServiceProvider.php',
+    'App\\Repositories\\EmployeeRepository' => $baseDir . '/app/Repositories/EmployeeRepository.php',
     'App\\Services\\EmployeeService' => $baseDir . '/app/Services/EmployeeService.php',
     'App\\Services\\ImportService' => $baseDir . '/app/Services/ImportService.php',
+    'App\\Services\\Import\\EmployeeCsvValidator' => $baseDir . '/app/Services/Import/EmployeeCsvValidator.php',
+    'App\\Services\\Import\\EmployeeDataAssembler' => $baseDir . '/app/Services/Import/EmployeeDataAssembler.php',
+    'App\\Services\\Import\\EmployeesCsvExtractor' => $baseDir . '/app/Services/Import/EmployeesCsvExtractor.php',
+    'App\\Services\\Import\\ImportService' => $baseDir . '/app/Services/Import/ImportService.php',
     'App\\Services\\ValidationService' => $baseDir . '/app/Services/ValidationService.php',
     'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
     'Brick\\Math\\BigDecimal' => $vendorDir . '/brick/math/src/BigDecimal.php',
@@ -6412,6 +6418,7 @@ return array(
     'Termwind\\ValueObjects\\Node' => $vendorDir . '/nunomaduro/termwind/src/ValueObjects/Node.php',
     'Termwind\\ValueObjects\\Style' => $vendorDir . '/nunomaduro/termwind/src/ValueObjects/Style.php',
     'Termwind\\ValueObjects\\Styles' => $vendorDir . '/nunomaduro/termwind/src/ValueObjects/Styles.php',
+    'Tests\\Feature\\EmployeeImportTest' => $baseDir . '/tests/Feature/EmployeeImportTest.php',
     'Tests\\Feature\\EmployeeTest' => $baseDir . '/tests/Feature/EmployeeTest.php',
     'Tests\\Feature\\ExampleTest' => $baseDir . '/tests/Feature/ExampleTest.php',
     'Tests\\Feature\\PositionTest' => $baseDir . '/tests/Feature/PositionTest.php',

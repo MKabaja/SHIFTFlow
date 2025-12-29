@@ -64,8 +64,6 @@ Route::middleware(['auth:api', 'role:admin'])
         Route::match(['put', 'patch'], '/{employee}', 'update');
         Route::delete('/{employee}', 'destroy');
         Route::get('/{employee}', 'show');
-        Route::post('/import', 'import');
+        Route::post('/import', 'importFromCsv');
         Route::get('/', 'index');
     });
-
-Route::post('/import', [EmployeeController::class, 'import']);

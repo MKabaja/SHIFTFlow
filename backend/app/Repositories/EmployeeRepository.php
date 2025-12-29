@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\DataTransferObjects\EmployeeImportData;
 use App\Models\Position;
 use App\Models\User;
-use App\Services\EmployeeService;
+use App\Services\LoginGeneratorService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -13,26 +13,46 @@ use Illuminate\Support\Facades\Hash;
 class EmployeeRepository
 {
     public function __construct(
-        private readonly EmployeeService $employeeService
+        private readonly LoginGeneratorService $loginGeneratorService
     ) {}
 
-    // EmployeeRepository
-    public function saveMany(Collection $employeeDataCollection): void
+    public function saveMany(Collection $employeeDataCollection): array
     {
         $positionsMap = Position::pluck('id', 'name');
 
-        DB::transaction(function () use ($employeeDataCollection, $positionsMap) {
-            foreach ($employeeDataCollection as $data) {
-
-                $positionIDs = $this->getPositionIds($data->positions, $positionsMap);
-                $payload = $this->prepareEmployeePersistenceData($data);
-
-                $this->saveEmployee($payload, $positionIDs);
-
-            }
-
+        return DB::transaction(function () use ($employeeDataCollection, $positionsMap) {
+            return $this->persistImportedEmployees($employeeDataCollection, $positionsMap);
         });
+    }
 
+    private function persistImportedEmployees(Collection $employeeDataCollection, Collection $positionsMap): array
+    {
+        $created = 0;
+        $updated = 0;
+
+        $allExistingLogins = User::pluck('login')->toArray();
+        $existingUsersByName = $this->getExistingUsers($employeeDataCollection);
+
+        foreach ($employeeDataCollection as $data) {
+            $positionIDs = $this->getPositionIds($data->positions, $positionsMap);
+
+            $payload = $this->prepareEmployeePersistenceData($data, $allExistingLogins, $existingUsersByName);
+
+            $user = $this->saveEmployee($payload, $positionIDs);
+
+            $allExistingLogins[] = $payload['login'];
+
+            if ($user->wasRecentlyCreated) {
+                $created++;
+            } else {
+                $updated++;
+            }
+        }
+
+        return [
+            'created' => $created,
+            'updated' => $updated,
+        ];
     }
 
     private function saveEmployee(array $employeeData, Collection $positionIDs): User
@@ -55,19 +75,30 @@ class EmployeeRepository
             ->values();
     }
 
-    private function prepareEmployeePersistenceData(EmployeeImportData $data): array
+    private function prepareEmployeePersistenceData(EmployeeImportData $data, array $allExistingLogins, Collection $existingUsersByName): array
     {
-        $baseLogin = $this->employeeService->createLogin($data->name, 5);
-        $checkedLogin = $this->employeeService->findUniqueLogin($baseLogin);
+        if ($existingUsersByName->has($data->name)) {
+            $login = $existingUsersByName->get($data->name);
+
+        } else {
+
+            $login = $this->loginGeneratorService->generate($data->name, $allExistingLogins);
+        }
 
         return [
             'name' => $data->name,
-            'login' => $checkedLogin,
+            'login' => $login,
             'contract_type' => $data->contractType,
             'pin_hashed' => Hash::make('1234'),
             'role' => 'employee',
             'email' => null,
-
         ];
+    }
+
+    private function getExistingUsers(Collection $collection): Collection
+    {
+        return User::whereIn('name', $collection
+            ->pluck('name'))
+            ->pluck('login', 'name');
     }
 }

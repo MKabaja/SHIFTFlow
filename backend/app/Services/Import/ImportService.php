@@ -4,7 +4,9 @@ namespace App\Services\Import;
 
 use App\Repositories\EmployeeRepository;
 use Exception;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 
 class ImportService
 {
@@ -15,7 +17,7 @@ class ImportService
         protected EmployeeRepository $repository,
     ) {}
 
-    public function import(UploadedFile $file)
+    public function import(UploadedFile $file): array
     {
         $headersAndRows = $this->extractor->extract($file);
 
@@ -29,18 +31,38 @@ class ImportService
 
         $employeeData = $this->assembler->assemble($validatedRows, $extractedHeader);
         try {
-            $this->repository->saveMany($employeeData);
+            $stats = $this->repository->saveMany($employeeData);
 
             return [
                 'success' => true,
-                'imported' => count($employeeData),
+                'created' => $stats['created'],
+                'updated' => $stats['updated'],
+                'total' => $stats['created'] + $stats['updated'],
+                'validation_issues' => $validationIssues,
+
+            ];
+
+        } catch (QueryException $e) {
+            Log::error('Database error during CSV import', [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'Failed to save data to the database.',
                 'validation_issues' => $validationIssues,
             ];
 
         } catch (Exception $e) {
+            Log::error('Unexpected error during CSV import', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return [
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => 'Unexpected import error.',
                 'validation_issues' => $validationIssues,
             ];
         }

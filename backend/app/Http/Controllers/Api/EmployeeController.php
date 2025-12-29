@@ -115,16 +115,17 @@ class EmployeeController extends Controller
         return response()->json(['message' => 'Employee deleted successfully'], 200);
     }
 
-    public function import(Request $request)
+    public function importFromCsv(Request $request): JsonResponse
     {
-        // 1. Walidacja, czy plik w ogóle jest
-        // $request->validate([
-        //     'file' => 'required|file|mimes:csv,txt'
-        // ]);
 
-        // 2. Wywołanie serwisu (który zaraz napiszesz)
-        $stats = $this->importService->import($request->file('file'));
+        $request->validate([
+            'csv' => 'required|file|mimes:csv,txt|max:10240',
+        ]);
 
-        return response()->json($stats);
+        $stats = $this->importService->import($request->file('csv'));
+
+        $statusCode = $stats['success'] ? 200 : 422;
+
+        return response()->json($stats, $statusCode);
     }
 }
