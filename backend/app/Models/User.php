@@ -4,25 +4,24 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Tymon\JWTAuth\JWT;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Support\Facades\Hash;
-use App\Models\Position;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
     use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
+     *
      * @property string $name
      * @property string $email
      * @property float $hourly_rate
@@ -30,7 +29,6 @@ class User extends Authenticatable implements JWTSubject
      * @property int $min_break_hours
      * @property string $contract_type
      */
-
     protected $fillable = [
         'name',
         'email',
@@ -44,7 +42,6 @@ class User extends Authenticatable implements JWTSubject
         'role',
     ];
 
-
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -53,7 +50,7 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
-        'pin_hashed'
+        'pin_hashed',
     ];
 
     /**
@@ -66,7 +63,7 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-
+            'pin_hashed' => 'hashed',
             'hourly_rate' => 'decimal:2',
             'is_active' => 'boolean',
             'max_hours_per_month' => 'integer',
@@ -76,34 +73,34 @@ class User extends Authenticatable implements JWTSubject
 
         ];
     }
-    protected function pinHashed(): Attribute
-    {
-        return Attribute::make(
-            set: fn($value) => $value ? Hash::make($value) : null,
-        );
-    }
+
     /**
      * Summary of schedules
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<Schedule, User>
-     * User may have multiple schedules
+     *                                                                         User may have multiple schedules
      */
     public function schedules()
     {
         return $this->hasMany(Schedule::class, 'user_id');
     }
+
     /**
      * Summary of availabilities
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<Availability, User>
-     * User may have multiple availabilities
+     *                                                                             User may have multiple availabilities
      */
     public function availabilities()
     {
         return $this->hasMany(Availability::class, 'user_id');
     }
+
     /**
      * Summary of positions
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Position, User, \Illuminate\Database\Eloquent\Relations\Pivot>
-     * user many belong to many Positions
+     *                                                                                                                              user many belong to many Positions
      */
     public function positions()
     {
@@ -111,7 +108,7 @@ class User extends Authenticatable implements JWTSubject
     }
     /**
      * ========== JWT METHODS ==========
-     * 
+     *
      * Te dwie metody są wymagane przez JWTSubject
      * Mówią JWT'owi jak identyfikować usera w tokenie
      */
@@ -124,7 +121,7 @@ class User extends Authenticatable implements JWTSubject
         return $this->getKey();
     }
 
-    //zwróć custom claims do JWT
+    // zwróć custom claims do JWT
     public function getJWTCustomClaims()
     {
         return [];

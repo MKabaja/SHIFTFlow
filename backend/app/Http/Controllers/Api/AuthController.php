@@ -3,116 +3,99 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginPinRequest;
+use App\Http\Requests\LoginRequest;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use Tymon\JWTAuth\JWT;
 
 class AuthController extends Controller
 {
-    // PIN Token lifetime
-    private const TTL_PIN =3600;
-    //Password Token lifetime
-    private const TTL_PASSWORD = 3600 *9;
-   
-    public function login(Request $request)
+    public function login(LoginRequest $request): JsonResponse
     {
-        //walidacja
-         $request->validate([
-            'email'=> 'required|email',
-            'password'=> 'required|min:6',
-        ]);
-        $user = User::where('email',$request->email)->first();
+        $validated = $request->validated();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' =>'Invalid Password or Email!'],401);
+        $user = User::where('login', $validated['login'])->first();
+
+        if (! $user || ! Hash::check($validated['password'], $user->password)) {
+            return response()->json(
+                [
+                    'message' => 'Invalid password or login!',
+                ], 401);
         }
-        $token = JWTAuth::fromUser($user);  
+        $token = JWTAuth::fromUser($user);
 
-        
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => self::TTL_PASSWORD,
-            'user'=> [
-                'id'=> $user->id,
-                'email'=> $user->email,
-                'name'=> $user->name,
-                'role'=> $user->role,
-                ]
+            'expires_in' => config('jwt.ttl') * 60,
+            'user' => [
+                'id' => $user->id,
+                'login' => $user->login,
+                'name' => $user->name,
+                'role' => $user->role,
+            ],
 
         ]);
     }
 
-    public function loginPin(Request $request)
+    public function loginPin(LoginPinRequest $request): JsonResponse
     {
-         $request->validate([
-            'employee_id' =>'required|exists:users,id',
-            'pin' => 'required|string|min:4',
-        ]);
-        
-        $user = User::find($request->employee_id);
-        
-        if(!$user || !Hash::check($request->pin,$user->pin_hashed)) {
-            return response()->json(['message'=> 'Invalid PIN or ID'],401);
-        } 
+        $validated = $request->validated();
+        // dd($validated);
+
+        $user = User::where('login', $validated['login'])->first();
+
+        if (! $user || ! Hash::check($validated['pin'], $user->pin_hashed)) {
+            return response()->json(
+                [
+                    'message' => 'Invalid pin or login',
+                ], 401);
+        }
 
         $token = JWTAuth::fromUser($user);
 
-
-           
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => self::TTL_PIN,
-            'user'=> [
+            'expires_in' => config('jwt.ttl') * 60,
+            'user' => [
                 'id' => $user->id,
+                'login' => $user->login,
                 'name' => $user->name,
                 'role' => $user->role,
             ],
         ]);
     }
-    public function me(Request $request)
+
+    public function me(Request $request): JsonResponse
     {
         $user = $request->user();
-       
+
         return response()->json([
-            'id'=> $user->id,
-            'name'=> $user->name,
-            'email'=> $user->email,
-            'role'=> $user->role,
-            'positions'=> $user->positions,
-            'status'=> $user->is_active,
-            'hourly_rate'=>$user->hourly_rate
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'positions' => $user->positions,
+            'status' => $user->is_active,
+            'hourly_rate' => $user->hourly_rate,
+            'login' => $user->login,
         ]);
     }
 
-       
-        
-            
-
-
-
-
-    
-    /**
-     * Logout endpoint
-     * 
-     * POST /api/auth/logout
-     */
-    public function logout()
+    public function logout(): JsonResponse
     {
         $token = JWTAuth::getToken();
 
-        if (!$token) {
-            return response()->json(['message'=> 'No token provided'],401);
+        if (! $token) {
+            return response()->json(['message' => 'No token provided'], 401);
         }
         JWTAuth::invalidate($token);
-        return response()->json(['message'=> 'Logged out successfully'],200);
-            
-        
+
+        return response()->json(['message' => 'Logged out successfully'], 200);
 
     }
-} 
+}

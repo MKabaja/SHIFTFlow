@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Services\LoginGeneratorService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class EmployeeRepository
 {
@@ -89,7 +88,7 @@ class EmployeeRepository
             'name' => $data->name,
             'login' => $login,
             'contract_type' => $data->contractType,
-            'pin_hashed' => Hash::make('1234'),
+            'pin_hashed' => 1234,
             'role' => 'employee',
             'email' => null,
         ];

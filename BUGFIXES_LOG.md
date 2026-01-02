@@ -104,3 +104,179 @@ $dataWithFallbacks = [
 3.  **createFromFormat jest strict:** Trailing data (nawet spacje czy sekundy) zawsze wyrzucą błąd. Używaj `substr` lub formatowania, by wyczyścić input.
 
 ---
+
+### Baza testowa vs produkcyjna (SQLite vs MySQL)
+
+**Problem:**
+
+-   Testy feature nie działały, bo Laravel próbował korzystać z SQLite (:memory:), mimo że projekt był skonfigurowany pod MySQL.
+
+-   Pojawiał się błąd w stylu: brak pliku bazy shiftflow_db / nieistniejąca baza testowa.
+
+**Jak zostało rozwiązane:**
+
+-   W pliku phpunit.xml jawnie ustawiono zmienne środowiskowe dla testów:
+
+```
+DB_CONNECTION=mysql
+
+DB_HOST=db
+
+DB_DATABASE=shiftflow_test
+
+DB_USERNAME, DB_PASSWORD
+```
+
+pod testową bazę.
+
+Wyczyszczono cache konfiguracji i usunięto stary config cache.
+
+Dzięki temu testy korzystają z osobnej bazy testowej MySQL, zgodnie z konfiguracją.
+
+2. N+1 zapytań przy imporcie (wydajność)
+   Problem:
+
+Naturalnym odruchem było sprawdzanie loginów / użytkowników w pętli (dla każdego rekordu CSV):
+
+To prowadziłoby do wielu zapytań SQL przy większym imporcie (N+1 problem).
+
+Jak zostało rozwiązane:
+
+Przed pętlą pobierane są wszystkie potrzebne dane jednym strzałem:
+
+User::pluck('login')->toArray() – wszystkie istniejące loginy.
+
+User::whereIn('name', $employeeDataCollection->pluck('name'))->pluck('login', 'name') – mapa istniejących użytkowników po name.
+
+W pętli:
+
+Operacje wykonywane są wyłącznie na kolekcjach i tablicach w pamięci.
+
+Nowo wygenerowany login jest dopisywany do tablicy, aby uniknąć kolizji w tym samym imporcie.
+
+Efekt: 2 zapytania przed pętlą + updateOrCreate dla każdego rekordu, brak dodatkowych zapytań w pętli.
+
+3. Zmiana loginu przy ponownym imporcie (regresja danych)
+   Problem:
+
+Przy drugim imporcie tego samego pracownika:
+
+Login potrafił się zmienić z np. jkowal na jkowal1.
+
+Wynikało to z tego, że przy każdym imporcie generowano login na nowo, zamiast zachować istniejący.
+
+Jak zostało rozwiązane:
+
+Przed pętlą pobierana jest mapa istniejących użytkowników:
+
+['jan kowalski' => 'jkowal', ...].
+
+W prepareEmployeePersistenceData():
+
+Jeśli existingUsersByName zawiera danego pracownika po name, używany jest jego dotychczasowy login.
+
+Jeśli pracownik nie istnieje – wywoływany jest mechanizm generowania loginu.
+
+Dzięki temu:
+
+Istniejący pracownik po ponownym imporcie zachowuje swój login.
+
+Statystyki importu prawidłowo rozróżniają created vs updated.
+
+4. Kolizje loginów (różne osoby, ten sam prefix)
+   Problem:
+
+Dwie różne osoby mogły wygenerować ten sam bazowy login, np.:
+
+Jan Kowalski → jkowal
+
+Jan Kowalczyk → też jkowal.
+
+Bez odpowiedniego mechanizmu powstawałyby duplikaty na kolumnie login (unikalny indeks).
+
+Jak zostało rozwiązane:
+
+Wprowadzono LoginGeneratorService z logiką:
+
+Wyznacz bazowy login na podstawie imienia i nazwiska.
+
+Filtrowanie loginów, które zaczynają się od bazowego (jkowal, jkowal1, jkowal2, …).
+
+Wyciąganie sufiksów numerycznych z końca loginu (regex).
+
+Zwracanie loginu w postaci baseLogin lub baseLogin.(max+1):
+
+Przykład: istnieje jkowal, jkowal1, jkowal5 → nowy login to jkowal6.
+
+Dzięki temu:
+
+Każdy nowy użytkownik otrzymuje unikalny login, nawet jeśli bazowy prefix się powtarza.
+
+5. Polskie znaki w loginach (problemy z unikalnością)
+   Problem:
+
+Imiona/nazwiska z polskimi znakami powodowały loginy typu śzuzan.
+
+To:
+
+Było mało czytelne.
+
+Potencjalnie mogło powodować problemy z unikalnością i porównywaniem stringów.
+
+Jak zostało rozwiązane:
+
+W LoginGeneratorService dodano transliterację:
+
+Str::ascii(mb_strtolower($login)).
+
+Przykłady:
+
+Ślusarek Zuzanna → szuzan.
+
+Łukasz → lukasz.
+
+Dzięki temu:
+
+Loginy są ASCII-only, czytelne, stabilne w bazie i przy porównaniach.
+
+6. Błąd przy ponownym imporcie – unikalny indeks na loginie
+   Problem:
+
+Przy imporcie z polskimi znakami i bez transliteracji:
+
+Próba utworzenia użytkownika z loginem, który już istniał (np. śzuzan) kończyła się błędem SQL Integrity constraint violation: 1062 Duplicate entry.
+
+Jak zostało rozwiązane:
+
+Po dodaniu transliteracji i mechanizmu max+1:
+
+Pierwszy użytkownik dostaje np. szuzan.
+
+Kolejny o tym samym bazowym loginie – szuzan1, itd.
+
+Dodatkowo:
+
+Dzięki sprawdzaniu po name (mapa existingUsersByName) istniejący użytkownik nie próbuje dostać nowego loginu, więc nie generuje konfliktu unikalności przy ponownym imporcie.
+
+7. Relacje user–positions (poprawne przypisanie stanowisk)
+   Problem:
+
+Na początku test nie sprawdzał, czy pracownicy faktycznie mają przypisane odpowiednie stanowiska (PD, PW).
+
+Istniało ryzyko, że import tworzy userów, ale relacje w tabeli pivot nie są poprawne.
+
+Jak zostało rozwiązane:
+
+Rozbudowano testy feature:
+
+Dla Jan Kowalski sprawdzane jest, że ma PD, a nie ma PW.
+
+Dla Anna Nowak – odwrotnie.
+
+W repozytorium:
+
+saveEmployee() po updateOrCreate wywołuje $user->positions()->sync($positionIDs);, co gwarantuje spójność relacji.
+
+```
+
+```

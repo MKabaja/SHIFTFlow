@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AvailabilityController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\PositionController;
 use App\Http\Controllers\Api\ScheduleController;
@@ -66,4 +67,15 @@ Route::middleware(['auth:api', 'role:admin'])
         Route::get('/{employee}', 'show');
         Route::post('/import', 'importFromCsv');
         Route::get('/', 'index');
+    });
+
+// Availabilities
+Route::middleware(['auth:api'])
+    ->prefix('availabilities')
+    ->controller(AvailabilityController::class)
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::delete('/{availability}', 'destroy');
+
     });

@@ -6,8 +6,6 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-use Illuminate\Support\Facades\Hash;
-
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
@@ -21,10 +19,17 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin User',
             'login' => 'admin',
             'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin'
+            'password' => 'password',
+            'role' => 'admin',
         ]);
+        User::factory()->create([
+            'name' => 'Mateusz Kabaja',
+            'login' => 'mkabaj',
+            'email' => 'mkabaj@example.com',
+            'pin_hashed' => 1234,
+            'role' => 'employee',
 
+        ]);
 
         $this->call([
             PositionSeeder::class,
