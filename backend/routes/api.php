@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AvailabilityController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\PositionController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ScheduleController;
 use Illuminate\Support\Facades\Route;
 
@@ -77,5 +78,15 @@ Route::middleware(['auth:api'])
         Route::get('/', 'index');
         Route::post('/', 'store');
         Route::delete('/{availability}', 'destroy');
+    });
+
+// Reports
+Route::middleware(['auth:api', 'role:admin,manager'])
+    ->prefix('reports')
+    ->controller(ReportController::class)
+    ->group(function () {
+        Route::get('/{user_id}', 'getHoursReport');
+        Route::get('/payroll', 'getEmployeeSalary');
+        Route::post('/coverage', 'coverage');
 
     });
