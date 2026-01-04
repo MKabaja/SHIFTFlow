@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Schedule;
 use App\Models\User;
 use App\Services\ReportService;
 use Illuminate\Http\JsonResponse;
@@ -13,26 +12,14 @@ class ReportController extends Controller
 {
     public function __construct(private ReportService $reportService) {}
 
-    public function getHoursReport(Request $request, $userId): JsonResponse
+    public function employeeHours(Request $request, $userId): JsonResponse
     {
-
         [$month,$year] = $this->getYearAndMonth($request);
 
         $user = User::findOrFail($userId);
         $this->authorize('viewReport', $user);
-        $report = $this->reportService->getHoursReport($userId, $month, $year);
 
-        $schedules = Schedule::with('position')
-            ->where('user_id', $user->id)
-            ->whereMonth('date', $month)
-            ->whereYear('date', $year)
-            ->get();
-
-        $totalHours = $schedules->sum('hours_worked');
-
-        $hoursByPosition = $schedules->groupBy('position.name')->map->sum('hours_worked');
-
-        $hoursByDate = $schedules->groupBy('date')->map->sum('hours_worked');
+        $report = $this->reportService->generateHourlyReport($userId, $month, $year);
 
         return response()->json([
             'user' => [
@@ -41,59 +28,40 @@ class ReportController extends Controller
             ],
             'month' => (int) $month,
             'year' => (int) $year,
-            'total_hours' => $totalHours,
-            'by_position' => $hoursByPosition,
-            'by_date' => $hoursByDate,
+            ...$report,
         ]);
     }
 
-    public function getEmployeeSalary(Request $request): JsonResponse
+    public function payrollSummary(Request $request): JsonResponse
     {
-        $month = $request->query('month', now()->month);
-        $year = $request->query('year', now()->year);
-
-        $schedules = Schedule::with('user', 'position')
-            ->whereMonth('date', $month)
-            ->whereYear('date', $year)
-            ->get();
-
-        $schedules = $schedules->map(function ($schedule) {
-            $schedule->cost = $schedule->hours_worked *
-                ($schedule->hourly_rate ?? $schedule->user->hourly_rate);
-
-            return $schedule;
-        });
-
-        $employees = $schedules->groupBy('user_id')->map(function ($group) {
-            $user = $group->first()->user;
-
-            return [
-                'id' => $user->id,
-                'name' => $user->name,
-                'hours' => $group->sum('hours_worked'),
-                'rate' => $user->hourly_rate,
-                'cost' => $group->sum('cost'),
-            ];
-        })->values();
-
-        $byPosition = $schedules->groupBy('position.name')->map->sum('cost');
-
-        $totalCost = $schedules->sum('cost');
+        [$month,$year] = $this->getYearAndMonth($request);
+        $report = $this->reportService->generatePayrollReport($month, $year);
 
         return response()->json([
             'month' => (int) $month,
             'year' => (int) $year,
-            'employees' => $employees,
-            'by_position' => $byPosition,
-            'total_cost' => $totalCost,
+            ...$report,
         ]);
 
     }
 
+    public function coverageSummary(Request $request): JsonResponse
+    {
+        $date = (string) $request->query('date', now()->format('Y-m-d'));
+
+        $report = $this->reportService->generateCoverageReport($date);
+
+        return response()->json([
+            'date' => $date,
+            ...$report,
+
+        ]);
+    }
+
     private function getYearAndMonth(Request $request): array
     {
-        $month = $request->query('month', now()->month);
-        $year = $request->query('year', now()->year);
+        $month = (int) $request->query('month', now()->month);
+        $year = (int) $request->query('year', now()->year);
 
         return [$month, $year];
     }

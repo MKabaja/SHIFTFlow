@@ -10,7 +10,7 @@ class ReportService
     /**
      * Get hours report for specific user
      */
-    public function getHoursReport(int $userId, int $month, int $year): array
+    public function generateHourlyReport(int $userId, int $month, int $year): array
     {
         $schedules = $this->getSchedulesForSpecificUser($userId, $month, $year);
 
@@ -21,36 +21,48 @@ class ReportService
         $hoursByDate = $this->sumWorkedHoursGroupedBy('date', $schedules);
 
         return [
-
             'total_hours' => $totalHours,
             'by_position' => $hoursByPosition,
             'by_date' => $hoursByDate,
         ];
-
     }
 
     /**
      * Get payroll report for all users
      */
-    public function getPayrollReport(int $month, int $year): array
+    public function generatePayrollReport(int $month, int $year): array
     {
-        // TODO: Twój kod
+        $schedules = $this->getSchedulesForMonth($month, $year);
+
+        $schedulesWithCost = $this->calculateCosts($schedules);
+
+        $employees = $this->aggregateEmployeeWorkAndPay($schedulesWithCost);
+
+        $byPosition = $schedulesWithCost->groupBy('position.name')->map->sum('cost');
+
+        $totalCost = $schedulesWithCost->sum('cost');
+
+        return [
+            'employees' => $employees,
+            'by_position' => $byPosition,
+            'total_cost' => $totalCost,
+        ];
     }
 
     /**
      * Get coverage report for specific date
      */
-    public function getCoverageReport(string $date): array
+    public function generateCoverageReport(string $date): array
     {
-        // TODO: Twój kod (zadanie 25.3)
-    }
+        $schedules = $this->getSchedulesForDate($date);
 
-    private function getYearAndMonth(Request $request): array
-    {
-        $month = $request->query('month', now()->month);
-        $year = $request->query('year', now()->year);
+        $coverage = $schedules->groupBy('position.name')->map->count();
 
-        return [$month, $year];
+        return [
+            'total_employees' => $schedules->count(),
+            'coverage' => $coverage,
+        ];
+
     }
 
     /**
@@ -59,10 +71,12 @@ class ReportService
     private function getSchedulesForSpecificUser(int $userId, int $month, int $year): Collection
     {
         return Schedule::with('position')
+            ->active()
             ->where('user_id', $userId)
             ->whereMonth('date', $month)
             ->whereYear('date', $year)
             ->get();
+
     }
 
     private function sumWorkedHoursGroupedBy(string $groupName, Collection $collection): Collection
@@ -71,51 +85,52 @@ class ReportService
 
     }
 
-    // /**
-    //  * Get schedules for all users in specific month
-    //  */
-    // private function getSchedulesForMonth(int $month, int $year): Collection
-    // {
-    //     // TODO: Twój kod
-    // }
+    /**
+     * Get schedules for all users in specific month
+     */
+    private function getSchedulesForMonth(int $month, int $year): Collection
+    {
+        return Schedule::with('user', 'position')
+            ->active()
+            ->whereMonth('date', $month)
+            ->whereYear('date', $year)
+            ->get();
 
-    // /**
-    //  * Calculate cost for each schedule
-    //  */
-    // private function calculateCosts(Collection $schedules): Collection
-    // {
-    //     // TODO: Twój kod
-    // }
+    }
 
-    // /**
-    //  * Group schedules by position name and sum hours
-    //  */
-    // private function groupByPosition(Collection $schedules): Collection
-    // {
-    //     // TODO: Twój kod
-    // }
+    /**
+     * Calculate cost for each schedule
+     */
+    private function calculateCosts(Collection $collection): Collection
+    {
+        return $collection->map(function ($schedule) {
+            $schedule->cost = $schedule->hours_worked *
+                ($schedule->hourly_rate ?? $schedule->user->hourly_rate);
 
-    // /**
-    //  * Group schedules by date and sum hours
-    //  */
-    // private function groupByDate(Collection $schedules): Collection
-    // {
-    //     // TODO: Twój kod
-    // }
+            return $schedule;
+        });
+    }
 
-    // /**
-    //  * Calculate costs grouped by employee
-    //  */
-    // private function calculateEmployeeCosts(Collection $schedules): Collection
-    // {
-    //     // TODO: Twój kod
-    // }
+    private function aggregateEmployeeWorkAndPay(Collection $collection): Collection
+    {
+        return $collection->groupBy('user_id')->map(function ($group) {
+            $user = $group->first()->user;
 
-    // /**
-    //  * Calculate costs grouped by position
-    //  */
-    // private function calculatePositionCosts(Collection $schedules): Collection
-    // {
-    //     // TODO: Twój kod
-    // }
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'hours' => $group->sum('hours_worked'),
+                'rate' => $user->hourly_rate,
+                'cost' => $group->sum('cost'),
+            ];
+        })->values();
+    }
+
+    private function getSchedulesForDate(string $date): Collection
+    {
+        return Schedule::with('position')
+            ->active()
+            ->whereDate('date', $date)
+            ->get();
+    }
 }

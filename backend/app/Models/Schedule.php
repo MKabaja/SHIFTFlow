@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Schedule extends Model
 {
-
     /**
      * The attributes that are mass assignable.
 /**
@@ -18,12 +18,11 @@ class Schedule extends Model
      * @property \Illuminate\Support\Carbon $shift_end Shift end time
      * @property int|null $hours_worked Calculated work hours (by backend).
      * @property string $status Shift status (scheduled, completed, cancelled, vacation, unavailable).
-     * @property float|null $hourly_rate  The employee's current hourly rate, null if not defined.
-     * @property string|null $notes  Optional notes or explanation.
-     * @property \Illuminate\Support\Carbon $created_at  The timestamp when the record was created
+     * @property float|null $hourly_rate The employee's current hourly rate, null if not defined.
+     * @property string|null $notes Optional notes or explanation.
+     * @property \Illuminate\Support\Carbon $created_at The timestamp when the record was created
      * @property \Illuminate\Support\Carbon $updated_at The timestamp when the record was last updated
      */
-
     protected $fillable = [
         'user_id',
         'date',
@@ -35,12 +34,13 @@ class Schedule extends Model
         'hourly_rate',
         'notes',
     ];
+
     protected function casts(): array
     {
         return [
             'date' => 'date',
             'shift_start' => 'datetime:H:i',
-            'shift_end' => 'datetime:H:i'
+            'shift_end' => 'datetime:H:i',
         ];
     }
 
@@ -48,8 +48,14 @@ class Schedule extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
     public function position()
     {
         return $this->belongsTo(Position::class, 'position_id');
+    }
+
+    public function scopeActive(Builder $query): void
+    {
+        $query->whereIn('status', ['scheduled', 'completed']);
     }
 }

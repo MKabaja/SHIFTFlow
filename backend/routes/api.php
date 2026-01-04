@@ -85,8 +85,8 @@ Route::middleware(['auth:api', 'role:admin,manager'])
     ->prefix('reports')
     ->controller(ReportController::class)
     ->group(function () {
-        Route::get('/{user_id}', 'getHoursReport');
-        Route::get('/payroll', 'getEmployeeSalary');
-        Route::post('/coverage', 'coverage');
+        Route::get('/coverage', 'coverageSummary');
+        Route::get('/payroll', 'payrollSummary');
+        Route::get('/{user}', 'employeeHours');
 
     });
