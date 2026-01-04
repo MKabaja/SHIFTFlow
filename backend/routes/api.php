@@ -63,11 +63,11 @@ Route::middleware(['auth:api', 'role:admin'])
     ->controller(EmployeeController::class)
     ->group(function () {
         Route::post('/', 'store');
+        Route::post('/import', 'importFromCsv');
+        Route::get('/', 'index');
         Route::match(['put', 'patch'], '/{employee}', 'update');
         Route::delete('/{employee}', 'destroy');
         Route::get('/{employee}', 'show');
-        Route::post('/import', 'importFromCsv');
-        Route::get('/', 'index');
     });
 
 // Availabilities

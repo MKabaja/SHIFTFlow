@@ -24,12 +24,60 @@ class EmployeeRepository
         });
     }
 
+    public function createEmployee(array $data): User
+    {
+        return DB::transaction(function () use ($data) {
+            $login = $this->generateUniqueLogin($data['name']);
+
+            $payload = [
+                'pin_hashed' => $data['pin'],
+                'role' => 'employee',
+                'login' => $login,
+                'name' => $data['name'],
+                'hourly_rate' => $data['hourly_rate'],
+                'email' => null,
+                'contract_type' => $data['contract_type'] ?? 'employment_contract',
+            ];
+            $user = User::create($payload);
+            $user->positions()->attach($data['positions']);
+
+            return $user;
+        });
+    }
+
+    public function updateEmployee(User $user, array $data): User
+    {
+        return DB::transaction(function () use ($data, $user) {
+
+            if (isset($data['pin'])) {
+                $data['pin_hashed'] = $data['pin'];
+                unset($data['pin']);
+            }
+
+            if (isset($data['positions'])) {
+                $positionsData = $data['positions'];
+                unset($data['positions']);
+            } else {
+                $positionsData = null;
+            }
+
+            $user->update($data);
+
+            if ($positionsData !== null) {
+                $user->positions()->sync($positionsData);
+            }
+
+            return $user;
+        });
+    }
+
     private function persistImportedEmployees(Collection $employeeDataCollection, Collection $positionsMap): array
     {
         $created = 0;
         $updated = 0;
 
         $allExistingLogins = User::pluck('login')->toArray();
+
         $existingUsersByName = $this->getExistingUsers($employeeDataCollection);
 
         foreach ($employeeDataCollection as $data) {
@@ -99,5 +147,12 @@ class EmployeeRepository
         return User::whereIn('name', $collection
             ->pluck('name'))
             ->pluck('login', 'name');
+    }
+
+    private function generateUniqueLogin(string $name): string
+    {
+        $allLogins = User::pluck('login')->toArray();
+
+        return $this->loginGeneratorService->generate($name, $allLogins);
     }
 }

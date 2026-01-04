@@ -30,8 +30,9 @@ class StoreEmployeeRequest extends FormRequest
 
             'positions.*' => ['required', 'integer', 'exists:positions,id'],
 
-            'hourly_rate' => ['nullable', 'numeric', 'min:0']
+            'hourly_rate' => ['nullable', 'numeric', 'min:0'],
 
+            'contract_type' => ['nullable', 'string', 'in:employment_contract,mandate_contract'],
 
         ];
     }

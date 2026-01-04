@@ -5,36 +5,36 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Services\EmployeeService;
+use App\Repositories\EmployeeRepository;
 use App\Services\Import\ImportService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class EmployeeController extends Controller
 {
-    protected $employeeService;
+    protected $employeeRepository;
 
     protected $importService;
 
-    public function __construct(EmployeeService $employeeService, ImportService $importService)
+    public function __construct(EmployeeRepository $employeeRepository, ImportService $importService)
     {
-        $this->employeeService = $employeeService;
+        $this->employeeRepository = $employeeRepository;
         $this->importService = $importService;
     }
 
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(): AnonymousResourceCollection
     {
-        $emplyees = User::where('role', 'employee')
+        $employees = User::where('role', 'employee')
             ->with('positions')
-            ->get();
+            ->paginate(10);
 
-        return response()->json($emplyees);
+        return UserResource::collection($employees);
     }
 
     /**
@@ -42,37 +42,27 @@ class EmployeeController extends Controller
      */
     public function store(StoreEmployeeRequest $request)
     {
-        $employee = DB::transaction(function () use ($request) {
-            $baseLogin = $this->employeeService->createLogin($request->name, 5);
-            $checkedLogin = $this->employeeService->findUniqueLogin($baseLogin);
+        $data = $request->validated();
 
-            $payload = [
-                'pin_hashed' => Hash::make($request->pin),
-                'role' => 'employee',
-                'login' => $checkedLogin,
-                'name' => $request->name,
-                'hourly_rate' => $request->hourly_rate,
-                'email' => null,
-            ];
+        $employee = $this->employeeRepository->createEmployee($data);
+        $employee->load('positions');
 
-            $user = User::create($payload);
-            $user->positions()->attach($request->positions);
-
-            return $user;
-        });
-
-        return response()->json([
-            'user' => $employee->load('positions'),
-            'message' => 'Employee created succesfully',
-        ], 201);
+        return (new UserResource($employee))
+            ->additional(['message' => 'Employee created successfully'])
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(User $employee): User
+    public function show(User $employee): UserResource
     {
-        return $employee->load('positions');
+        if ($employee->role !== 'employee') {
+            abort(404);
+        }
+
+        return new UserResource($employee->load('positions'));
     }
 
     /**
@@ -80,36 +70,27 @@ class EmployeeController extends Controller
      */
     public function update(UpdateEmployeeRequest $request, User $employee): JsonResponse
     {
+        if ($employee->role !== 'employee') {
+            abort(404);
+        }
         $data = $request->validated();
+        $updatedEmployee = $this->employeeRepository->updateEmployee($employee, $data);
+        $updatedEmployee->load('positions');
 
-        if ($request->filled('pin')) {
-            $data['pin_hashed'] = Hash::make($data['pin']);
-            unset($data['pin']);
-        }
-        if (isset($data['positions'])) {
-            $positionsData = $data['positions'];
-            unset($data['positions']);
-        } else {
-            $positionsData = null;
-        }
-
-        $employee->update($data);
-
-        if ($positionsData !== null) {
-            $employee->positions()->sync($positionsData);
-        }
-
-        return response()->json([
-            'message' => 'Employee updated successfully',
-            'employee' => $employee->load('positions'),
-        ], 200);
+        return (new UserResource($updatedEmployee))
+            ->additional(['message' => 'Employee updated successfully'])
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $employee)
+    public function destroy(User $employee): JsonResponse
     {
+        if ($employee->role !== 'employee') {
+            abort(404);
+        }
         $employee->delete();
 
         return response()->json(['message' => 'Employee deleted successfully'], 200);
