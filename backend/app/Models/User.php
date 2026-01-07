@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -75,53 +77,60 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Summary of schedules
+     * User May have multiple SHIFTS
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Schedule, User>
-     *                                                                         User may have multiple schedules
+     * @return HasMany<Shift, User>
      */
-    public function schedules()
+    public function shifts(): HasMany
     {
-        return $this->hasMany(Schedule::class, 'user_id');
+        return $this->hasMany(Shift::class, 'user_id');
     }
 
     /**
-     * Summary of availabilities
+     * User may create multiple SCHEDULES
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Availability, User>
-     *                                                                             User may have multiple availabilities
+     * @return HasMany<Schedule, User>
      */
-    public function availabilities()
+    public function createdSchedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class, 'created_by');
+    }
+
+    /**
+     * User may have multiple Availabilities
+     *
+     * @return HasMany<Availability, User>
+     */
+    public function availabilities(): HasMany
     {
         return $this->hasMany(Availability::class, 'user_id');
     }
 
     /**
-     * Summary of positions
+     * User may have mutiple positions & position belong to multiple users
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Position, User, \Illuminate\Database\Eloquent\Relations\Pivot>
-     *                                                                                                                              user many belong to many Positions
+     * @return BelongsToMany<Position, User, \Illuminate\Database\Eloquent\Relations\Pivot>
      */
-    public function positions()
+    public function positions(): BelongsToMany
     {
         return $this->belongsToMany(Position::class);
     }
-    /**
-     * ========== JWT METHODS ==========
-     *
-     * Te dwie metody są wymagane przez JWTSubject
-     * Mówią JWT'owi jak identyfikować usera w tokenie
-     */
 
     /**
-     * Zwróć ID usera (do JWT payload)
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed The primary key of the user (typically an integer or UUID).
      */
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
 
-    // zwróć custom claims do JWT
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array<string, mixed>
+     */
     public function getJWTCustomClaims()
     {
         return [];
