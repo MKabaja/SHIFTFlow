@@ -15,26 +15,21 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('user_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
+                ->constrained()
+                ->cascadeOnDelete();
 
-            $table->date('date')
-                  ->comment('The date the availability applies to.');
+            $table->date('date');
 
-            $table->unique(['user_id','date']);
-               
+            $table->unique(['user_id', 'date']);
 
             $table->boolean('is_available')
-                  ->default(true)
-                  ->comment('TRUE = Available (Wants to work), FALSE = Unavailable (Vacation/Off).');
+                ->default(true);
 
             $table->date('submission_date')
-                  ->nullable()
-                  ->comment('When the employee actually submitted the availability request to the system.');
-            
+                ->nullable();
+
             $table->text('notes')
-                  ->nullable()
-                  ->comment('Optional shift details or managerial comments.');
+                ->nullable();
 
             $table->timestamps();
         });

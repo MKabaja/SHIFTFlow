@@ -11,35 +11,39 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('schedules', function (Blueprint $table) {
+        Schema::create('shifts', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('user_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
-                  
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignId('schedule_id')
+                ->nullable()
+                ->constrained()
+                ->cascadeOnDelete();
+
             $table->date('date');
 
             $table->foreignId('position_id')
-                  ->constrained('positions')
-                  ->cascadeOnDelete();
-            
+                ->constrained('positions')
+                ->cascadeOnDelete();
 
             $table->time('shift_start');
 
             $table->time('shift_end');
 
-            $table->unsignedSmallInteger('hours_worked')    ->nullable();
+            $table->unsignedSmallInteger('hours_worked')->nullable();
 
-            $table->enum('status', ['scheduled','completed','cancelled','vacation','unavailable'])->default('scheduled');
+            $table->enum('status', ['scheduled', 'cancelled'])->default('scheduled');
 
-            $table->decimal('hourly_rate',8,2)->nullable();
+            $table->decimal('hourly_rate', 8, 2)->nullable();
 
             $table->text('notes')->nullable();
 
             $table->index('user_id');
             $table->index('date');
-            $table->index(['user_id','date']);
+            $table->index(['user_id', 'date']);
 
             $table->timestamps();
         });
@@ -50,6 +54,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('schedules');
+        Schema::dropIfExists('shifts');
     }
 };

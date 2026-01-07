@@ -6,61 +6,52 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-      /**
-       * Run the migrations.
-       */
-      public function up(): void
-      {
-            Schema::table('users', function (Blueprint $table) {
-                  $table->string('pin_hashed', 60)
-                        ->nullable()
-                        ->comment('Hashed PIN for quick login (not unique)');
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('pin_hashed', 60)
+                ->nullable();
 
-                  $table->boolean('is_active')
-                        ->default(true)
-                        ->comment('Mark an employee as active/inactive');
+            $table->boolean('is_active')
+                ->default(true);
 
-                  $table->enum('role', ['employee', 'manager', 'admin'])
-                        ->default('employee')
-                        ->comment('Employees roles');
+            $table->enum('role', ['employee', 'manager', 'admin'])
+                ->default('employee');
 
+            $table->decimal('hourly_rate', 8, 2)
+                ->nullable();
 
+            $table->unsignedSmallInteger('max_hours_per_month')
+                ->nullable();
 
-                  $table->decimal('hourly_rate', 8, 2)
-                        ->nullable()
-                        ->comment('Hourly pay');
+            $table->unsignedSmallInteger('min_break_hours')
+                ->default(11);
 
-                  $table->unsignedSmallInteger('max_hours_per_month')
-                        ->nullable()
-                        ->comment('Max working hours per month - set by admin per user/contract');
+            $table->enum('contract_type', ['employment_contract', 'mandate_contract'])
+                ->default('employment_contract');
 
+        });
+    }
 
-                  $table->unsignedSmallInteger('min_break_hours')
-                        ->default(11)
-                        ->comment('Minimum rest period between shifts');
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn([
+                'pin_hashed',
+                'role',
+                'is_active',
+                'contract_type',
+                'hourly_rate',
+                'max_hours_per_month',
+                'min_break_hours',
 
-                  $table->enum('contract_type', ['employment_contract', 'mandate_contract'])
-                        ->default('employment_contract')
-                        ->comment('Employment contract type');
-            });
-      }
-
-      /**
-       * Reverse the migrations.
-       */
-      public function down(): void
-      {
-            Schema::table('users', function (Blueprint $table) {
-                  $table->dropColumn([
-                        'pin_hashed',
-                        'role',
-                        'is_active',
-                        'contract_type',
-                        'hourly_rate',
-                        'max_hours_per_month',
-                        'min_break_hours',
-
-                  ]);
-            });
-      }
+            ]);
+        });
+    }
 };

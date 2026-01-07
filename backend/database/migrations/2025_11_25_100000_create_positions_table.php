@@ -15,20 +15,15 @@ return new class extends Migration
             $table->id();
 
             $table->string('name')
-                  ->unique()
-                  ->comment('Positions name');
+                ->unique();
 
             $table->string('description')
-                  ->nullable()
-                  ->comment('A brief explanation');
+                ->nullable();
 
             $table->foreignId('created_by')
-                  ->nullable()
-                  ->constrained('users')
-                  ->nullOnDelete()
-                  ->comment('Manager who created this position');
-                  
-                  
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
             $table->timestamps();
         });
