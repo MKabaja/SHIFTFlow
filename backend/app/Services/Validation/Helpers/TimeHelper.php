@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Services\Validation\Helpers;
+
+use Carbon\Carbon;
+use DateTimeInterface;
+use Exception;
+
+class TimeHelper
+{
+    public static function formatDateForQuery(string|DateTimeInterface $input): string
+    {
+        if ($input instanceof DateTimeInterface) {
+            return $input->format('Y-m-d');
+        }
+
+        try {
+            return Carbon::parse($input)->format('Y-m-d');
+
+        } catch (Exception $e) {
+            throw new \InvalidArgumentException(
+                "Unable to parse date format: {$input}"
+            );
+        }
+
+    }
+
+    public static function formatTimeForQuery(string|DateTimeInterface $input): string
+    {
+        if ($input instanceof DateTimeInterface) {
+            return $input->format('H:i');
+        }
+        try {
+            return Carbon::parse($input)
+                ->format('H:i');
+
+        } catch (Exception $e) {
+            throw new \InvalidArgumentException(
+                "Unable to parse time format: {$input}"
+            );
+        }
+    }
+
+    public static function createFullDateTime(string|DateTimeInterface $day, string|DateTimeInterface $time): Carbon
+    {
+        $formattedDay = self::formatDateForQuery($day);
+        $formattedTime = self::formatTimeForQuery($time);
+
+        return Carbon::parse($formattedDay.' '.$formattedTime);
+    }
+}
+
+// TODO: Metoda 3 - createFullDateTime
+// TODO: Metoda 4 - adjustTimeIfNextDay
+// TODO: Metoda 5 - getQuarterFromMonth
+// TODO: Metoda 6 - getQuarterMonths

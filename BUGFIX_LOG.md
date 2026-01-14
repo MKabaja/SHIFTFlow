@@ -288,6 +288,133 @@ W repozytorium:
 
 -   `saveEmployee()` po `updateOrCreate` wywołuje `$user->positions()->sync($positionIDs);`, co gwarantuje spójność relacji.
 
+### Zmiany z FAZY 1–2 (Database + Models)
+
+2026-01-07 – Refactor: Shifts vs Schedules (FAZA 1 & 2)
+Database
+
+-   Przebudowano strukturę bazy zgodnie z planem refaktoru (shifts ↔ schedules, relacja 1:N).
+    ​
+
+-   Utworzono tabelę shifts jako docelową tabelę dla pojedynczych zmian pracowników:
+
+-   Kolumny: id, user_id, schedule_id, date, position_id, shift_start, shift_end, hours_worked, hourly_rate, status, notes, created_at, updated_at.
+    ​
+
+-   Dodano klucze obce:
+
+`user_id` → users z `cascadeOnDelete()`
+
+`schedule_id` → schedules z `cascadeOnDelete()`
+
+`position_id` → positions z `cascadeOnDelete()`.
+​
+
+-   Uproszczono status do wartości ['scheduled', 'cancelled'] jako docelowy minimalny lifecycle zmiany.
+    ​
+
+-   Dodano indeksy na user_id, date oraz złożony indeks na user_id, date pod przyszłe zapytania raportowe.
+    ​
+
+-   Utworzono tabelę schedules jako zbiorczy grafik:
+
+-   Kolumny: id, name, description, month, year, status, published_at, created_by, created_at, updated_at.
+    ​
+
+-   created_by jako foreignId do users (twórca grafiku).
+    ​
+
+-   Wyczyściono wcześniejsze migracje refaktorowe:
+
+-   Usunięto osobne migracje typu „rename schedules → shifts” oraz „add_schedule_id_to_shifts” i scalono logikę bezpośrednio do bazowych migracji, ponieważ projekt nie jest jeszcze na produkcji.
+    ​
+
+-   Dzięki temu migrate:fresh --seed tworzy od razu finalną, docelową strukturę bez historii pośrednich rename’ów.
+    ​
+
+### Models
+
+-   Zmieniono odpowiedzialności modeli zgodnie z nową architekturą.
+    ​
+
+# Shift
+
+-   Przeniesiono stary model Schedule do nowego modelu Shift i powiązano go z tabelą shifts przez konwencję nazw (bez protected $table).
+    ​
+
+-   Zaktualizowano $fillable, aby odzwierciedlał docelowe pola: user_id, position_id, schedule_id, date, shift_start, shift_end, hours_worked, hourly_rate, status, notes.
+    ​
+
+-   Dodano casty dla pól czasowych (date, shift_start, shift_end) oraz utrzymano istniejący scope active().
+    ​
+
+# Zdefiniowano relacje:
+
+`user()` – `belongsTo(User::class, 'user_id')`
+
+`position()` – `belongsTo(Position::class, 'position_id')`
+
+`schedule()` – `belongsTo(Schedule::class)`.
+​
+
+# Schedule
+
+-   Utworzono nowy model Schedule powiązany z tabelą schedules.
+    ​
+
+-   Skonfigurowano $fillable: name, description, month, year, status, published_at, created_by.
+    ​
+
+-   Dodano casty dla month, year, published_at.
+    ​
+
+# Zdefiniowano relacje:
+
+`shifts()` – `hasMany(Shift::class)` (jeden grafik ma wiele zmian).
+​
+
+`creator()` – `belongsTo(User::class, 'created_by')` (twórca grafiku).
+​
+
+# User
+
+-   Uporządkowano relacje zgodnie z nową semantyką:
+
+-   `shifts()` – `hasMany(Shift::class, 'user_id')` (wszystkie zmiany pracownika).
+    ​
+
+-   `createdSchedules()` – `hasMany(Schedule::class, 'created_by')` (grafiki stworzone przez użytkownika, np. managera).
+    ​
+
+-   Pozostawiono istniejące relacje `availabilities()` oraz `positions()` (pivot position_user).
+    ​
+
+# Position
+
+-   Zmieniono relację z schedules() na shifts():
+
+-   `shifts()` – `hasMany(Shift::class, 'position_id')` (wszystkie zmiany przypisane do danej pozycji).
+    ​
+
+-   Pozostawiono creator() (belongsTo(User::class, 'created_by')) oraz users() (belongsToMany(User::class)).
+    ​
+
+# Verification
+
+Uruchomiono php artisan migrate:fresh --seed w celu potwierdzenia, że nowa struktura bazy tworzy się poprawnie od zera.
+​
+
+W tinker ręcznie zweryfikowano wszystkie kluczowe relacje:
+
+Schedule::create(...) → $schedule->creator zwraca poprawnego User.
+​
+
+Shift::create(...) → $shift->schedule, $shift->user, $shift->position zwracają oczekiwane modele.
+​
+
+$schedule->shifts zwraca kolekcję ze wszystkimi powiązanymi Shift.
+​
+
 ---
 
 **Koniec dokumentu**

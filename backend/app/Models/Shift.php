@@ -64,4 +64,27 @@ class Shift extends Model
     {
         $query->whereIn('status', ['scheduled', 'completed']);
     }
+
+    public function scopeWhereOverlapping(Builder $query, string $start, string $end): Builder
+    {
+        return $query
+            ->where('shift_start', '<', $end)
+            ->where('shift_end', '>', $start);
+    }
+
+    public function scopeWhereNotShift(Builder $query, ?int $id): Builder
+    {
+        return $query->when($id, fn ($q) => $q->where('id', '!=', $id));
+    }
+
+    public function scopeFinishedBefore(Builder $query, string $date, string $time): Builder
+    {
+        return $query->where(function ($q) use ($date, $time) {
+            $q->where('date', '<', $date)
+                ->orWhere(function ($inner) use ($date, $time) {
+                    $inner->where('date', $date)
+                        ->where('shift_end', '<=', $time);
+                });
+        });
+    }
 }

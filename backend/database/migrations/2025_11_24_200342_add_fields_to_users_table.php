@@ -27,8 +27,11 @@ return new class extends Migration
             $table->unsignedSmallInteger('max_hours_per_month')
                 ->nullable();
 
+            $table->unsignedSmallInteger('max_hours_per_quarter')
+                ->nullable();
+
             $table->unsignedSmallInteger('min_break_hours')
-                ->default(11);
+                ->nullable();
 
             $table->enum('contract_type', ['employment_contract', 'mandate_contract'])
                 ->default('employment_contract');
@@ -49,6 +52,7 @@ return new class extends Migration
                 'contract_type',
                 'hourly_rate',
                 'max_hours_per_month',
+                'max_hours_per_quarter',
                 'min_break_hours',
 
             ]);

@@ -36,3 +36,37 @@ Testy: Zastąpiono bezpośrednie wstrzykiwanie tablicy ID (create(['positions' =
 Wydajność: Szybkie joiny i eager loading (User::with('positions')).
 
 Skalowalność: Łatwiejsze rozbudowywanie systemu raportowania i filtrowania.
+
+Chiałem umówic jeszcze pewną kestię, potencjalnych zmian w systemie, otóż po rozmowie z żoną odnosnie Limitów uzgodnilismy że:
+
+1 - MUsimy dodac LIMIT GODZIN KWartalny- kopalnia ma system pracy oparty osystem kwartalny, wiec to co ona aktualnie pilnuje to limity kwartalne.
+
+To ja proponuje tak:
+
+-Każdemu Pracownikowi mozesz przypisac Jakąś liczbę godzin powiedzmy że np 168 /msc, tutej to co juz mamy w user:
+
+$table->unsignedSmallInteger('max_hours_per_month')
+                ->nullable();
+
+-Gdy na GRAFIKU Wstawisz kogos tak ze tą liczbe przekroczy, grafik tego nie zablokuje ale pokążę Ci ostrzeżenie-czyli to co sobie ustawisz to info dla Ciebie aby trzymac sie jakiejś sredniej.
+
+-   Blokująca będzie liczba kwartalna np ustawiasz limit kwartalny na 550H
+
+tutaj musimy dodac limit KWARTALNY, tez nullable jesli ktos nie ma przypisane limitu system go pomija(bo to nie dotyczy kazdego tylko tych co mają umowę o prace)
+
+kwartał = 3MSC czyli 3 GRAFIKI czyli jesli ktos przekroczy Limit kwartalny to ostaniego grafiku ww kwartale nie dasz rade opublikowac, pokaze sie naczerowno kto przekroczył i o ile,
+
+2 - ten limit 11h - minimum break:
+obecnie mamy $table->unsignedSmallInteger('min_break_hours')
+->default(11);
+
+i tutaj :
+Wszyscy pracownicy mają pole przerwa miedzy zmianami,Domysnie puste, jesli sobie komus dodasz 11h,8h, ile sobie wybierzesz -Wtedy system bedzie tego pilnował, jesli pole zostanie puste- wtedy system pomiją tą regułe dla danej osoby.
+
+bo wszystkie limity GODZINOWE Dotyczą osób które mają UMOWE o PRACę,
+
+ZLECENIE, lub inne nie mają limitów
+
+moj user table ma aktualnie :
+$table->enum('contract_type', ['employment_contract', 'mandate_contract'])
+->default('employment_contract');
