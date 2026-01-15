@@ -35,7 +35,7 @@ class MinimumBreakValidator
             $required = number_format($shift->minBreakHours, 1);
             $actual = number_format($breakHours, 1);
             throw ValidationException::withMessages([
-                'min_break' => ["Insufficient break: required {$required}h, got {$actual}h"],
+                'min_break' => ["Insufficient break required {$required}h, got {$actual}h"],
             ]);
         }
 
@@ -44,7 +44,7 @@ class MinimumBreakValidator
     private function findLastShift(ShiftValidationData $shift): ?Shift
     {
         return Shift::where('user_id', $shift->userId)
-            ->whereNotShift($shift->ignoreShiftId)
+            ->excluding($shift->ignoreShiftId)
             ->finishedBefore($shift->date, $shift->shiftStart)
             ->orderByDesc('date')
             ->orderByDesc('shift_end')

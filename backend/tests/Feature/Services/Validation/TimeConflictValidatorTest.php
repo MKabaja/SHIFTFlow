@@ -32,9 +32,6 @@ it('passes when there is no time conflict', function () {
 
     $validator = new TimeConflictValidator;
 
-    // 2. Act & Assert
-    // Próbujemy dodać zmianę wieczorną: 16:00 - 22:00
-    // (Stykają się o 16:00, ale to NIE jest konflikt)
     $dto = new ShiftValidationData(
         userId: $user->id,
         date: '2026-05-10',

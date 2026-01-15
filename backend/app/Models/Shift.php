@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Shift extends Model
 {
+    use HasFactory;
+
     /**
      * The attributes that are mass assignable.
 /**
@@ -72,9 +75,9 @@ class Shift extends Model
             ->where('shift_end', '>', $start);
     }
 
-    public function scopeWhereNotShift(Builder $query, ?int $id): Builder
+    public function scopeExcluding(Builder $query, ?int $id): Builder
     {
-        return $query->when($id, fn ($q) => $q->where('id', '!=', $id));
+        return $query->when($id, fn ($q, $id) => $q->where('id', '!=', $id));
     }
 
     public function scopeFinishedBefore(Builder $query, string $date, string $time): Builder

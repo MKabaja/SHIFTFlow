@@ -17,7 +17,7 @@ class TimeConflictValidator
 
         if ($conflict) {
             throw ValidationException::withMessages([
-                'shift_start' => ['Time conflict: User has shift during this time'],
+                'shift_start' => ['User has shift during this time'],
             ]);
         }
 
@@ -27,8 +27,7 @@ class TimeConflictValidator
     {
         return Shift::where('user_id', $shift->userId)
             ->where('date', $shift->date)
-            ->when($shift->ignoreShiftId, fn ($query) => $query->where('id', '!=', $shift->ignoreShiftId))
-
+            ->excluding($shift->ignoreShiftId)
             ->whereOverlapping($shift->shiftStart, $shift->shiftEnd)
             ->exists();
     }
