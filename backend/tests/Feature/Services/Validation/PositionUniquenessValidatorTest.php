@@ -12,9 +12,15 @@ uses(TestCase::class);
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 it('throws exception when user has duplicate position on same day', function () {
-    $user = User::factory()->employee()->create();
-    $b1 = Position::factory()->create(['name' => 'B1']);
-    $user->positions()->attach($b1->id);
+    $user = User::factory()
+        ->employee()
+        ->create();
+
+    $b1 = Position::factory()
+        ->create(['name' => 'B1']);
+
+    $user->positions()
+        ->attach($b1->id);
 
     Shift::factory()
         ->forUser($user)

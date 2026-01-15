@@ -112,4 +112,11 @@ class ShiftFactory extends Factory
             'hourly_rate' => $rate,
         ]);
     }
+
+    public function withHoursWorked(int $hours): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'hours_worked' => $hours,
+        ]);
+    }
 }

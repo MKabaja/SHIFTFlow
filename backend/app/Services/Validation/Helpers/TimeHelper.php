@@ -48,6 +48,17 @@ class TimeHelper
 
         return Carbon::parse($formattedDay.' '.$formattedTime);
     }
+
+    public static function createMonthRange(string|DateTimeInterface $date): object
+    {
+
+        $carbonDate = Carbon::parse(self::formatDateForQuery($date));
+
+        return (object) [
+            'start' => $carbonDate->copy()->startOfMonth(),
+            'end' => $carbonDate->copy()->endOfMonth(),
+        ];
+    }
 }
 
 // TODO: Metoda 3 - createFullDateTime
