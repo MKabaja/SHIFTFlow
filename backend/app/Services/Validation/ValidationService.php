@@ -2,7 +2,7 @@
 
 namespace App\Services\Validation;
 
-use App\Models\User;
+use App\DataTransferObjects\ShiftValidationData;
 use App\Services\Validation\Validators\AvailabilityValidator;
 use App\Services\Validation\Validators\MaxHoursPerMonthValidator;
 use App\Services\Validation\Validators\MaxHoursPerQuarterValidator;
@@ -23,20 +23,31 @@ class ValidationService
         private PositionUniquenessValidator $positionUniquenessValidator,
     ) {}
 
-    public function validate(
-        User $user,
-        int $positionId,
-        string $date,
-        string $shiftStart,
-        string $shiftEnd,
-        ?int $ignoreShiftId = null
-    ): array {
-        $errors = [];
-        $warnings = [];
+    /**
+     * Validate shift data through all validators.
+     * Executes validators in optimized order (fast to slow).
+     * Stops on first validation failure.
+     *
+     * @param ShiftValidationData Data Transfer Object
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function validate(ShiftValidationData $shift): void
+    {
 
-        return [
-            'errors' => $errors,
-            'warnings' => $warnings,
+        $validators = [
+            $this->positionPermissionValidator,
+            $this->availabilityValidator,
+            $this->positionUniquenessValidator,
+            $this->timeConflictValidator,
+            $this->minimumBreakValidator,
+            $this->maxHoursPerMonthValidator,
+            $this->maxHoursPerQuarterValidator,
         ];
+
+        foreach ($validators as $validator) {
+            $validator->validate($shift);
+        }
+
     }
 }

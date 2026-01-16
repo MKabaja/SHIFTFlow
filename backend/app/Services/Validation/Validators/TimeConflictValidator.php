@@ -4,26 +4,20 @@ namespace App\Services\Validation\Validators;
 
 use App\DataTransferObjects\ShiftValidationData;
 use App\Models\Shift;
-use Illuminate\Validation\ValidationException;
 
-class TimeConflictValidator
+class TimeConflictValidator extends BaseConflictValidator
 {
-    /**
-     * @param  ShiftValidationData  $shift  Data Transfer Object
-     */
     public function validate(ShiftValidationData $shift): void
     {
-        $conflict = $this->findConflict($shift);
+        $conflict = $this->hasConflict($shift);
 
         if ($conflict) {
-            throw ValidationException::withMessages([
-                'shift_start' => ['User has shift during this time'],
-            ]);
+            $this->throwConflictException('User has another shift during this time');
         }
 
     }
 
-    private function findConflict(ShiftValidationData $shift): bool
+    private function hasConflict(ShiftValidationData $shift): bool
     {
         return Shift::where('user_id', $shift->userId)
             ->where('date', $shift->date)

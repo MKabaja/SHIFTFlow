@@ -5,9 +5,8 @@ namespace App\Services\Validation\Validators;
 use App\DataTransferObjects\ShiftValidationData;
 use App\Models\Shift;
 use App\Services\Validation\Helpers\TimeHelper;
-use Illuminate\Validation\ValidationException;
 
-class MinimumBreakValidator
+class MinimumBreakValidator extends BaseConflictValidator
 {
     public function validate(ShiftValidationData $shift): void
     {
@@ -17,9 +16,15 @@ class MinimumBreakValidator
             return;
         }
 
-        $previousShiftEnd = TimeHelper::createFullDateTime($lastShift->date, $lastShift->shift_end);
+        $previousShiftEnd = TimeHelper::createFullDateTime(
+            $lastShift->date,
+            $lastShift->shift_end
+        );
 
-        $currentShiftStart = TimeHelper::createFullDateTime($shift->date, $shift->shiftStart);
+        $currentShiftStart = TimeHelper::createFullDateTime(
+            $shift->date,
+            $shift->shiftStart
+        );
 
         if ($lastShift->shift_end < $lastShift->shift_start) {
             $previousShiftEnd->addDay();
@@ -34,9 +39,9 @@ class MinimumBreakValidator
         if ($breakHours < $shift->minBreakHours) {
             $required = number_format($shift->minBreakHours, 1);
             $actual = number_format($breakHours, 1);
-            throw ValidationException::withMessages([
-                'min_break' => ["Insufficient break required {$required}h, got {$actual}h"],
-            ]);
+
+            $this->throwConflictException("User has insufficient break:{$actual}, required: {$required}");
+
         }
 
     }

@@ -3,19 +3,24 @@
 namespace App\Services\Validation\Validators;
 
 use App\DataTransferObjects\ShiftValidationData;
-use Illuminate\Validation\ValidationException;
 
-class PositionPermissionValidator
+class PositionPermissionValidator extends BaseConflictValidator
 {
     public function validate(ShiftValidationData $shift): void
     {
 
-        if (! in_array($shift->positionId, $shift->allowedPositionIds)) {
+        if ($this->hasConflict($shift)) {
 
-            throw ValidationException::withMessages([
-                'position_id' => ["User does not have permission for this position (ID: $shift->positionId)"],
-            ]);
+            $this->throwConflictException('User has no permission for the selected position');
         }
 
+    }
+
+    private function hasConflict(ShiftValidationData $shift): bool
+    {
+        return ! in_array(
+            $shift->positionId,
+            $shift->allowedPositionIds
+        );
     }
 }
