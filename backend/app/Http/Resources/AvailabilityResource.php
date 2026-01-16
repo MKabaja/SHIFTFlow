@@ -20,8 +20,8 @@ class AvailabilityResource extends JsonResource
             'notes' => $this->notes,
             'is_available' => $this->is_available,
             'date' => $this->date->format('Y-m-d'),
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at?->toIso8601String(),
+            'updated_at' => $this->updated_at?->toIso8601String(),
 
         ];
     }

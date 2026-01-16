@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\AvailabilityController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\PositionController;
 use App\Http\Controllers\Api\ReportController;
-use App\Http\Controllers\Api\ScheduleController;
+use App\Http\Controllers\Api\ShiftController;
 use Illuminate\Support\Facades\Route;
 
 // ===============================================
@@ -26,17 +26,17 @@ Route::prefix('auth')
             });
     });
 
-// Schedule Crud
+// Shift Crud
 
 Route::middleware(['auth:api', 'role:admin,manager'])
-    ->prefix('schedules')
-    ->controller(ScheduleController::class)
+    ->prefix('shifts')
+    ->controller(ShiftController::class)
     ->group(function () {
         Route::get('/', 'index');
         Route::post('/', 'store');
-        Route::match(['put', 'patch'], '/{schedule}', 'update');
-        Route::delete('/{schedule}', 'destroy');
-        Route::get('/{schedule}', 'show');
+        Route::match(['put', 'patch'], '/{shift}', 'update');
+        Route::delete('/{shift}', 'destroy');
+        Route::get('/{shift}', 'show');
     });
 
 // Positions G1

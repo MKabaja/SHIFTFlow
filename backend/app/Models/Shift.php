@@ -90,4 +90,22 @@ class Shift extends Model
                 });
         });
     }
+
+    public function scopeDateRange(Builder $query, ?string $from, ?string $to): Builder
+    {
+
+        if ($from && $to) {
+            return $query->whereBetween('date', [$from, $to]);
+        }
+
+        if ($from && ! $to) {
+            return $query->where('date', '>=', $from);
+        }
+
+        if (! $from && $to) {
+            return $query->where('date', '<=', $to);
+        }
+
+        return $query;
+    }
 }
