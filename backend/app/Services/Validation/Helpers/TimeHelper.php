@@ -59,6 +59,29 @@ class TimeHelper
             'end' => $carbonDate->copy()->endOfMonth(),
         ];
     }
+
+    public static function createQuarterRange(string|DateTimeInterface $date): object
+    {
+        $carbonDate = Carbon::parse(self::formatDateForQuery($date));
+
+        return (object) [
+
+            'start' => $carbonDate->copy()->startOfQuarter(),
+            'end' => $carbonDate->copy()->endOfQuarter(),
+        ];
+    }
+
+    public static function calculateMinutesDifference(string $startTime, string $endTime): int
+    {
+        $start = Carbon::parse($startTime);
+        $end = Carbon::parse($endTime);
+
+        if ($end->lessThan($start)) {
+            $end->addDay();
+        }
+
+        return $start->diffInMinutes($end);
+    }
 }
 
 // TODO: Metoda 3 - createFullDateTime
