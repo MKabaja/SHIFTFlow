@@ -3,24 +3,51 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\GetSchedulesRequest;
+use App\Http\Requests\StoreScheduleRequest;
+use App\Http\Resources\ScheduleListResource;
+use App\Http\Resources\ScheduleResource;
+use App\Models\Schedule;
 use Illuminate\Http\Request;
 
 class ScheduleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(GetSchedulesRequest $request)
     {
-        //
+
+        $schedules = Schedule::with('creator')
+            ->when($request
+                ->input('month'), fn ($q, $m) => $q
+                ->where('month', $m))
+
+            ->when($request
+                ->input('year'), fn ($q, $y) => $q
+                ->where('year', $y))
+
+            ->paginate(20);
+
+        return ScheduleListResource::collection($schedules);
+
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreScheduleRequest $request)
     {
-        //
+        $scheduleData = $request->validated();
+
+        $schedule = Schedule::create([
+            'name' => $scheduleData['name'],
+            'month' => $scheduleData['month'],
+            'year' => $scheduleData['year'],
+            'description' => $scheduleData['description'] ?? null,
+            'created_by' => $request->user()->id,
+            'status' => 'draft',
+        ]);
+
+        return (new ScheduleResource($schedule))
+            ->additional(['message' => 'Schedule created successfully'])
+            ->response()
+            ->setStatusCode(201);
+
     }
 
     /**
