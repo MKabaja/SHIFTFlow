@@ -29,7 +29,7 @@ class UpdateScheduleRequest extends FormRequest
     {
         return [
             'name' => [
-                'required',
+                'sometimes',
                 'string',
                 'max:255',
             ],

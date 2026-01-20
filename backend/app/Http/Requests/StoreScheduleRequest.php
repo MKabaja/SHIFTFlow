@@ -28,6 +28,9 @@ class StoreScheduleRequest extends FormRequest
      */
     public function rules(): array
     {
+        $minYear = now()->year;
+        $maxYear = $minYear + 5;
+
         return [
             'name' => [
                 'required',
@@ -46,15 +49,22 @@ class StoreScheduleRequest extends FormRequest
 
             ],
             'year' => [
-                    'required',
-                    'integer',
-                    'min:2026',
+                'required',
+                'integer',
+                "between:{$minYear},{$maxYear}",
 
             ],
             'description' => [
-                    'nullable',
-                    'string',
+                'nullable',
+                'string',
             ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'month.unique' => 'The schedule for this month and year has already been created.',
         ];
     }
 }
