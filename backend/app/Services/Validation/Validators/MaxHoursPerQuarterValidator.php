@@ -21,6 +21,7 @@ class MaxHoursPerQuarterValidator extends BaseHourValidator
             $quarterRange->start,
             $quarterRange->end
         );
+        $minutesInQuarter += $shift->accumulatedBatchMinutes;
 
         $difference = TimeHelper::calculateMinutesDifference(
             $shift->shiftStart,

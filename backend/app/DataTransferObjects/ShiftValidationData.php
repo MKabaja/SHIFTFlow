@@ -15,6 +15,7 @@ readonly class ShiftValidationData
         public ?int $minBreakHours,
         public ?int $maxHoursPerQuarter,
         public ?int $ignoreShiftId = null,
+        public int $accumulatedBatchMinutes = 0
 
     ) {}
 }

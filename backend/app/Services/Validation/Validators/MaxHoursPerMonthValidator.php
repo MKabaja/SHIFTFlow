@@ -22,6 +22,7 @@ class MaxHoursPerMonthValidator extends BaseHourValidator
             $monthRange->start,
             $monthRange->end
         );
+        $minutesInMonth += $shift->accumulatedBatchMinutes;
 
         $difference = TimeHelper::calculateMinutesDifference(
             $shift->shiftStart,

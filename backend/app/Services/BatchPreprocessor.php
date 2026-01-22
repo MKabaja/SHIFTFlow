@@ -87,7 +87,6 @@ class BatchPreprocessor
         foreach ($shiftsData as $index => $shift) {
             try {
                 $date = Carbon::parse($shift['date']);
-
             } catch (\Exception $e) {
                 continue;
             }
