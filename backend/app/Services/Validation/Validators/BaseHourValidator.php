@@ -23,7 +23,7 @@ abstract class BaseHourValidator implements ShiftValidatorInterface
         return Shift::where('user_id', $shift->userId)
             ->whereBetween('date', [$startDate, $endDate])
             ->excluding($shift->ignoreShiftId)
-            ->sum('hours_worked') ?? 0;
+            ->sum('minutes_worked') ?? 0;
     }
 
     /**

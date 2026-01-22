@@ -36,9 +36,9 @@ it('throws exception when user has duplicate position on same day', function () 
         shiftEnd: '22:00',
         positionId: $b1->id,
         allowedPositionIds: [$b1->id],
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
         ignoreShiftId: null,
     );
 
@@ -67,9 +67,9 @@ it('passes when user has different position on same day', function () {
         shiftEnd: '22:00',
         positionId: $k1->id,
         allowedPositionIds: [$b1->id, $k1->id],
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
         ignoreShiftId: null,
     );
 
@@ -97,9 +97,9 @@ it('passes when shift is on different day with same position', function () {
         shiftEnd: '16:00',
         positionId: $b1->id,
         allowedPositionIds: [$b1->id],
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
         ignoreShiftId: null,
     );
 
@@ -130,9 +130,9 @@ it('ignores the shift being currently edited', function () {
         shiftEnd: '17:00',
         positionId: $b1->id,
         allowedPositionIds: [$b1->id],
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
         ignoreShiftId: $shiftToEdit->id
     );
 

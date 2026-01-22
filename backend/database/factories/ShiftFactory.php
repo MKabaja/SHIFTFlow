@@ -25,7 +25,7 @@ class ShiftFactory extends Factory
             'shift_start' => '08:00',
             'shift_end' => '16:00',
 
-            'hours_worked' => null,
+            'minutes_worked' => null,
             'hourly_rate' => null,
             'status' => 'scheduled',
             'notes' => null,
@@ -113,10 +113,10 @@ class ShiftFactory extends Factory
         ]);
     }
 
-    public function withHoursWorked(int $hours): static
+    public function withMinuteWorked(int $minutes): static
     {
         return $this->state(fn (array $attributes) => [
-            'hours_worked' => $hours,
+            'minutes_worked' => $minutes,
         ]);
     }
 }

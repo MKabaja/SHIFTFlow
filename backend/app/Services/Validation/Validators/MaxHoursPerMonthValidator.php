@@ -10,12 +10,12 @@ class MaxHoursPerMonthValidator extends BaseHourValidator
     public function validate(ShiftValidationData $shift): void
     {
 
-        if ($shift->maxHoursPerMonth === null) {
+        if ($shift->maxMinutesPerMonth === null) {
             return;
         }
 
         $monthRange = TimeHelper::createMonthRange($shift->date);
-        $monthlyMinuteLimit = $shift->maxHoursPerMonth * 60;
+        $monthlyMinuteLimit = $shift->maxMinutesPerMonth;
 
         $minutesInMonth = $this->retrieveWorkedMinutesInRange(
             $shift,
@@ -32,13 +32,13 @@ class MaxHoursPerMonthValidator extends BaseHourValidator
         $totalMinutes = $minutesInMonth + $difference;
 
         if ($totalMinutes > $monthlyMinuteLimit) {
-            $totalHours = $totalMinutes / 60;
-            $excessHours = $totalHours - $shift->maxHoursPerMonth;
+
+            $excessMinutes = $totalMinutes - $monthlyMinuteLimit;
 
             $this->throwExceededLimitException(
                 'month',
-                $shift->maxHoursPerMonth,
-                $excessHours
+                $monthlyMinuteLimit / 60,
+                round($excessMinutes / 60, 1)
             );
         }
     }

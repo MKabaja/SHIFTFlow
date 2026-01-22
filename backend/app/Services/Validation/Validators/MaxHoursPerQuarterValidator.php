@@ -9,12 +9,12 @@ class MaxHoursPerQuarterValidator extends BaseHourValidator
 {
     public function validate(ShiftValidationData $shift): void
     {
-        if ($shift->maxHoursPerQuarter === null) {
+        if ($shift->maxMinutesPerQuarter === null) {
             return;
         }
 
         $quarterRange = TimeHelper::createQuarterRange($shift->date);
-        $quarterlyMinuteLimit = $shift->maxHoursPerQuarter * 60;
+        $quarterlyMinuteLimit = $shift->maxMinutesPerQuarter;
 
         $minutesInQuarter = $this->retrieveWorkedMinutesInRange(
             $shift,
@@ -31,13 +31,14 @@ class MaxHoursPerQuarterValidator extends BaseHourValidator
         $totalMinutes = $minutesInQuarter + $difference;
 
         if ($totalMinutes > $quarterlyMinuteLimit) {
-            $totalHours = $totalMinutes / 60;
-            $excessHours = $totalHours - $shift->maxHoursPerQuarter;
+            $excessMinutes = $totalMinutes - $quarterlyMinuteLimit;
 
             $this->throwExceededLimitException(
                 'quarter',
-                $shift->maxHoursPerQuarter,
-                $excessHours
+                $quarterlyMinuteLimit / 60,
+
+                round($excessMinutes / 60, 1)
+
             );
         }
     }

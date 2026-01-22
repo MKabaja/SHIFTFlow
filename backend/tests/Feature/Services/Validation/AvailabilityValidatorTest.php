@@ -30,9 +30,9 @@ it('throws exception when  user is unavailable', function () {
         shiftEnd: '16:00:00',
         positionId: 1,
         allowedPositionIds: [1, 2, 3],
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
     );
 
     expect(fn () => $validator->validate($dto))->toThrow(ValidationException::class);
@@ -52,9 +52,9 @@ it('passes when no availability record exists for this date', function () {
         shiftEnd: '16:00:00',
         positionId: 1,
         allowedPositionIds: [1, 2, 3],
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
     );
 
     expect(fn () => $validator->validate($dto))->not->toThrow(ValidationException::class);
@@ -79,9 +79,9 @@ it('passes when user is explicitly available', function () {
         shiftEnd: '16:00:00',
         positionId: 1,
         allowedPositionIds: [1, 2, 3],
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
     );
 
     expect(fn () => $validator->validate($dto))

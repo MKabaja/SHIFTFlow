@@ -24,13 +24,12 @@ return new class extends Migration
             $table->decimal('hourly_rate', 8, 2)
                 ->nullable();
 
-            $table->unsignedSmallInteger('max_hours_per_month')
+            $table->unsignedMediumInteger('max_minutes_per_month')->nullable();
+
+            $table->unsignedMediumInteger('max_minutes_per_quarter')
                 ->nullable();
 
-            $table->unsignedSmallInteger('max_hours_per_quarter')
-                ->nullable();
-
-            $table->unsignedSmallInteger('min_break_hours')
+            $table->unsignedMediumInteger('min_break_minutes')
                 ->nullable();
 
             $table->enum('contract_type', ['employment_contract', 'mandate_contract'])

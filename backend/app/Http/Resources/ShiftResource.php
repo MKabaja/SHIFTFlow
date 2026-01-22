@@ -27,7 +27,9 @@ class ShiftResource extends JsonResource
             'date' => $this->date->format('Y-m-d'),
             'shift_start' => $this->shift_start->format('H:i'),
             'shift_end' => $this->shift_end->format('H:i'),
-            'hours_worked' => $this->hours_worked,
+
+            'minutes_worked' => $this->minutes_worked,
+            'hours_worked' => round($this->minutes_worked / 60, 2),
             'hourly_rate' => $this->hourly_rate ? (float) $this->hourly_rate : null,
             'status' => $this->status,
             'notes' => $this->notes,

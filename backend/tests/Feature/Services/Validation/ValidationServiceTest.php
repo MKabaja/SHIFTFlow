@@ -13,7 +13,7 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 it('passes validation when all validators pass', function () {
     $user = User::factory()
         ->employee()
-        ->withHourLimits()
+        ->withMinuteLimits()
         ->create();
     $position = Position::factory()
         ->create();
@@ -28,9 +28,9 @@ it('passes validation when all validators pass', function () {
         shiftStart: '08:00',
         shiftEnd: '16:00',
         allowedPositionIds: [$position->id],
-        maxHoursPerMonth: $user->max_hours_per_month,
-        minBreakHours: $user->min_break_hours,
-        maxHoursPerQuarter: $user->max_hours_per_quarter,
+        maxMinutesPerMonth: $user->max_minutes_per_month,
+        minBreakMinutes: $user->min_break_minutes,
+        maxMinutesPerQuarter: $user->max_minutes_per_quarter,
         ignoreShiftId: null,
     );
 
@@ -43,7 +43,7 @@ it('passes validation when all validators pass', function () {
 it('throws exception when position permission validator fails', function () {
     $user = User::factory()
         ->employee()
-        ->withHourLimits()
+        ->withMinuteLimits()
         ->create();
     $position = Position::factory()
         ->create();
@@ -55,9 +55,9 @@ it('throws exception when position permission validator fails', function () {
         shiftStart: '08:00',
         shiftEnd: '16:00',
         allowedPositionIds: [],
-        maxHoursPerMonth: $user->max_hours_per_month,
-        minBreakHours: $user->min_break_hours,
-        maxHoursPerQuarter: $user->max_hours_per_quarter,
+        maxMinutesPerMonth: $user->max_minutes_per_month,
+        minBreakMinutes: $user->min_break_minutes,
+        maxMinutesPerQuarter: $user->max_minutes_per_quarter,
         ignoreShiftId: null,
     );
 

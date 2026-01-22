@@ -39,9 +39,9 @@ it('passes when there is no time conflict', function () {
         shiftEnd: '22:00',
         positionId: 1,
         allowedPositionIds: [1, 2, 3],
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
     );
     expect(fn () => $validator->validate($dto))
         ->not->toThrow(ValidationException::class);
@@ -75,9 +75,9 @@ it('throws exception when shifts overlap', function () {
         shiftEnd: '14:00',
         positionId: 1,
         allowedPositionIds: [1, 2, 3],
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
     );
 
     expect(fn () => $validator->validate($dto))
@@ -112,9 +112,9 @@ it('ignores the shift being currently edited', function () {
         shiftEnd: '17:00',
         positionId: 1,
         allowedPositionIds: [1, 2, 3],
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
         ignoreShiftId: $shiftToEdit->id
     );
 

@@ -29,9 +29,9 @@ it('passes when user has position permission', function () {
         shiftEnd: '16:00:00',
         positionId: $position->id,
         allowedPositionIds: $user->positions->pluck('id')->toArray(),
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
     );
 
     expect(fn () => $validator->validate($dto))->not->toThrow(ValidationException::class);
@@ -55,9 +55,9 @@ it('throws exception when user lacks position permission', function () {
         shiftEnd: '16:00:00',
         positionId: $forbiddenPosition->id,
         allowedPositionIds: $user->positions->pluck('id')->toArray(),
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
     );
 
     $validator->validate($dto);

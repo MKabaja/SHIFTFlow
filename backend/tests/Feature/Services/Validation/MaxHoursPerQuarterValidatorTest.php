@@ -14,7 +14,7 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 it('throws exception when user has exceeded quarterly hourly limit', function () {
     $user = User::factory()
         ->employee()
-        ->withHourLimits()
+        ->withMinuteLimits()
         ->create();
 
     $b1 = Position::factory()->create(['name' => 'B1']);
@@ -24,7 +24,7 @@ it('throws exception when user has exceeded quarterly hourly limit', function ()
         ->forPosition($b1)
         ->onDate('2026-05-10')
         ->withTimes('08:00', '16:00')
-        ->withHoursWorked(475 * 60)
+        ->withMinuteWorked(28500)
         ->create();
 
     $dto = new ShiftValidationData(
@@ -34,9 +34,9 @@ it('throws exception when user has exceeded quarterly hourly limit', function ()
         shiftEnd: '16:00',
         positionId: $b1->id,
         allowedPositionIds: [$b1->id],
-        maxHoursPerMonth: $user->max_hours_per_month,
-        minBreakHours: null,
-        maxHoursPerQuarter: $user->max_hours_per_quarter,
+        maxMinutesPerMonth: $user->max_minutes_per_month,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: $user->max_minutes_per_quarter,
         ignoreShiftId: null,
     );
 
@@ -49,7 +49,7 @@ it('throws exception when user has exceeded quarterly hourly limit', function ()
 it('passes when total hours are within quarter limit', function () {
     $user = User::factory()
         ->employee()
-        ->withHourLimits()
+        ->withMinuteLimits()
         ->create();
 
     $b1 = Position::factory()
@@ -60,7 +60,7 @@ it('passes when total hours are within quarter limit', function () {
         ->forPosition($b1)
         ->onDate('2026-05-10')
         ->withTimes('08:00', '16:00')
-        ->withHoursWorked(400 * 60)
+        ->withMinuteWorked(24000)
         ->create();
 
     $dto = new ShiftValidationData(
@@ -70,9 +70,9 @@ it('passes when total hours are within quarter limit', function () {
         shiftEnd: '16:00',
         positionId: $b1->id,
         allowedPositionIds: [$b1->id],
-        maxHoursPerMonth: $user->max_hours_per_month,
-        minBreakHours: null,
-        maxHoursPerQuarter: $user->max_hours_per_quarter,
+        maxMinutesPerMonth: $user->max_minutes_per_month,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: $user->max_minutes_per_quarter,
         ignoreShiftId: null,
     );
 
@@ -85,7 +85,7 @@ it('passes when total hours are within quarter limit', function () {
 it('passes when user has no quarter hour limit', function () {
     $user = User::factory()
         ->employee()
-        ->withoutHourLimits()
+        ->withoutMinuteLimits()
         ->create();
 
     $b1 = Position::factory()
@@ -96,7 +96,7 @@ it('passes when user has no quarter hour limit', function () {
         ->forPosition($b1)
         ->onDate('2026-05-10')
         ->withTimes('08:00', '16:00')
-        ->withHoursWorked(500 * 60)
+        ->withMinuteWorked(30000)
         ->create();
 
     $dto = new ShiftValidationData(
@@ -106,9 +106,9 @@ it('passes when user has no quarter hour limit', function () {
         shiftEnd: '16:00',
         positionId: $b1->id,
         allowedPositionIds: [$b1->id],
-        maxHoursPerMonth: $user->max_hours_per_month,
-        minBreakHours: null,
-        maxHoursPerQuarter: $user->max_hours_per_quarter,
+        maxMinutesPerMonth: $user->max_minutes_per_month,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: $user->max_minutes_per_quarter,
         ignoreShiftId: null,
     );
 
@@ -121,7 +121,7 @@ it('passes when user has no quarter hour limit', function () {
 it('ignores current shift when updating', function () {
     $user = User::factory()
         ->employee()
-        ->withHourLimits()
+        ->withMinuteLimits()
         ->create();
 
     $b1 = Position::factory()->create();
@@ -130,7 +130,7 @@ it('ignores current shift when updating', function () {
         ->forUser($user)
         ->forPosition($b1)
         ->onDate('2026-05-10')
-        ->withHoursWorked(470 * 60)
+        ->withMinuteWorked(28200)
         ->create();
 
     $shiftToEdit = Shift::factory()
@@ -138,7 +138,7 @@ it('ignores current shift when updating', function () {
         ->forPosition($b1)
         ->onDate('2026-05-15')
         ->withTimes('08:00', '16:00')
-        ->withHoursWorked(8 * 60)
+        ->withMinuteWorked(480)
         ->create();
 
     $dto = new ShiftValidationData(
@@ -148,9 +148,9 @@ it('ignores current shift when updating', function () {
         shiftEnd: '18:00',
         positionId: $b1->id,
         allowedPositionIds: [$b1->id],
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: $user->max_hours_per_quarter,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: $user->max_minutes_per_quarter,
         ignoreShiftId: $shiftToEdit->id,
     );
 

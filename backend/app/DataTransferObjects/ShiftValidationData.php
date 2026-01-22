@@ -11,9 +11,9 @@ readonly class ShiftValidationData
         public int $positionId,
         public string $shiftEnd,
         public array $allowedPositionIds,
-        public ?int $maxHoursPerMonth,
-        public ?int $minBreakHours,
-        public ?int $maxHoursPerQuarter,
+        public ?int $maxMinutesPerMonth,
+        public ?int $minBreakMinutes,
+        public ?int $maxMinutesPerQuarter,
         public ?int $ignoreShiftId = null,
         public int $accumulatedBatchMinutes = 0
 

@@ -12,7 +12,7 @@ class MinimumBreakValidator extends BaseConflictValidator
     {
         $lastShift = $this->findLastShift($shift);
 
-        if (! $lastShift || $shift->minBreakHours === null) {
+        if (! $lastShift || $shift->minBreakMinutes === null) {
             return;
         }
 
@@ -30,17 +30,17 @@ class MinimumBreakValidator extends BaseConflictValidator
             $previousShiftEnd->addDay();
         }
 
-        $breakHours = $previousShiftEnd->diffInMinutes($currentShiftStart, false) / 60;
+        $breakMinutes = $previousShiftEnd->diffInMinutes($currentShiftStart, false);
 
-        if ($breakHours < 0) {
+        if ($breakMinutes < 0) {
             return;
         }
 
-        if ($breakHours < $shift->minBreakHours) {
-            $required = number_format($shift->minBreakHours, 1);
-            $actual = number_format($breakHours, 1);
+        if ($breakMinutes < $shift->minBreakMinutes) {
+            $required = number_format($shift->minBreakMinutes / 60, 1);
+            $actual = number_format($breakMinutes / 60, 1);
 
-            $this->throwConflictException("User has insufficient break:{$actual}, required: {$required}");
+            $this->throwConflictException("User has insufficient break:{$actual}h, required: {$required}h");
 
         }
 

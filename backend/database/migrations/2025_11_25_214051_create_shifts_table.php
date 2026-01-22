@@ -33,7 +33,7 @@ return new class extends Migration
 
             $table->time('shift_end');
 
-            $table->unsignedSmallInteger('hours_worked')->nullable();
+            $table->unsignedSmallInteger('minutes_worked')->nullable();
 
             $table->enum('status', ['scheduled', 'cancelled'])->default('scheduled');
 

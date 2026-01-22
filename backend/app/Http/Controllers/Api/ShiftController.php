@@ -54,15 +54,15 @@ class ShiftController extends Controller
             shiftEnd: $shiftData['shift_end'],
             positionId: $shiftData['position_id'],
             allowedPositionIds: $user->positions->pluck('id')->toArray(),
-            maxHoursPerMonth: $user->max_hours_per_month,
-            minBreakHours: $user->min_break_hours,
-            maxHoursPerQuarter: $user->max_hours_per_quarter,
+            maxMinutesPerMonth: $user->max_minutes_per_month,
+            minBreakMinutes: $user->min_break_minutes,
+            maxMinutesPerQuarter: $user->max_minutes_per_quarter,
             ignoreShiftId: null
         );
 
         $this->validationService->validate($dto);
 
-        $hoursWorked = TimeHelper::calculateMinutesDifference(
+        $minutesWorked = TimeHelper::calculateMinutesDifference(
             "{$dto->date} {$dto->shiftStart}",
             "{$dto->date} {$dto->shiftEnd}"
         );
@@ -73,7 +73,7 @@ class ShiftController extends Controller
             'date' => $shiftData['date'],
             'shift_start' => $shiftData['shift_start'],
             'shift_end' => $shiftData['shift_end'],
-            'hours_worked' => $hoursWorked,
+            'minutes_worked' => $minutesWorked,
             'schedule_id' => $shiftData['schedule_id'] ?? null,
             'status' => $shiftData['status'] ?? 'scheduled',
             'notes' => $shiftData['notes'] ?? null,
@@ -108,14 +108,14 @@ class ShiftController extends Controller
             shiftEnd: $shiftData['shift_end'],
             positionId: $shiftData['position_id'],
             allowedPositionIds: $user->positions->pluck('id')->toArray(),
-            maxHoursPerMonth: $user->max_hours_per_month,
-            minBreakHours: $user->min_break_hours,
-            maxHoursPerQuarter: $user->max_hours_per_quarter,
+            maxMinutesPerMonth: $user->max_minutes_per_month,
+            minBreakMinutes: $user->min_break_minutes,
+            maxMinutesPerQuarter: $user->max_minutes_per_quarter,
             ignoreShiftId: $shift->id
         );
         $this->validationService->validate($dto);
 
-        $hoursWorked = TimeHelper::calculateMinutesDifference(
+        $minutesWorked = TimeHelper::calculateMinutesDifference(
             "{$dto->date} {$dto->shiftStart}",
             "{$dto->date} {$dto->shiftEnd}"
         );
@@ -126,7 +126,7 @@ class ShiftController extends Controller
             'date' => $shiftData['date'],
             'shift_start' => $shiftData['shift_start'],
             'shift_end' => $shiftData['shift_end'],
-            'hours_worked' => $hoursWorked,
+            'minutes_worked' => $minutesWorked,
             'schedule_id' => $shiftData['schedule_id'] ?? $shift->schedule_id,
             'status' => $shiftData['status'] ?? $shift->status,
             'notes' => $shiftData['notes'] ?? $shift->notes,

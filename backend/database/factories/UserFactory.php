@@ -21,9 +21,9 @@ class UserFactory extends Factory
             'hourly_rate' => null,
             'contract_type' => 'employment_contract',
 
-            'max_hours_per_month' => null,
-            'max_hours_per_quarter' => null,
-            'min_break_hours' => null,
+            'max_minutes_per_month' => null,
+            'max_minutes_per_quarter' => null,
+            'min_break_minutes' => null,
 
         ];
     }
@@ -49,9 +49,9 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'role' => 'employee',
 
-            'max_hours_per_month' => 160,
-            'max_hours_per_quarter' => 480,
-            'min_break_hours' => 11,
+            'max_minutes_per_month' => 9600,
+            'min_break_minutes' => 660,
+            'max_minutes_per_quarter' => 28800,
             'hourly_rate' => 25.00,
         ]);
     }
@@ -70,24 +70,24 @@ class UserFactory extends Factory
         ]);
     }
 
-    public function withHourLimits(
-        ?int $monthly = 160,
-        ?int $quarterly = 480,
-        ?int $breakHours = 11
+    public function withMinuteLimits(
+        ?int $monthly = 9600,
+        ?int $quarterly = 28800,
+        ?int $breakHours = 660
     ): static {
         return $this->state(fn (array $attributes) => [
-            'max_hours_per_month' => $monthly,
-            'max_hours_per_quarter' => $quarterly,
-            'min_break_hours' => $breakHours,
+            'max_minutes_per_month' => $monthly,
+            'max_minutes_per_quarter' => $quarterly,
+            'min_break_minutes' => $breakHours,
         ]);
     }
 
-    public function withoutHourLimits(): static
+    public function withoutMinuteLimits(): static
     {
         return $this->state(fn (array $attributes) => [
-            'max_hours_per_month' => null,
-            'max_hours_per_quarter' => null,
-            'min_break_hours' => null,
+            'max_minutes_per_month' => null,
+            'max_minutes_per_quarter' => null,
+            'min_break_minutes' => null,
         ]);
     }
 

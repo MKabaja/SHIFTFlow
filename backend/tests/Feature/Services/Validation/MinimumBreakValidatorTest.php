@@ -27,9 +27,9 @@ it('passes if there is no previous shift in the database', function () {
         shiftEnd: '22:00',
         positionId: 1,
         allowedPositionIds: [1, 2, 3],
-        maxHoursPerMonth: null,
-        minBreakHours: 11,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: 660,
+        maxMinutesPerQuarter: null,
     );
     expect(fn () => $validator->validate($dto))
         ->not->toThrow(ValidationException::class);
@@ -60,9 +60,9 @@ it('finishes validation early if minBreakHours is null', function () {
         shiftEnd: '22:00',
         positionId: 1,
         allowedPositionIds: [1, 2, 3],
-        maxHoursPerMonth: null,
-        minBreakHours: null,
-        maxHoursPerQuarter: null,
+        maxMinutesPerMonth: null,
+        minBreakMinutes: null,
+        maxMinutesPerQuarter: null,
     );
 
     expect(fn () => $validator->validate($dto))
@@ -89,9 +89,9 @@ it('ignores the current shift when validating during an update', function () {
         shiftEnd: '17:00',
         positionId: $position->id,
         allowedPositionIds: [$position->id],
-        maxHoursPerMonth: null,
-        maxHoursPerQuarter: null,
-        minBreakHours: 11,
+        maxMinutesPerMonth: null,
+        maxMinutesPerQuarter: null,
+        minBreakMinutes: 660,
         ignoreShiftId: $existingShift->id,
     );
 
@@ -123,9 +123,9 @@ it('fails when break is too short on the same day', function () {
         shiftEnd: '17:00',
         positionId: $position->id,
         allowedPositionIds: [$position->id],
-        maxHoursPerMonth: null,
-        maxHoursPerQuarter: null,
-        minBreakHours: 11,
+        maxMinutesPerMonth: null,
+        maxMinutesPerQuarter: null,
+        minBreakMinutes: 660,
     );
 
     $validator = new MinimumBreakValidator;
@@ -156,9 +156,9 @@ it('fails when break is too short between consecutive days', function () {
         shiftEnd: '14:00',
         positionId: $position->id,
         allowedPositionIds: [$position->id],
-        maxHoursPerMonth: null,
-        maxHoursPerQuarter: null,
-        minBreakHours: 11,
+        maxMinutesPerMonth: null,
+        maxMinutesPerQuarter: null,
+        minBreakMinutes: 660,
     );
 
     $validator = new MinimumBreakValidator;
