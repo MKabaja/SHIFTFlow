@@ -9,15 +9,18 @@ use App\Http\Requests\UpdateScheduleRequest;
 use App\Http\Resources\ScheduleListResource;
 use App\Http\Resources\ScheduleResource;
 use App\Models\Schedule;
+use App\Services\ScheduleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ScheduleController extends Controller
 {
+    public function __construct(private ScheduleService $scheduleService) {}
+
     public function index(GetSchedulesRequest $request): AnonymousResourceCollection
     {
 
-        $schedules = Schedule::with('creator')
+        $schedules = Schedule::with(['creator', 'shifts'])
             ->when($request
                 ->input('month'), fn ($q, $m) => $q
                 ->where('month', $m))
@@ -34,16 +37,7 @@ class ScheduleController extends Controller
 
     public function store(StoreScheduleRequest $request): JsonResponse
     {
-        $scheduleData = $request->validated();
-
-        $schedule = Schedule::create([
-            'name' => $scheduleData['name'],
-            'month' => $scheduleData['month'],
-            'year' => $scheduleData['year'],
-            'description' => $scheduleData['description'] ?? null,
-            'created_by' => $request->user()->id,
-            'status' => 'draft',
-        ]);
+        $schedule = $this->scheduleService->create($request->validated());
 
         return ScheduleResource::make($schedule)
             ->additional(['message' => 'Schedule created successfully'])
@@ -54,7 +48,7 @@ class ScheduleController extends Controller
 
     public function show(Schedule $schedule): ScheduleListResource
     {
-        $schedule->load(['creator', 'shifts.user', 'shifts.position']);
+        $schedule->load(['creator', 'shifts']);
 
         return ScheduleListResource::make($schedule);
     }
