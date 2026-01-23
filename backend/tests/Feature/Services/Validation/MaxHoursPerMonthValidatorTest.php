@@ -6,6 +6,7 @@ use App\Models\Shift;
 use App\Models\User;
 use App\Services\Validation\Validators\MaxHoursPerMonthValidator;
 use Illuminate\Validation\ValidationException;
+use Tests\Factories\ShiftValidationDataFactory;
 use Tests\TestCase;
 
 uses(TestCase::class);
@@ -164,7 +165,7 @@ it('ignores current shift when updating', function () {
 it('throws exception when accumulated batch minutes exceed monthly limit', function () {
     $user = User::factory()
         ->employee()
-        ->withMinuteLimits() // limit 160
+        ->withMinuteLimits()
         ->create();
 
     $b1 = Position::factory()
@@ -175,7 +176,7 @@ it('throws exception when accumulated batch minutes exceed monthly limit', funct
         ->forPosition($b1)
         ->onDate('2026-05-10')
         ->withTimes('08:00', '16:00')
-        ->withMinuteWorked(9000) // 10 zapasu
+        ->withMinuteWorked(9000)
         ->create();
 
     $dto = new ShiftValidationData(
@@ -200,7 +201,7 @@ it('throws exception when accumulated batch minutes exceed monthly limit', funct
 it('passes when accumulated batch minutes does not exceed monthly limit', function () {
     $user = User::factory()
         ->employee()
-        ->withMinuteLimits() // limit 160
+        ->withMinuteLimits()
         ->create();
 
     $b1 = Position::factory()
@@ -211,7 +212,7 @@ it('passes when accumulated batch minutes does not exceed monthly limit', functi
         ->forPosition($b1)
         ->onDate('2026-05-10')
         ->withTimes('08:00', '16:00')
-        ->withMinuteWorked(9000) // 10 zapasu
+        ->withMinuteWorked(9000)
         ->create();
 
     $dto = new ShiftValidationData(
@@ -230,5 +231,26 @@ it('passes when accumulated batch minutes does not exceed monthly limit', functi
     $validator = new MaxHoursPerMonthValidator;
     expect(fn () => $validator->validate($dto))
         ->not->toThrow(ValidationException::class);
+});
 
+it('passes when does not affect validation when accumulated minutes is zero', function () {
+    $user = User::factory()
+        ->employee()
+        ->withMinuteLimits()
+        ->create();
+
+    $b1 = Position::factory()
+        ->create(['name' => 'B1']);
+
+    $dto = ShiftValidationDataFactory::new()
+        ->withUser($user)
+        ->withPosition($b1)
+        ->onDate('2026-05-10')
+        ->withShiftTime('08:00', '16:00')
+        ->withAccumulatedMinutes(0)
+        ->create();
+
+    $validator = new MaxHoursPerMonthValidator;
+    expect(fn () => $validator->validate($dto))
+        ->not->toThrow(ValidationException::class);
 });

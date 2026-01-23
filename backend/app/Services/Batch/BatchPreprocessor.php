@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Batch;
 
 use App\Models\Schedule;
 use Carbon\Carbon;

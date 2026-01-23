@@ -33,7 +33,7 @@ class Shift extends Model
         'date',
         'shift_start',
         'shift_end',
-        'hours_worked',
+        'minutes_worked',
         'hourly_rate',
         'status',
         'notes',
@@ -45,6 +45,8 @@ class Shift extends Model
             'date' => 'date',
             'shift_start' => 'datetime:H:i',
             'shift_end' => 'datetime:H:i',
+            'minutes_worked' => 'integer',
+
         ];
     }
 
