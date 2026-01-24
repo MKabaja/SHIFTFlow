@@ -33,13 +33,20 @@ Route::middleware(['auth:api', 'role:admin,manager'])
     ->prefix('shifts')
     ->controller(ShiftController::class)
     ->group(function () {
-        Route::get('/', 'index');
+
         Route::post('/', 'store');
         Route::match(['put', 'patch'], '/{shift}', 'update');
         Route::delete('/{shift}', 'destroy');
         Route::get('/{shift}', 'show');
     });
-// Schedule Crud
+Route::middleware(['auth:api', 'role:admin,manager,employee'])
+    ->prefix('shifts')
+    ->controller(ShiftController::class)
+    ->group(function () {
+        Route::get('/', 'index');
+
+    });
+// Schedule Crud + Batch
 Route::middleware(['auth:api', 'role:admin,manager'])
     ->prefix('schedules')
     ->controller(ScheduleController::class)
@@ -49,6 +56,8 @@ Route::middleware(['auth:api', 'role:admin,manager'])
         Route::match(['put', 'patch'], '/{schedule}', 'update');
         Route::delete('/{schedule}', 'destroy');
         Route::get('/{schedule}', 'show');
+        Route::post('/{schedule}/shifts/batch', 'addShiftsBatch');
+        Route::post('/{schedule}/publish', 'publish');
     });
 
 // Positions G1

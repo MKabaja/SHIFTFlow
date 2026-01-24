@@ -5,10 +5,6 @@ use App\Models\Availability;
 use App\Models\User;
 use App\Services\Validation\Validators\AvailabilityValidator;
 use Illuminate\Validation\ValidationException;
-use Tests\TestCase;
-
-uses(TestCase::class);
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 it('throws exception when  user is unavailable', function () {
     $date = '2025-01-29';

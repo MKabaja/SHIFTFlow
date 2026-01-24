@@ -19,10 +19,9 @@ class ShiftResource extends JsonResource
             'schedule_id' => $this->schedule_id,
 
             'user_id' => $this->user_id,
-            'user_name' => $this->user?->name,
-
+            'user_name' => $this->whenLoaded('user', fn () => $this->user->name),
             'position_id' => $this->position_id,
-            'position_name' => $this->position?->name,
+            'position_name' => $this->whenLoaded('position', fn () => $this->position->name),
 
             'date' => $this->date->format('Y-m-d'),
             'shift_start' => $this->shift_start->format('H:i'),
@@ -30,7 +29,7 @@ class ShiftResource extends JsonResource
 
             'minutes_worked' => $this->minutes_worked,
             'hours_worked' => round($this->minutes_worked / 60, 2),
-            'hourly_rate' => $this->hourly_rate ? (float) $this->hourly_rate : null,
+
             'status' => $this->status,
             'notes' => $this->notes,
 

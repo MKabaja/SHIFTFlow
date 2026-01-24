@@ -6,10 +6,6 @@ use App\Models\Shift;
 use App\Models\User;
 use App\Services\Validation\Validators\TimeConflictValidator;
 use Illuminate\Validation\ValidationException;
-use Tests\TestCase;
-
-uses(TestCase::class);
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 it('passes when there is no time conflict', function () {
 

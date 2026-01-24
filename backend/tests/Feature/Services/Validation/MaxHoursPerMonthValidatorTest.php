@@ -7,10 +7,6 @@ use App\Models\User;
 use App\Services\Validation\Validators\MaxHoursPerMonthValidator;
 use Illuminate\Validation\ValidationException;
 use Tests\Factories\ShiftValidationDataFactory;
-use Tests\TestCase;
-
-uses(TestCase::class);
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 it('throws exception when user has exceeded hourly limit', function () {
     $user = User::factory()

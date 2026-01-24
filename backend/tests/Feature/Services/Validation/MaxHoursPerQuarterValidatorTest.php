@@ -6,10 +6,6 @@ use App\Models\Shift;
 use App\Models\User;
 use App\Services\Validation\Validators\MaxHoursPerQuarterValidator;
 use Illuminate\Validation\ValidationException;
-use Tests\TestCase;
-
-uses(TestCase::class);
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 it('throws exception when user has exceeded quarterly hourly limit', function () {
     $user = User::factory()

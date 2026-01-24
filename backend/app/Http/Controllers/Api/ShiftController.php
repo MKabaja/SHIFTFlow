@@ -43,6 +43,8 @@ class ShiftController extends Controller
 
     public function store(StoreShiftRequest $request)
     {
+        abort(410, 'Use schedule batch endpoint instead.');
+
         $shiftData = $request->validated();
         $user = User::with('positions')
             ->findOrFail($shiftData['user_id']);

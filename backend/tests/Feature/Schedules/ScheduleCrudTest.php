@@ -2,10 +2,7 @@
 
 use App\Models\Schedule;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
-uses(TestCase::class, RefreshDatabase::class);
 it('allows manager to list and filter schedules', function () {
     /** @var \Tests\TestCase $this
      * @var \App\Models\User $manager

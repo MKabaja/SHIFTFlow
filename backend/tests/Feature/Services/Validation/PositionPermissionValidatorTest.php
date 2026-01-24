@@ -5,10 +5,7 @@ use App\Models\Position;
 use App\Models\User;
 use App\Services\Validation\Validators\PositionPermissionValidator;
 use Illuminate\Validation\ValidationException;
-use Tests\TestCase;
 
-uses(TestCase::class);
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 it('passes when user has position permission', function () {
 
     $validator = new PositionPermissionValidator;

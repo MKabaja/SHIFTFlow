@@ -143,9 +143,9 @@ Postman Test błędów: Brak name → 422 {"name": ["The name field is required.
 #### ✅ SESJA 1 GOTOWA Gdy:
 
 ```php
-[ ] php artisan serve
-[ ] Postman: GET/POST/PUT/DELETE /api/schedules wszystkie 2xx
-[ ] php artisan test tests/Feature/ScheduleTest.php → 4 testy PASS
+[x] php artisan serve
+[x] Postman: GET/POST/PUT/DELETE /api/schedules wszystkie 2xx
+[x] php artisan test tests/Feature/ScheduleTest.php → 4 testy PASS
 
 Commit: `:calendar: feat(api): ScheduleController CRUD + tests`
 ```
@@ -239,9 +239,9 @@ text
 
 ✅ SESJA 2 GOTOWA Gdy:
 text
-[ ] php artisan test → 6 testów (index + store + update)
-[ ] Postman: StoreScheduleRequest walidacja (brak name → 422)
-[ ] ScheduleResource działa z eager loading
+[x] php artisan test → 6 testów (index + store + update)
+[x] Postman: StoreScheduleRequest walidacja (brak name → 422)
+[x] ScheduleResource działa z eager loading
 Commit: :hammer: refactor(services): ScheduleService + FormRequests
 
 🎯 SESJA 3: BatchPreprocessor (1.5h)
@@ -282,8 +282,8 @@ $result = $preprocessor->prepare($shifts, $schedule);
 $result[1]->count() === 2
 ✅ SESJA 3 GOTOWA Gdy:
 text
-[ ] Tinker: BatchPreprocessor działa
-[ ] Walidacja inputu rzuca wyjątki na złe dane
+[x] Tinker: BatchPreprocessor działa
+[x] Walidacja inputu rzuca wyjątki na złe dane
 Commit: :package: feat(services): BatchPreprocessor input validation + sorting
 
 🎯 SESJA 4: BatchResult Value Object (30min)
@@ -361,8 +361,8 @@ accumulatedBatchHours: 20, // 20h z poprzednich shiftów w batchu
 $validator->validate($dto); // NIE rzuca błędu (jeśli suma OK)
 ✅ SESJA 5 GOTOWA Gdy:
 text
-[ ] php artisan test Unit/\*ValidatorTest.php → PASS
-[ ] Tinker: DTO z accumulatedBatchHours działa
+[x] php artisan test Unit/\*ValidatorTest.php → PASS
+[x] Tinker: DTO z accumulatedBatchHours działa
 Commit: :mag: feat(validation): DTO accumulatedBatchHours + validators batch support
 
 🎯 SESJA 6: BatchValidationService Core (3h)
@@ -444,14 +444,14 @@ php artisan make:request StoreBatchShiftsRequest
 rules():
 'shifts' => 'required|array|min:1'
 'shifts._.client_temp_id' => 'required|string'
-'shifts._.user_id' => 'required|exists:users,id'
-'shifts._.position_id' => 'required|exists:positions,id'
-'shifts._.date' => 'required|date'
+'shifts._.user*id' => 'required|exists:users,id'
+'shifts.*.position*id' => 'required|exists:positions,id'
+'shifts.*.date' => 'required|date'
 'shifts._.shift_start' => 'required|date_format:H:i'
 'shifts._.shift_end' => 'required|date_format:H:i|after:shifts.\*.shift_start'
 ✅ SESJA 6 GOTOWA Gdy:
 text
-[ ] Tinker: BatchValidationService::validate() → zwraca błędy z client_temp_id
+[x] Tinker: BatchValidationService::validate() → zwraca błędy z client_temp_id
 [ ] php artisan test Unit/BatchValidationTest.php → 6 testów
 Commit: :test_tube: feat(services): BatchValidationService + internal conflicts
 

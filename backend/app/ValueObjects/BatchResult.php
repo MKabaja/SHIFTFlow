@@ -2,21 +2,23 @@
 
 namespace App\ValueObjects;
 
+use Illuminate\Support\Collection;
+
 readonly class BatchResult
 {
     private function __construct(
-        private array $shifts = [],
+        private Collection $shifts,
         private array $errors = [],
     ) {}
 
-    public static function success(array $shifts): self
+    public static function success(Collection $shifts): self
     {
         return new self(shifts: $shifts);
     }
 
     public static function withErrors(array $errors): self
     {
-        return new self(errors: $errors);
+        return new self(shifts: collect(), errors: $errors);
     }
 
     public function hasErrors(): bool
@@ -29,13 +31,13 @@ readonly class BatchResult
         return $this->errors;
     }
 
-    public function shifts(): array
+    public function shifts(): Collection
     {
         return $this->shifts;
     }
 
     public function count(): int
     {
-        return count($this->shifts);
+        return $this->shifts->count();
     }
 }

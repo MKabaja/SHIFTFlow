@@ -5,10 +5,6 @@ use App\Models\Position;
 use App\Models\User;
 use App\Services\Validation\ValidationService;
 use Illuminate\Validation\ValidationException;
-use Tests\TestCase;
-
-uses(TestCase::class);
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 it('passes validation when all validators pass', function () {
     $user = User::factory()

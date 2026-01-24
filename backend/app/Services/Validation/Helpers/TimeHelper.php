@@ -83,8 +83,3 @@ class TimeHelper
         return $start->diffInMinutes($end);
     }
 }
-
-// TODO: Metoda 3 - createFullDateTime
-// TODO: Metoda 4 - adjustTimeIfNextDay
-// TODO: Metoda 5 - getQuarterFromMonth
-// TODO: Metoda 6 - getQuarterMonths
