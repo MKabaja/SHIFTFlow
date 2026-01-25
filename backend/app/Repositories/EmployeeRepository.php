@@ -36,6 +36,9 @@ class EmployeeRepository
                 'name' => $data['name'],
                 'hourly_rate' => $data['hourly_rate'],
                 'email' => null,
+                'max_minutes_per_month' => $data['max_minutes_per_month'] ?? null,
+                'max_minutes_per_quarter' => $data['max_minutes_per_quarter'] ?? null,
+                'min_break_minutes' => $data['min_break_minutes'] ?? null,
                 'contract_type' => $data['contract_type'] ?? 'employment_contract',
             ];
             $user = User::create($payload);

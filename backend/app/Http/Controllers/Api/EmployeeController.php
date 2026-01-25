@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IndexEmployeeRequest;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Http\Resources\UserResource;
@@ -28,11 +29,17 @@ class EmployeeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): AnonymousResourceCollection
+    public function index(IndexEmployeeRequest $request): AnonymousResourceCollection
     {
+        $perPage = $request->validated('per_page') ?? 50;
         $employees = User::where('role', 'employee')
             ->with('positions')
-            ->paginate(10);
+            ->when($request
+                ->validated('search'), fn ($q, $s) => $q
+                ->where('name', 'like', '%'.$s.'%'))
+
+            ->paginate($perPage)
+            ->withQueryString();
 
         return UserResource::collection($employees);
     }

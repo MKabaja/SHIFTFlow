@@ -6,8 +6,10 @@ use App\Models\Availability;
 use App\Models\Position;
 use App\Models\Schedule;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
+uses(RefreshDatabase::class);
 abstract class TestCase extends BaseTestCase
 {
     public User $manager;

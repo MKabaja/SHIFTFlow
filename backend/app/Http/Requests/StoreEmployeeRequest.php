@@ -34,6 +34,12 @@ class StoreEmployeeRequest extends FormRequest
 
             'contract_type' => ['nullable', 'string', 'in:employment_contract,mandate_contract'],
 
+            'max_minutes_per_month' => ['nullable', 'integer', 'min:0'],
+
+            'max_minutes_per_quarter' => ['nullable', 'integer', 'min:0'],
+
+            'min_break_minutes' => ['nullable', 'integer', 'min:0'],
+
         ];
     }
 }

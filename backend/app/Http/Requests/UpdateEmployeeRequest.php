@@ -30,7 +30,15 @@ class UpdateEmployeeRequest extends FormRequest
 
             'positions.*' => ['sometimes', 'integer', 'exists:positions,id'],
 
-            'hourly_rate' => ['sometimes', 'nullable', 'numeric', 'min:0']
+            'hourly_rate' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+
+            'max_minutes_per_month' => ['nullable', 'integer', 'min:0'],
+
+            'max_minutes_per_quarter' => ['nullable', 'integer', 'min:0'],
+
+            'min_break_minutes' => ['nullable', 'integer', 'min:0'],
+
+            'contract_type' => ['nullable', 'string', 'in:employment_contract,mandate_contract'],
         ];
     }
 }
