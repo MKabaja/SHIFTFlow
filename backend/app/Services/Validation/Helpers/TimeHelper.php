@@ -4,7 +4,6 @@ namespace App\Services\Validation\Helpers;
 
 use Carbon\Carbon;
 use DateTimeInterface;
-use Exception;
 
 class TimeHelper
 {
@@ -17,7 +16,7 @@ class TimeHelper
         try {
             return Carbon::parse($input)->format('Y-m-d');
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             throw new \InvalidArgumentException(
                 "Unable to parse date format: {$input}"
             );
@@ -34,7 +33,7 @@ class TimeHelper
             return Carbon::parse($input)
                 ->format('H:i');
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             throw new \InvalidArgumentException(
                 "Unable to parse time format: {$input}"
             );

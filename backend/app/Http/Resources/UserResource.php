@@ -17,13 +17,16 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'email' => $this->email,
+            'email' => $this->email ?? null,
             'login' => $this->login,
             'role' => $this->role,
             'is_active' => (bool) $this->is_active,
 
             'hourly_rate' => $this->hourly_rate ? (float) $this->hourly_rate : null,
-            'max_hours' => $this->max_hours_per_month,
+            'monthly_hour_limit' => round($this->max_minutes_per_month / 60, 1),
+            'quarter_hour_limit' => round($this->max_minutes_per_quarter / 60, 1),
+            'break_limit' => round($this->min_break_minutes / 60, 1),
+
             'contract_type' => $this->contract_type,
 
             'positions' => PositionResource::collection($this->whenLoaded('positions')),

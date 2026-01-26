@@ -11,7 +11,7 @@ beforeEach(function () {
 
 });
 // store
-test('admin can create employee', function () {
+test('admin can create an employee', function () {
     /** @var \Tests\TestCase $this
      * @var \App\Models\User $admin
      */
@@ -154,4 +154,65 @@ test('pagination links contain the search and per_page parameters', function () 
         ->toContain("search={$searchTerm}")
         ->toContain("per_page={$perPage}")
         ->toContain('page=2');
+});
+// delete
+test('admin can delete an employee', function () {
+    /** @var \Tests\TestCase $this */
+    $employee = User::factory()
+        ->employee()
+        ->create();
+
+    $this->deleteJson("/api/employees/{$employee->id}")
+        ->assertStatus(200);
+
+    $this->assertSoftDeleted('users', ['id' => $employee->id]);
+
+});
+test('non-admin user cannot delete an employee', function () {
+    /** @var \Tests\TestCase $this */
+    $employee = User::factory()
+        ->employee()
+        ->create();
+
+    $otherEmployee = User::factory()
+        ->employee()
+        ->create();
+
+    /** @var \App\Models\User $otherEmployee */
+    $this->actingAs($otherEmployee, 'api');
+
+    $this->deleteJson("/api/employees/{$employee->id}")
+        ->assertStatus(403);
+});
+// show
+test('admin can show an employee', function () {
+    /** @var \Tests\TestCase $this */
+    $employee = User::factory()
+        ->employee()
+        ->create([
+            'name' => 'Sebastian Witczak',
+            'login' => 'switcz',
+            'is_active' => true,
+            'max_minutes_per_month' => 10080,
+            'max_minutes_per_quarter' => 30240,
+            'min_break_minutes' => 660,
+            'hourly_rate' => 25,
+
+        ]);
+
+    $this->getJson("/api/employees/{$employee->id}")
+        ->assertOk()
+        ->assertJson([
+            'data' => [
+                'id' => $employee->id,
+                'name' => 'Sebastian Witczak',
+                'login' => 'switcz',
+                'is_active' => true,
+                'monthly_hour_limit' => 168,
+                'quarter_hour_limit' => 504,
+                'break_limit' => 11,
+                'hourly_rate' => 25,
+            ],
+        ]);
+
 });

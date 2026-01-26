@@ -43,6 +43,15 @@ abstract class TestCase extends BaseTestCase
         return $this->actingAs($this->admin, 'api');
     }
 
+    public function actingAsEmployee(): self
+    {
+        $this->employee = User::factory()
+            ->employee()
+            ->create();
+
+        return $this->actingAs($this->employee, 'api');
+    }
+
     public function seedPositions(): void
     {
 
