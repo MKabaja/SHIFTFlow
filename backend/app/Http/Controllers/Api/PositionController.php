@@ -40,7 +40,7 @@ class PositionController extends Controller
      */
     public function show(Position $position)
     {
-        return $position->load(['creator', 'schedules']);
+        return $position->load(['creator', 'shifts']);
     }
 
     /**

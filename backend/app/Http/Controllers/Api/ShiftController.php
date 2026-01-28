@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\DataTransferObjects\ShiftValidationData;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IndexShiftRequest;
 use App\Http\Requests\StoreShiftRequest;
 use App\Http\Requests\UpdateShiftRequest;
 use App\Http\Resources\ShiftResource;
@@ -11,34 +12,38 @@ use App\Models\Shift;
 use App\Models\User;
 use App\Services\Validation\Helpers\TimeHelper;
 use App\Services\Validation\ValidationService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ShiftController extends Controller
 {
     public function __construct(protected ValidationService $validationService) {}
 
-    public function index(Request $request)
+    public function index(IndexShiftRequest $request)
     {
         $user = Auth::user();
+        $perPage = $request->validated('per_page') ?? 50;
 
         $shifts = Shift::query()
             ->with(['user', 'position', 'schedule'])
 
-            ->when($request->user_id, fn ($q, $userId) => $q->where('user_id', $userId))
+            ->when($request
+                ->user_id, fn ($q, $userId) => $q
+                ->where('user_id', $userId))
 
-            ->when($request->date, fn ($q, $date) => $q->where('date', $date))
+            ->when($request
+                ->date, fn ($q, $date) => $q
+                ->where('date', $date))
 
             ->dateRange($request->from, $request->to)
-
-            ->when($user->role === 'employee', fn ($q) => $q->whereHas('schedule', fn ($sq) => $sq->where('status', 'published')))
+            ->when($user
+                ->role === 'employee', fn ($q) => $q
+                ->whereHas('schedule', fn ($sq) => $sq
+                    ->where('status', 'published')))
 
             ->orderBy('date')
-
-            ->paginate(50);
+            ->paginate($perPage);
 
         return ShiftResource::collection($shifts);
-
     }
 
     public function store(StoreShiftRequest $request)

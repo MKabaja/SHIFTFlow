@@ -23,6 +23,7 @@ class ScheduleController extends Controller
 
     public function index(GetSchedulesRequest $request): AnonymousResourceCollection
     {
+        $perPage = $request->validated('per_page') ?? 20;
 
         $schedules = Schedule::with(['creator', 'shifts'])
             ->when($request
@@ -33,7 +34,11 @@ class ScheduleController extends Controller
                 ->input('year'), fn ($q, $y) => $q
                 ->where('year', $y))
 
-            ->paginate(20);
+            ->when($request
+                ->validated('search'), fn ($q, $s) => $q
+                ->where('name', 'like', '%'.$s.'%'))
+
+            ->paginate($perPage);
 
         return ScheduleListResource::collection($schedules);
 
@@ -104,6 +109,11 @@ class ScheduleController extends Controller
 
     public function publish(Schedule $schedule): JsonResponse
     {
+        if ($schedule->status === 'published') {
+            return response()->json([
+                'message' => 'Schedule is already published',
+            ], 409);
+        }
 
         $schedule->update([
             'status' => 'published',

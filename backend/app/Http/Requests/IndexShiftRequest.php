@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GetSchedulesRequest extends FormRequest
+class IndexShiftRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,20 +21,28 @@ class GetSchedulesRequest extends FormRequest
      */
     public function rules(): array
     {
-        $minYear = now()->year;
-        $maxYear = $minYear + 5;
-
         return [
 
-            'month' => [
+            'user_id' => [
                 'nullable',
                 'integer',
-                'between:1,12',
+                'exists:users,id',
             ],
-            'year' => [
+
+            'date' => [
                 'nullable',
-                'integer',
-                "between:{$minYear},{$maxYear}",
+                'date_format:Y-m-d',
+            ],
+
+            'from' => [
+                'nullable',
+                'date_format:Y-m-d',
+            ],
+            'to' => [
+                'nullable',
+                'date_format:Y-m-d',
+                'after_or_equal:from',
+
             ],
             'per_page' => [
                 'integer',
@@ -42,12 +50,6 @@ class GetSchedulesRequest extends FormRequest
                 'min:1',
                 'max:150',
             ],
-            'search' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-
         ];
     }
 }

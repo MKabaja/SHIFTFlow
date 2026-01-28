@@ -14,19 +14,23 @@ class AvailabilityController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        $requestedUserId = $request->query('user_id');
 
-        if ($request->query('user_id') && $user->role === 'employee') {
+        if ($requestedUserId && $user->role === 'employee') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $availabilities = Availability::query()
 
-            ->when($user->role === 'employee', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->when($request->query('user_id') && in_array($user->role, ['admin', 'manager']), function ($query, $userId) {
-                return $query->where('user_id', $userId);
-            })
+            ->when($user
+                ->role === 'employee', fn ($q) => $q
+                ->where('user_id', $user->id))
+
+            ->when($requestedUserId
+                && in_array($user->role, ['admin', 'manager']),
+                fn ($q) => $q->where('user_id', $requestedUserId)
+
+            )
             ->get();
 
         return AvailabilityResource::collection($availabilities);
