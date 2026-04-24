@@ -15,17 +15,23 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')
     ->controller(AuthController::class)
     ->group(function () {
-        Route::post('/login', 'login');
+        Route::middleware('throttle:5,1') // Limit to 5 attempts per minute
+            ->group(function () {
+                
+            Route::post('/login', 'login');
+            Route::post('/login-pin', 'loginPin');
+        });
 
-        Route::post('/login-pin', 'loginPin');
+        
 
         Route::middleware('auth:api')
             ->group(function () {
+                
                 Route::get('/me', 'me');
-
                 Route::post('/logout', 'logout');
             });
-    });
+        });
+
 
 // Shift Crud
 
@@ -39,7 +45,7 @@ Route::middleware(['auth:api', 'role:admin,manager'])
         Route::delete('/{shift}', 'destroy');
         Route::get('/{shift}', 'show');
     });
-Route::middleware(['auth:api', 'role:admin,manager,employee'])
+Route::middleware(['auth:api', 'role:admin,manager,employee']) // Shifts — employee read-only (index only, filtered by role in controller)
     ->prefix('shifts')
     ->controller(ShiftController::class)
     ->group(function () {
