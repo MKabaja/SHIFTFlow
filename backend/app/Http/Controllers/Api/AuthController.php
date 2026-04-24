@@ -25,6 +25,13 @@ class AuthController extends Controller
                     'message' => 'Invalid password or login!',
                 ], 401);
         }
+
+        if (! $user->is_active) {
+            return response()->json(
+                [
+                    'message' => 'Account deactivated.',
+                ], 403);
+        }
         $token = JWTAuth::fromUser($user);
 
         return response()->json([
@@ -44,7 +51,7 @@ class AuthController extends Controller
     public function loginPin(LoginPinRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        // dd($validated);
+        
 
         $user = User::where('login', $validated['login'])->first();
 
@@ -53,6 +60,13 @@ class AuthController extends Controller
                 [
                     'message' => 'Invalid pin or login',
                 ], 401);
+        }
+
+        if (! $user->is_active) {
+            return response()->json(
+                [
+                    'message' => 'Account deactivated.',
+                ], 403);
         }
 
         $token = JWTAuth::fromUser($user);
