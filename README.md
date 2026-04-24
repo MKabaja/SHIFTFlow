@@ -8,11 +8,11 @@
 
 Budujemy REST API w Laravel + Breeze dla systemu obsługi grafików turystycznych w kopalni Soli Wieliczka. System obsługuje:
 
--   3 role: pracownik, kierownik, admin
--   20+ stanowisk w kopalni (B1-B8, PW, WR, WS, TGT, itp.)
--   Wariantację godzin pracy, dyspozycje, urlopy
--   Raporty godzin i finansowe
--   Import pracowników z CSV/Excel
+- 3 role: pracownik, kierownik, admin
+- 20+ stanowisk w kopalni (B1-B8, PW, WR, WS, TGT, itp.)
+- Wariantację godzin pracy, dyspozycje, urlopy
+- Raporty godzin i finansowe
+- Import pracowników z CSV/Excel
 
 **Zakres MVP:** Migracje, modele, CRUD API, auth z JWT, walidacje biznesowe, dokumentacja.
 
@@ -20,12 +20,12 @@ Budujemy REST API w Laravel + Breeze dla systemu obsługi grafików turystycznyc
 
 ## 2. STACK TECHNICZNY
 
--   **Framework:** Laravel 11 + Breeze (auth/logowanie)
--   **Auth:** JWT via `tymon/jwt-auth`
--   **Database:** MySQL 8.0 (Docker)
--   **API:** REST (JSON responses)
--   **Testing:** Laravel Feature tests
--   **Deployment:** Docker Compose
+- **Framework:** Laravel 11 + Breeze (auth/logowanie)
+- **Auth:** JWT via `tymon/jwt-auth`
+- **Database:** MySQL 8.0 (Docker)
+- **API:** REST (JSON responses)
+- **Testing:** Laravel Feature tests
+- **Deployment:** Docker Compose
 
 ---
 
@@ -110,47 +110,47 @@ Database (Users, Schedules, Availabilities, Positions)
 
 ### Auth
 
--   `POST /api/auth/login` — kierownik/admin (email + password)
--   `POST /api/auth/login-pin` — pracownik (id + pin)
--   `POST /api/auth/logout` — wylogowanie
--   `GET /api/auth/me` — dane zalogowanego użytkownika
+- `POST /api/auth/login` — kierownik/admin (email + password)
+- `POST /api/auth/login-pin` — pracownik (id + pin)
+- `POST /api/auth/logout` — wylogowanie
+- `GET /api/auth/me` — dane zalogowanego użytkownika
 
 ### Positions (Admin/Manager)
 
--   `GET /api/positions` — lista wszystkich stanowisk
--   `POST /api/positions` — dodawanie stanowiska (admin)
--   `GET /api/positions/{id}` — szczegóły stanowiska
--   `PUT /api/positions/{id}` — edycja stanowiska (admin)
--   `DELETE /api/positions/{id}` — usunięcie stanowiska (admin)
+- `GET /api/positions` — lista wszystkich stanowisk
+- `POST /api/positions` — dodawanie stanowiska (admin)
+- `GET /api/positions/{id}` — szczegóły stanowiska
+- `PUT /api/positions/{id}` — edycja stanowiska (admin)
+- `DELETE /api/positions/{id}` — usunięcie stanowiska (admin)
 
 ### Employees (Admin/Manager)
 
--   `GET /api/employees` — lista pracowników (z pozycjami)
--   `POST /api/employees` — dodawanie pracownika (admin)
--   `GET /api/employees/{id}` — szczegóły pracownika
--   `PUT /api/employees/{id}` — edycja (admin)
--   `DELETE /api/employees/{id}` — usunięcie (admin)
--   `POST /api/employees/import` — import z CSV/Excel (admin)
+- `GET /api/employees` — lista pracowników (z pozycjami)
+- `POST /api/employees` — dodawanie pracownika (admin)
+- `GET /api/employees/{id}` — szczegóły pracownika
+- `PUT /api/employees/{id}` — edycja (admin)
+- `DELETE /api/employees/{id}` — usunięcie (admin)
+- `POST /api/employees/import` — import z CSV/Excel (admin)
 
 ### Schedules
 
--   `GET /api/schedules?date=2025-11-24&user_id=1` — lista grafików
--   `POST /api/schedules` — dodawanie grafiku (manager/admin)
--   `PUT /api/schedules/{id}` — edycja grafiku (manager/admin, drag&drop)
--   `DELETE /api/schedules/{id}` — usunięcie grafiku
--   `GET /api/schedules/{id}` — szczegóły grafiku
+- `GET /api/schedules?date=2025-11-24&user_id=1` — lista grafików
+- `POST /api/schedules` — dodawanie grafiku (manager/admin)
+- `PUT /api/schedules/{id}` — edycja grafiku (manager/admin, drag&drop)
+- `DELETE /api/schedules/{id}` — usunięcie grafiku
+- `GET /api/schedules/{id}` — szczegóły grafiku
 
 ### Availabilities (Pracownik)
 
--   `GET /api/availabilities?user_id=1` — dyspozycje pracownika
--   `POST /api/availabilities` — dodawanie dyspozycji (pracownik na siebie)
--   `DELETE /api/availabilities/{id}` — usunięcie dyspozycji
+- `GET /api/availabilities?user_id=1` — dyspozycje pracownika
+- `POST /api/availabilities` — dodawanie dyspozycji (pracownik na siebie)
+- `DELETE /api/availabilities/{id}` — usunięcie dyspozycji
 
 ### Reports (Manager/Admin)
 
--   `GET /api/reports/hours/{user_id}?month=11&year=2025` — raport godzin
--   `GET /api/reports/payroll?month=11&year=2025` — raport płacowy
--   `GET /api/reports/coverage?date=2025-11-24` — obsada na dzień
+- `GET /api/reports/hours/{user_id}?month=11&year=2025` — raport godzin
+- `GET /api/reports/payroll?month=11&year=2025` — raport płacowy
+- `GET /api/reports/coverage?date=2025-11-24` — obsada na dzień
 
 ---
 
@@ -161,13 +161,11 @@ Database (Users, Schedules, Availabilities, Positions)
 Przed zapisaniem Schedule musisz sprawdzić:
 
 1. **Uprawnienia do stanowiska**
-
     - Input: user_id, position_id
     - Logic: Sprawdź czy position_id ∈ user.positions (array position_ids)
     - Return: True/False lub throw ValidationException
 
 2. **Dostępność pracownika**
-
     - Input: user_id, date
     - Logic:
         - Query: SELECT \* FROM availabilities WHERE user_id=? AND date=?
@@ -176,13 +174,11 @@ Przed zapisaniem Schedule musisz sprawdzić:
     - Return: True (dostępny) / False (brak dostępności)
 
 3. **Konflikt czasowy**
-
     - Input: user_id, date, shift_start, shift_end
     - Logic: Query Schedule gdzie user_id ma już grafik na tym dniu pomiędzy shift_start a shift_end
     - Return: True (konflikt) / False (brak konfliktu)
 
 4. **Minimalna przerwa między zmianami**
-
     - Input: user_id, date, shift_start, min_break_hours
     - Logic: Pobierz ostatni Schedule tego user_id przed date. Oblicz różnicę czasu między shift_end poprzedniego a shift_start nowego. Sprawdź czy >= min_break_hours
     - Return: True (OK) / False (za krótka przerwa) + error message z liczą godzin
@@ -275,26 +271,26 @@ laravel-schedule-app/
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/installation
--   https://laravel.com/docs/11/starter-kits#breeze
+- https://laravel.com/docs/11/installation
+- https://laravel.com/docs/11/starter-kits#breeze
 
--   [x] Utwórz nowy projekt Laravel: `composer create-project laravel/laravel schedule-app`
--   [x] Zainstaluj Breeze: `composer require laravel/breeze && php artisan breeze:install`
--   [x] Sprawdź czy logowanie działa: `php artisan serve` → localhost:8000/login
+- [x] Utwórz nowy projekt Laravel: `composer create-project laravel/laravel schedule-app`
+- [x] Zainstaluj Breeze: `composer require laravel/breeze && php artisan breeze:install`
+- [x] Sprawdź czy logowanie działa: `php artisan serve` → localhost:8000/login
 
 #### Zadanie 1.2: Docker Setup
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/installation#docker-installation
+- https://laravel.com/docs/11/installation#docker-installation
 
--   [x] Utwórz `Dockerfile` (PHP 8.2 FPM z ext: pdo_mysql, zip)
--   [x] Utwórz `docker-compose.yml` z usługami:
-    -   **app**: Laravel container na porcie 8000
-    -   **db**: MySQL 8.0 na porcie 3306 (baza: wieliczka_db)
-    -   **phpmyadmin**: PhpMyAdmin na porcie 8080 (optional)
--   [x] `docker-compose up -d` → aplikacja dostępna na localhost:8000
--   [x] Sprawdź że baza połączy się: `php artisan migrate`
+- [x] Utwórz `Dockerfile` (PHP 8.2 FPM z ext: pdo_mysql, zip)
+- [x] Utwórz `docker-compose.yml` z usługami:
+    - **app**: Laravel container na porcie 8000
+    - **db**: MySQL 8.0 na porcie 3306 (baza: wieliczka_db)
+    - **phpmyadmin**: PhpMyAdmin na porcie 8080 (optional)
+- [x] `docker-compose up -d` → aplikacja dostępna na localhost:8000
+- [x] Sprawdź że baza połączy się: `php artisan migrate`
 
 **Commit:** `:tada: feat(setup): Laravel Breeze initial setup with Docker`
 
@@ -306,27 +302,27 @@ laravel-schedule-app/
 
 **Dokumentacja:**
 
--   https://github.com/tymondesigns/jwt-auth
--   https://jwt-auth.readthedocs.io/en/develop/
+- https://github.com/tymondesigns/jwt-auth
+- https://jwt-auth.readthedocs.io/en/develop/
 
--   [x] `composer require tymon/jwt-auth`
--   [x] `php artisan vendor:publish --provider="Tymon\\JWTAuth\\Providers\\JWTAuthServiceProvider"`
--   [x] `php artisan jwt:secret` (generator klucza)
--   [x] W `config/auth.php` dodaj guard 'api' z JWT driver:
-    -   Typ: `jwt`
-    -   Provider: `users`
-    -   Ścieżka do klucza z .env
+- [x] `composer require tymon/jwt-auth`
+- [x] `php artisan vendor:publish --provider="Tymon\\JWTAuth\\Providers\\JWTAuthServiceProvider"`
+- [x] `php artisan jwt:secret` (generator klucza)
+- [x] W `config/auth.php` dodaj guard 'api' z JWT driver:
+    - Typ: `jwt`
+    - Provider: `users`
+    - Ścieżka do klucza z .env
 
 #### Zadanie 3.2: Testuj JWT endpoint
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/authentication#guards
+- https://laravel.com/docs/11/authentication#guards
 
--   [x] Utwórz testowy route: `GET /api/auth/me` (chroniony middleware `auth:api`)
--   [x] Route powinien zwrócić zalogowanego użytkownika lub 401 Unauthorized
--   [x] Test w Postmanie bez tokenu → 401
--   [x] Przygotuj się do login endpointu (kolejna sesja)
+- [x] Utwórz testowy route: `GET /api/auth/me` (chroniony middleware `auth:api`)
+- [x] Route powinien zwrócić zalogowanego użytkownika lub 401 Unauthorized
+- [x] Test w Postmanie bez tokenu → 401
+- [x] Przygotuj się do login endpointu (kolejna sesja)
 
 **Commit:** `:lock: feat(auth): JWT authentication setup`
 
@@ -338,21 +334,21 @@ laravel-schedule-app/
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/migrations
--   https://laravel.com/docs/11/migrations#columns
+- https://laravel.com/docs/11/migrations
+- https://laravel.com/docs/11/migrations#columns
 
 **Plik:** `database/migrations/XXXX_extend_users_table.php`
 
 Funkcja `up()` powinna:
 
--   Dodać kolumnę `pin_hashed` (string 60, nullable) — hashed PIN dla pracownika
--   Dodać kolumnę `is_active` (boolean, default: true) — czy pracownik aktywny
--   Dodać kolumnę `role` (enum: employee, manager, admin, default: employee)
--   Dodać kolumnę `positions` (json, nullable) — lista position_ids (FK → positions.id)
--   Dodać kolumnę `hourly_rate` (decimal 8,2, nullable)
--   Dodać kolumnę `max_hours_per_month` (unsignedSmallInteger, nullable)
--   Dodać kolumnę `min_break_hours` (unsignedSmallInteger, default: 11)
--   Dodać kolumnę `contract_type` (enum: uop, zlecenie, default: uop)
+- Dodać kolumnę `pin_hashed` (string 60, nullable) — hashed PIN dla pracownika
+- Dodać kolumnę `is_active` (boolean, default: true) — czy pracownik aktywny
+- Dodać kolumnę `role` (enum: employee, manager, admin, default: employee)
+- Dodać kolumnę `positions` (json, nullable) — lista position_ids (FK → positions.id)
+- Dodać kolumnę `hourly_rate` (decimal 8,2, nullable)
+- Dodać kolumnę `max_hours_per_month` (unsignedSmallInteger, nullable)
+- Dodać kolumnę `min_break_hours` (unsignedSmallInteger, default: 11)
+- Dodać kolumnę `contract_type` (enum: uop, zlecenie, default: uop)
 
 Funkcja `down()` powinna usunąć wszystkie dodane kolumny.
 
@@ -360,32 +356,32 @@ Funkcja `down()` powinna usunąć wszystkie dodane kolumny.
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#mass-assignment
--   https://laravel.com/docs/11/eloquent#attribute-casting
--   https://laravel.com/docs/11/eloquent#relationships
+- https://laravel.com/docs/11/eloquent#mass-assignment
+- https://laravel.com/docs/11/eloquent#attribute-casting
+- https://laravel.com/docs/11/eloquent#relationships
 
 **Plik:** `app/Models/User.php`
 
 W modelu dodaj:
 
--   `$fillable` array — wszystkie nowe kolumny (name, email, password, pin_hashed, is_active, role, positions, hourly_rate, max_hours_per_month, min_break_hours, contract_type)
--   `$hidden` — dodaj 'pin_hashed' (nigdy nie zwracaj PIN w API!)
--   `$casts` — rzutuj 'positions' na 'array', 'is_active' na 'boolean', 'hourly_rate' na 'decimal:2'
--   Relacje:
-    -   `schedules()` — hasMany Schedule
-    -   `availabilities()` — hasMany Availability
--   JWT Methods (jeśli używasz Tymon/JWT-Auth):
-    -   `getJWTIdentifier()` — zwróć getKey()
-    -   `getJWTCustomClaims()` — zwróć ['role' => $this->role, 'is_active' => $this->is_active]
+- `$fillable` array — wszystkie nowe kolumny (name, email, password, pin_hashed, is_active, role, positions, hourly_rate, max_hours_per_month, min_break_hours, contract_type)
+- `$hidden` — dodaj 'pin_hashed' (nigdy nie zwracaj PIN w API!)
+- `$casts` — rzutuj 'positions' na 'array', 'is_active' na 'boolean', 'hourly_rate' na 'decimal:2'
+- Relacje:
+    - `schedules()` — hasMany Schedule
+    - `availabilities()` — hasMany Availability
+- JWT Methods (jeśli używasz Tymon/JWT-Auth):
+    - `getJWTIdentifier()` — zwróć getKey()
+    - `getJWTCustomClaims()` — zwróć ['role' => $this->role, 'is_active' => $this->is_active]
 
 #### Zadanie 5.3: Uruchom migrację
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/migrations#running-migrations
+- https://laravel.com/docs/11/migrations#running-migrations
 
--   [x] `php artisan migrate`
--   [x] Sprawdź w PhpMyAdmin że kolumny dodane w users
+- [x] `php artisan migrate`
+- [x] Sprawdź w PhpMyAdmin że kolumny dodane w users
 
 **Commit:** `:wrench: feat(models): Extend User model with role, positions, pin_hashed, contract_type`
 
@@ -397,57 +393,57 @@ W modelu dodaj:
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#generating-model-classes
--   https://laravel.com/docs/11/migrations#creating-tables
+- https://laravel.com/docs/11/eloquent#generating-model-classes
+- https://laravel.com/docs/11/migrations#creating-tables
 
 **Polecenie:** `php artisan make:model Schedule -m`
 
 Migracja `create_schedules_table` powinna:
 
--   `id` (PK)
--   `user_id` (FK → users, on delete cascade)
--   `position_id` (FK → positions, on delete cascade) — zamiast enum position
--   `date` (date)
--   `shift_start` (time)
--   `shift_end` (time)
--   `hours_worked` (unsignedSmallInteger)
--   `status` (enum: scheduled, completed, cancelled, vacation, unavailable)
--   `hourly_rate` (decimal 8,2, nullable)
--   `notes` (text, nullable)
--   `timestamps`
--   Indeksy: na user_id, date, (user_id, date)
+- `id` (PK)
+- `user_id` (FK → users, on delete cascade)
+- `position_id` (FK → positions, on delete cascade) — zamiast enum position
+- `date` (date)
+- `shift_start` (time)
+- `shift_end` (time)
+- `hours_worked` (unsignedSmallInteger)
+- `status` (enum: scheduled, completed, cancelled, vacation, unavailable)
+- `hourly_rate` (decimal 8,2, nullable)
+- `notes` (text, nullable)
+- `timestamps`
+- Indeksy: na user_id, date, (user_id, date)
 
 Model `app/Models/Schedule.php`:
 
--   Relacja: `user()` — belongsTo User
--   Relacja: `position()` — belongsTo Position (NEW - 28.11.2025)
--   `$fillable` — wszystkie kolumny
--   `$casts` — rzutuj date i times na Carbon
+- Relacja: `user()` — belongsTo User
+- Relacja: `position()` — belongsTo Position (NEW - 28.11.2025)
+- `$fillable` — wszystkie kolumny
+- `$casts` — rzutuj date i times na Carbon
 
 #### Zadanie 7.2: Utwórz Availability model i migrację
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#generating-model-classes
+- https://laravel.com/docs/11/eloquent#generating-model-classes
 
 **Polecenie:** `php artisan make:model Availability -m`
 
 Migracja `create_availabilities_table` powinna:
 
--   `id` (PK)
--   `user_id` (FK → users, on delete cascade)
--   `date` (date)
--   `is_available` (boolean, default: true) — TRUE = chce pracować, FALSE = nie chce (dyspozycja/urlop)
--   `submission_date` (date, nullable) — kiedy pracownik złożył dyspozycję
--   `notes` (text, nullable) — powód (urlop, choroba, itp.)
--   `timestamps`
--   Indeks: unique na (user_id, date) — jeden rekord per dzień per pracownik
+- `id` (PK)
+- `user_id` (FK → users, on delete cascade)
+- `date` (date)
+- `is_available` (boolean, default: true) — TRUE = chce pracować, FALSE = nie chce (dyspozycja/urlop)
+- `submission_date` (date, nullable) — kiedy pracownik złożył dyspozycję
+- `notes` (text, nullable) — powód (urlop, choroba, itp.)
+- `timestamps`
+- Indeks: unique na (user_id, date) — jeden rekord per dzień per pracownik
 
 Model `app/Models/Availability.php`:
 
--   Relacja: `user()` — belongsTo User
--   `$fillable` — user_id, date, is_available, notes (submission_date BEZ $fillable!)
--   `$casts` — rzutuj date i submission_date na Carbon, is_available na boolean
+- Relacja: `user()` — belongsTo User
+- `$fillable` — user_id, date, is_available, notes (submission_date BEZ $fillable!)
+- `$casts` — rzutuj date i submission_date na Carbon, is_available na boolean
 
 #### Zadanie 7.2.5: Position Model i migracja (NEW - 28.11.2025)
 
@@ -455,25 +451,25 @@ Model `app/Models/Availability.php`:
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#generating-model-classes
--   https://laravel.com/docs/11/migrations#creating-tables
+- https://laravel.com/docs/11/eloquent#generating-model-classes
+- https://laravel.com/docs/11/migrations#creating-tables
 
 **Polecenie:** `php artisan make:model Position -m`
 
 Migracja `create_positions_table` powinna:
 
--   `id` (PK)
--   `name` (string, unique) — np. "B1", "B2", "PW", "WR", "WS", "TGT"
--   `description` (text, nullable) — np. "Bileter jeden"
--   `created_by` (FK → users, nullable, on delete set null)
--   `timestamps`
+- `id` (PK)
+- `name` (string, unique) — np. "B1", "B2", "PW", "WR", "WS", "TGT"
+- `description` (text, nullable) — np. "Bileter jeden"
+- `created_by` (FK → users, nullable, on delete set null)
+- `timestamps`
 
 Model `app/Models/Position.php`:
 
--   Relacja: `creator()` — belongsTo User, 'created_by'
--   Relacja: `schedules()` — hasMany Schedule (NEW)
--   `$fillable` — ['name', 'description', 'created_by']
--   `$casts` — brak specjalnych rzutów
+- Relacja: `creator()` — belongsTo User, 'created_by'
+- Relacja: `schedules()` — hasMany Schedule (NEW)
+- `$fillable` — ['name', 'description', 'created_by']
+- `$casts` — brak specjalnych rzutów
 
 **Migracja pozycji w kolejności:**
 
@@ -483,16 +479,16 @@ Model `app/Models/Position.php`:
 
 **Dlaczego ta zmiana:**
 
--   ✅ **Dynamiczność** – dodawanie/usuwanie stanowisk bez kodu
--   ✅ **Skalowalność** – łatwe rozbudowywanie + archiwizowanie
--   ✅ **Bezpieczeństwo** – walidacja przez FK, brak "orphan" rekordów
--   ✅ **Audyt** – wiemy kto dodał daną pozycję (created_by)
--   ✅ **Best practice** – relacyjne rozdzielenie odpowiedzialności
+- ✅ **Dynamiczność** – dodawanie/usuwanie stanowisk bez kodu
+- ✅ **Skalowalność** – łatwe rozbudowywanie + archiwizowanie
+- ✅ **Bezpieczeństwo** – walidacja przez FK, brak "orphan" rekordów
+- ✅ **Audyt** – wiemy kto dodał daną pozycję (created_by)
+- ✅ **Best practice** – relacyjne rozdzielenie odpowiedzialności
 
 #### Zadanie 7.3: Uruchom migracje
 
--   [x] `php artisan migrate`
--   [x] Sprawdź strukturę tabel w PhpMyAdmin
+- [x] `php artisan migrate`
+- [x] Sprawdź strukturę tabel w PhpMyAdmin
 
 **Commit:** `:database: feat(models): Schedule, Availability & Position models (position_id FK)`
 
@@ -504,74 +500,74 @@ Model `app/Models/Position.php`:
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/controllers#generating-controllers
--   https://laravel.com/docs/11/hashing#verifying-that-a-password-matches-a-hash
--   https://jwt-auth.readthedocs.io/en/develop/authentication/
+- https://laravel.com/docs/11/controllers#generating-controllers
+- https://laravel.com/docs/11/hashing#verifying-that-a-password-matches-a-hash
+- https://jwt-auth.readthedocs.io/en/develop/authentication/
 
 **Plik:** `app/Http/Controllers/Api/AuthController.php`
 
 Metoda `login()`:
 
--   Accept: `POST /api/auth/login` → JSON body: {email, password}
--   Validuj input (email required, password required)
--   Sprawdź credentials: znajdź User po email i porównaj hasło
--   Jeśli OK: wygeneruj JWT token (używaj auth()->attempt() + auth()->tokenById())
--   Return: 200 JSON: {token, user: {id, name, role}}
--   Jeśli błąd: 401 {error: "Invalid credentials"}
+- Accept: `POST /api/auth/login` → JSON body: {email, password}
+- Validuj input (email required, password required)
+- Sprawdź credentials: znajdź User po email i porównaj hasło
+- Jeśli OK: wygeneruj JWT token (używaj auth()->attempt() + auth()->tokenById())
+- Return: 200 JSON: {token, user: {id, name, role}}
+- Jeśli błąd: 401 {error: "Invalid credentials"}
 
 #### Zadanie 9.2: AuthController - Login PIN (dla pracownika)
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/rate-limiting#defining-rate-limiters
--   https://laravel.com/docs/11/hashing
+- https://laravel.com/docs/11/rate-limiting#defining-rate-limiters
+- https://laravel.com/docs/11/hashing
 
 **Plik:** `app/Http/Controllers/Api/AuthController.php`
 
 Metoda `loginPin()`:
 
--   Accept: `POST /api/auth/login-pin` → JSON body: {employee_id, pin}
--   Validuj input (employee_id required, pin required)
--   Sprawdź czy user istnieje i role === 'employee'
--   Porównaj PIN (hashed): Hash::check($pin, $user->pin_hashed)
--   Rate limiting: max 5 prób / 15 minut (użyj RateLimiter)
--   Jeśli OK: wygeneruj JWT token
--   Return: 200 JSON: {token, user: {id, name, role}}
--   Jeśli błąd: 401 {error: "Invalid PIN"}
+- Accept: `POST /api/auth/login-pin` → JSON body: {employee_id, pin}
+- Validuj input (employee_id required, pin required)
+- Sprawdź czy user istnieje i role === 'employee'
+- Porównaj PIN (hashed): Hash::check($pin, $user->pin_hashed)
+- Rate limiting: max 5 prób / 15 minut (użyj RateLimiter)
+- Jeśli OK: wygeneruj JWT token
+- Return: 200 JSON: {token, user: {id, name, role}}
+- Jeśli błąd: 401 {error: "Invalid PIN"}
 
 #### Zadanie 9.3: AuthController - Current User
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/authentication#retrieving-the-authenticated-user
+- https://laravel.com/docs/11/authentication#retrieving-the-authenticated-user
 
 **Plik:** `app/Http/Controllers/Api/AuthController.php`
 
 Metoda `me()`:
 
--   Accept: `GET /api/auth/me` (protected: middleware auth:api)
--   Return: 200 JSON zalogowanego użytkownika (auth()->user())
--   Nie zwracaj PIN!
+- Accept: `GET /api/auth/me` (protected: middleware auth:api)
+- Return: 200 JSON zalogowanego użytkownika (auth()->user())
+- Nie zwracaj PIN!
 
 #### Zadanie 9.4: Routes
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/routing#route-groups
+- https://laravel.com/docs/11/routing#route-groups
 
 **Plik:** `routes/api.php`
 
 Utwórz routes:
 
--   `POST /api/auth/login` → AuthController@login (public)
--   `POST /api/auth/login-pin` → AuthController@loginPin (public)
--   `GET /api/auth/me` → AuthController@me (protected: middleware auth:api)
+- `POST /api/auth/login` → AuthController@login (public)
+- `POST /api/auth/login-pin` → AuthController@loginPin (public)
+- `GET /api/auth/me` → AuthController@me (protected: middleware auth:api)
 
 #### Zadanie 9.5: Testuj w Postmanie
 
--   [x] POST /api/auth/login z email admina + password (z Breeze seedera) → powinna zwrócić token
--   [x] Copy token, ustawie header: `Authorization: Bearer {token}`
--   [x] GET /api/auth/me → powinna zwrócić dane użytkownika
+- [x] POST /api/auth/login z email admina + password (z Breeze seedera) → powinna zwrócić token
+- [x] Copy token, ustawie header: `Authorization: Bearer {token}`
+- [x] GET /api/auth/me → powinna zwrócić dane użytkownika
 
 **Commit:** `:lock: feat(auth): Login endpoints (email & PIN)`
 
@@ -583,7 +579,7 @@ Utwórz routes:
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/middleware#defining-middleware
+- https://laravel.com/docs/11/middleware#defining-middleware
 
 **Plik:** `app/Http/Middleware/RoleMiddleware.php`
 
@@ -591,18 +587,18 @@ Polecenie: `php artisan make:middleware RoleMiddleware`
 
 Middleware `RoleMiddleware`:
 
--   Accept parametry: `...roles` (np. 'manager', 'admin')
--   Logic:
-    -   Sprawdź czy user zalogowany (auth()->check())
-    -   Sprawdź czy role zalogowanego === jeden z parametrów (in_array(auth()->user()->role, $roles))
-    -   Jeśli OK: pass to next request
-    -   Jeśli błąd: return 403 Forbidden {error: "Unauthorized role"}
+- Accept parametry: `...roles` (np. 'manager', 'admin')
+- Logic:
+    - Sprawdź czy user zalogowany (auth()->check())
+    - Sprawdź czy role zalogowanego === jeden z parametrów (in_array(auth()->user()->role, $roles))
+    - Jeśli OK: pass to next request
+    - Jeśli błąd: return 403 Forbidden {error: "Unauthorized role"}
 
 #### Zadanie 11.2: Zarejestruj middleware
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/middleware#registering-middleware
+- https://laravel.com/docs/11/middleware#registering-middleware
 
 **Plik:** `app/Http/Kernel.php`
 
@@ -614,9 +610,9 @@ W `routeMiddleware` dodaj:
 
 #### Zadanie 11.3: Testuj middleware
 
--   [x] W `routes/api.php` dodaj testowy route: `Route::get('/admin-only', [...])->middleware('auth:api', 'role:admin')`
--   [x] Zaloguj się jako employee → 403
--   [x] Zaloguj się jako admin → 200
+- [x] W `routes/api.php` dodaj testowy route: `Route::get('/admin-only', [...])->middleware('auth:api', 'role:admin')`
+- [x] Zaloguj się jako employee → 403
+- [x] Zaloguj się jako admin → 200
 
 **Commit:** `:shield: feat(middleware): Role-based access control middleware`
 
@@ -628,8 +624,8 @@ W `routeMiddleware` dodaj:
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/controllers#resource-controllers
--   https://laravel.com/docs/11/eloquent#retrieving-results
+- https://laravel.com/docs/11/controllers#resource-controllers
+- https://laravel.com/docs/11/eloquent#retrieving-results
 
 **Plik:** `app/Http/Controllers/Api/ScheduleController.php`
 
@@ -637,75 +633,75 @@ Polecenie: `php artisan make:controller Api/ScheduleController --api`
 
 Metoda `index()`:
 
--   Accept: `GET /api/schedules?date=2025-11-24&user_id=1` (optional query params)
--   Logic:
-    -   Jeśli role === 'employee': pokaż tylko grafiki zalogowanego użytkownika
-    -   Jeśli role === 'manager' lub 'admin': pokaż wszystkie, ale jeśli user_id w query → filtruj po user_id
-    -   Jeśli date w query: filtruj po date
-    -   Eager load user i position (with(['user', 'position']))
-    -   Sortuj po date DESC
--   Return: 200 JSON array Schedule'ów z user i position details
+- Accept: `GET /api/schedules?date=2025-11-24&user_id=1` (optional query params)
+- Logic:
+    - Jeśli role === 'employee': pokaż tylko grafiki zalogowanego użytkownika
+    - Jeśli role === 'manager' lub 'admin': pokaż wszystkie, ale jeśli user_id w query → filtruj po user_id
+    - Jeśli date w query: filtruj po date
+    - Eager load user i position (with(['user', 'position']))
+    - Sortuj po date DESC
+- Return: 200 JSON array Schedule'ów z user i position details
 
 #### Zadanie 13.2: ScheduleController - Store
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#inserting-models
--   https://laravel.com/docs/11/validation
+- https://laravel.com/docs/11/eloquent#inserting-models
+- https://laravel.com/docs/11/validation
 
 **Plik:** `app/Http/Controllers/Api/ScheduleController.php`
 
 Metoda `store()`:
 
--   Accept: `POST /api/schedules` → JSON body: {user_id, date, position_id, shift_start, shift_end}
--   Validuj input (Form Request: StoreScheduleRequest)
--   Sprawdź autoryzację: tylko manager/admin mogą tworzyć dla innych
--   Oblicz hours_worked = (shift_end - shift_start) w godzinach
--   Przed save: CALL ValidationService do sprawdzenia biznesowych reguł
-    -   Pozycja w positions?
-    -   Dostępny pracownik?
-    -   Konflikt czasowy?
-    -   Przerwa między zmianami?
-    -   Limit godzin/miesiąc?
--   Jeśli validation throws exception: catch i return 422 {error: message}
--   Jeśli OK: Create Schedule i return 201 {schedule}
+- Accept: `POST /api/schedules` → JSON body: {user_id, date, position_id, shift_start, shift_end}
+- Validuj input (Form Request: StoreScheduleRequest)
+- Sprawdź autoryzację: tylko manager/admin mogą tworzyć dla innych
+- Oblicz hours_worked = (shift_end - shift_start) w godzinach
+- Przed save: CALL ValidationService do sprawdzenia biznesowych reguł
+    - Pozycja w positions?
+    - Dostępny pracownik?
+    - Konflikt czasowy?
+    - Przerwa między zmianami?
+    - Limit godzin/miesiąc?
+- Jeśli validation throws exception: catch i return 422 {error: message}
+- Jeśli OK: Create Schedule i return 201 {schedule}
 
 #### Zadanie 13.3: ScheduleController - Update
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#updates
+- https://laravel.com/docs/11/eloquent#updates
 
 **Plik:** `app/Http/Controllers/Api/ScheduleController.php`
 
 Metoda `update(Schedule $schedule, Request $request)`:
 
--   Accept: `PUT /api/schedules/{id}` → JSON body: {position_id, shift_start, shift_end, notes}
--   Autoryzacja: tylko creator/manager/admin mogą edytować
--   Validuj input (UpdateScheduleRequest)
--   Powtórz walidacje biznesowe (jak w store)
--   Update i return 200 {schedule}
+- Accept: `PUT /api/schedules/{id}` → JSON body: {position_id, shift_start, shift_end, notes}
+- Autoryzacja: tylko creator/manager/admin mogą edytować
+- Validuj input (UpdateScheduleRequest)
+- Powtórz walidacje biznesowe (jak w store)
+- Update i return 200 {schedule}
 
 #### Zadanie 13.4: ScheduleController - Delete
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#deleting-models
+- https://laravel.com/docs/11/eloquent#deleting-models
 
 **Plik:** `app/Http/Controllers/Api/ScheduleController.php`
 
 Metoda `destroy(Schedule $schedule)`:
 
--   Accept: `DELETE /api/schedules/{id}`
--   Autoryzacja: tylko manager/admin
--   Delete schedule
--   Return 200 {message: "Schedule deleted"}
+- Accept: `DELETE /api/schedules/{id}`
+- Autoryzacja: tylko manager/admin
+- Delete schedule
+- Return 200 {message: "Schedule deleted"}
 
 #### Zadanie 13.5: StoreScheduleRequest
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/validation#form-request-validation
+- https://laravel.com/docs/11/validation#form-request-validation
 
 **Plik:** `app/Http/Requests/StoreScheduleRequest.php`
 
@@ -713,19 +709,19 @@ Polecenie: `php artisan make:request StoreScheduleRequest`
 
 Form Request do validacji:
 
--   `authorize()`: sprawdź czy user jest manager lub admin
--   `rules()`:
-    -   user_id: required, exists:users,id
-    -   position_id: required, exists:positions,id
-    -   date: required, date, date_format:Y-m-d
-    -   shift_start: required, date_format:H:i
-    -   shift_end: required, date_format:H:i, after:shift_start
+- `authorize()`: sprawdź czy user jest manager lub admin
+- `rules()`:
+    - user_id: required, exists:users,id
+    - position_id: required, exists:positions,id
+    - date: required, date, date_format:Y-m-d
+    - shift_start: required, date_format:H:i
+    - shift_end: required, date_format:H:i, after:shift_start
 
 #### Zadanie 13.6: Routes
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/routing#resource-controllers
+- https://laravel.com/docs/11/routing#resource-controllers
 
 **Plik:** `routes/api.php`
 
@@ -745,8 +741,8 @@ Route::middleware(['auth:api', 'role:manager,admin'])->group(function () {
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#retrieving-single-models
--   https://laravel.com/docs/11/eloquent#counting-models
+- https://laravel.com/docs/11/eloquent#retrieving-single-models
+- https://laravel.com/docs/11/eloquent#counting-models
 
 **Plik:** `app/Services/ValidationService.php`
 
@@ -756,24 +752,24 @@ Klasa z metodami do walidacji (patrz sekcja 6. WALIDACJE BIZNESOWE):
 
 Metoda `validateScheduleCreation($userId, $date, $shiftStart, $shiftEnd, $positionId)`:
 
--   Sprawdzenie 1: Uprawnienia do stanowiska
-    -   Pobierz user.positions (array position_ids)
-    -   Sprawdź czy position_id ∈ positions
-    -   Throw: "User does not have permission for position: {positionId}"
--   Sprawdzenie 2: Dostępność
-    -   Query Availability gdzie user_id i date
-    -   Throw: "User is unavailable on {date}"
--   Sprawdzenie 3: Konflikt czasowy
-    -   Query Schedule gdzie user_id, date, i time overlap
-    -   Throw: "Time conflict: User has schedule during this time"
--   Sprawdzenie 4: Minimum break hours
-    -   Query Schedule user_id, order by date DESC
-    -   Oblicz break = (shift_start - previous_shift_end)
-    -   Throw: "Insufficient break: required {min}h, got {actual}h"
--   Sprawdzenie 5: Max hours per month
-    -   Query sum(hours_worked) dla user_id w current month
-    -   Oblicz new_hours = (shift_end - shift_start)
-    -   Throw: "Max hours exceeded: {total}h > {max}h"
+- Sprawdzenie 1: Uprawnienia do stanowiska
+    - Pobierz user.positions (array position_ids)
+    - Sprawdź czy position_id ∈ positions
+    - Throw: "User does not have permission for position: {positionId}"
+- Sprawdzenie 2: Dostępność
+    - Query Availability gdzie user_id i date
+    - Throw: "User is unavailable on {date}"
+- Sprawdzenie 3: Konflikt czasowy
+    - Query Schedule gdzie user_id, date, i time overlap
+    - Throw: "Time conflict: User has schedule during this time"
+- Sprawdzenie 4: Minimum break hours
+    - Query Schedule user_id, order by date DESC
+    - Oblicz break = (shift_start - previous_shift_end)
+    - Throw: "Insufficient break: required {min}h, got {actual}h"
+- Sprawdzenie 5: Max hours per month
+    - Query sum(hours_worked) dla user_id w current month
+    - Oblicz new_hours = (shift_end - shift_start)
+    - Throw: "Max hours exceeded: {total}h > {max}h"
 
 Jeśli wszystkie OK: return true
 
@@ -781,11 +777,11 @@ Jeśli wszystkie OK: return true
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/container#method-injection
+- https://laravel.com/docs/11/container#method-injection
 
--   Inject ValidationService do konstruktora controllera
--   W store() i update() wywoła `$this->validationService->validateScheduleCreation(...)`
--   Catch ValidationException i return 422
+- Inject ValidationService do konstruktora controllera
+- W store() i update() wywoła `$this->validationService->validateScheduleCreation(...)`
+- Catch ValidationException i return 422
 
 **Commit:** `:mag: feat(services): Business logic validation service`
 
@@ -797,7 +793,7 @@ Jeśli wszystkie OK: return true
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#retrieving-multiple-models
+- https://laravel.com/docs/11/eloquent#retrieving-multiple-models
 
 **Plik:** `app/Http/Controllers/Api/PositionController.php`
 
@@ -805,65 +801,65 @@ Polecenie: `php artisan make:controller Api/PositionController --api`
 
 Metoda `index()`:
 
--   Accept: `GET /api/positions` (protected: manager/admin)
--   Return: 200 JSON array wszystkich Positions z creator info (eager load creator)
--   Include: id, name, description, created_by (user.name), created_at
+- Accept: `GET /api/positions` (protected: manager/admin)
+- Return: 200 JSON array wszystkich Positions z creator info (eager load creator)
+- Include: id, name, description, created_by (user.name), created_at
 
 #### Zadanie 17.2: PositionController - Store
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#inserting-models
+- https://laravel.com/docs/11/eloquent#inserting-models
 
 **Plik:** `app/Http/Controllers/Api/PositionController.php`
 
 Metoda `store()`:
 
--   Accept: `POST /api/positions` → JSON body: {name, description}
--   Autoryzacja: tylko admin
--   Validuj input: name (required, string, unique:positions,name)
--   Set created_by = auth()->id()
--   Create Position
--   Return 201 {position}
+- Accept: `POST /api/positions` → JSON body: {name, description}
+- Autoryzacja: tylko admin
+- Validuj input: name (required, string, unique:positions,name)
+- Set created_by = auth()->id()
+- Create Position
+- Return 201 {position}
 
 #### Zadanie 17.3: PositionController - Update
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#updating-models
+- https://laravel.com/docs/11/eloquent#updating-models
 
 **Plik:** `app/Http/Controllers/Api/PositionController.php`
 
 Metoda `update(Position $position, Request $request)`:
 
--   Accept: `PUT /api/positions/{id}` → JSON body: {name, description}
--   Autoryzacja: tylko admin
--   Validuj input: name (required, string, unique:positions,name,{id})
--   Update position
--   Return 200 {position}
+- Accept: `PUT /api/positions/{id}` → JSON body: {name, description}
+- Autoryzacja: tylko admin
+- Validuj input: name (required, string, unique:positions,name,{id})
+- Update position
+- Return 200 {position}
 
 #### Zadanie 17.4: PositionController - Delete
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#deleting-models
+- https://laravel.com/docs/11/eloquent#deleting-models
 
 **Plik:** `app/Http/Controllers/Api/PositionController.php`
 
 Metoda `destroy(Position $position)`:
 
--   Accept: `DELETE /api/positions/{id}`
--   Autoryzacja: tylko admin
--   Sprawdź czy pozycja nie jest używana w Schedule (query count)
--   Jeśli używana: return 422 {error: "Cannot delete position - used in schedules"}
--   Delete position
--   Return 200 {message: "Position deleted"}
+- Accept: `DELETE /api/positions/{id}`
+- Autoryzacja: tylko admin
+- Sprawdź czy pozycja nie jest używana w Schedule (query count)
+- Jeśli używana: return 422 {error: "Cannot delete position - used in schedules"}
+- Delete position
+- Return 200 {message: "Position deleted"}
 
 #### Zadanie 17.5: Routes
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/routing#resource-controllers
+- https://laravel.com/docs/11/routing#resource-controllers
 
 **Plik:** `routes/api.php`
 
@@ -883,72 +879,72 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#retrieving-multiple-models
+- https://laravel.com/docs/11/eloquent#retrieving-multiple-models
 
 **Plik:** `app/Http/Controllers/Api/EmployeeController.php`
 
 Metoda `index()`:
 
--   Accept: `GET /api/employees` (protected: only manager/admin)
--   Return: 200 JSON array wszystkich Users role=employee
--   Include positions (jako position objects - eager load), hourly_rate
--   Eager load: with('positions') - relacja many-to-many (jeśli użyjesz pivot table, albo json array z IDs)
+- Accept: `GET /api/employees` (protected: only manager/admin)
+- Return: 200 JSON array wszystkich Users role=employee
+- Include positions (jako position objects - eager load), hourly_rate
+- Eager load: with('positions') - relacja many-to-many (jeśli użyjesz pivot table, albo json array z IDs)
 
 #### Zadanie 19.2: EmployeeController - Store
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/hashing#hashing-passwords
+- https://laravel.com/docs/11/hashing#hashing-passwords
 
 **Plik:** `app/Http/Controllers/Api/EmployeeController.php`
 
 Metoda `store()`:
 
--   Accept: `POST /api/employees` → JSON body: {name, email, pin, position_ids (array), hourly_rate, max_hours_per_month, min_break_hours, contract_type}
--   Autoryzacja: tylko admin
--   Validuj input (Form Request):
-    -   position_ids: required, array, each ID exists:positions,id
--   Hash PIN: `Hash::make($pin)` i zapisz do `pin_hashed`
--   Validate position_ids exist
--   Create User z role='employee'
--   Set positions = $position_ids (jako JSON array lub relacja)
--   Return 201 {user}
+- Accept: `POST /api/employees` → JSON body: {name, email, pin, position_ids (array), hourly_rate, max_hours_per_month, min_break_hours, contract_type}
+- Autoryzacja: tylko admin
+- Validuj input (Form Request):
+    - position_ids: required, array, each ID exists:positions,id
+- Hash PIN: `Hash::make($pin)` i zapisz do `pin_hashed`
+- Validate position_ids exist
+- Create User z role='employee'
+- Set positions = $position_ids (jako JSON array lub relacja)
+- Return 201 {user}
 
 #### Zadanie 19.3: EmployeeController - Update
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#updating-models
+- https://laravel.com/docs/11/eloquent#updating-models
 
 **Plik:** `app/Http/Controllers/Api/EmployeeController.php`
 
 Metoda `update(User $user, Request $request)`:
 
--   Accept: `PUT /api/employees/{id}` → JSON body: {position_ids, hourly_rate, contract_type, ...}
--   Autoryzacja: tylko admin
--   Update user
--   Return 200 {user}
+- Accept: `PUT /api/employees/{id}` → JSON body: {position_ids, hourly_rate, contract_type, ...}
+- Autoryzacja: tylko admin
+- Update user
+- Return 200 {user}
 
 #### Zadanie 19.4: EmployeeController - Delete
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#deleting-models
+- https://laravel.com/docs/11/eloquent#deleting-models
 
 **Plik:** `app/Http/Controllers/Api/EmployeeController.php`
 
 Metoda `destroy(User $user)`:
 
--   Accept: `DELETE /api/employees/{id}`
--   Autoryzacja: tylko admin
--   Delete user (cascade usunie schedules)
--   Return 200 {message}
+- Accept: `DELETE /api/employees/{id}`
+- Autoryzacja: tylko admin
+- Delete user (cascade usunie schedules)
+- Return 200 {message}
 
 #### Zadanie 19.5: Routes
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/routing#resource-controllers
+- https://laravel.com/docs/11/routing#resource-controllers
 
 **Plik:** `routes/api.php`
 
@@ -968,48 +964,48 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#mass-assignment
--   https://github.com/SpartnerNL/Laravel-Excel (optional, lub parse CSV ręcznie)
+- https://laravel.com/docs/11/eloquent#mass-assignment
+- https://github.com/SpartnerNL/Laravel-Excel (optional, lub parse CSV ręcznie)
 
 **Plik:** `app/Services/ImportService.php`
 
 Metoda `parseCSV(UploadedFile $file)`:
 
--   Accept: UploadedFile z CSV
--   Logic:
-    -   Odczytaj CSV (każdy wiersz = pracownik)
-    -   Kolumny: name, email, pin, B1, B2, B3, ..., PW, PW2, WR, WS, TGT, ...
-    -   Dla każdego pracownika:
-        -   Zbierz wszystkie pozycje gdzie wartość = "TAK" (lub 1)
-        -   Query positions by name i zbierz position_ids
-        -   Utwórz array positions: [id1, id2, ...]
-        -   Hash PIN do `pin_hashed`
-        -   Create User z role='employee'
-        -   Set positions = array position_ids
--   Return: array{success: count, errors: []}
+- Accept: UploadedFile z CSV
+- Logic:
+    - Odczytaj CSV (każdy wiersz = pracownik)
+    - Kolumny: name, email, pin, B1, B2, B3, ..., PW, PW2, WR, WS, TGT, ...
+    - Dla każdego pracownika:
+        - Zbierz wszystkie pozycje gdzie wartość = "TAK" (lub 1)
+        - Query positions by name i zbierz position_ids
+        - Utwórz array positions: [id1, id2, ...]
+        - Hash PIN do `pin_hashed`
+        - Create User z role='employee'
+        - Set positions = array position_ids
+- Return: array{success: count, errors: []}
 
 #### Zadanie 21.2: EmployeeController - Import endpoint
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/requests#file-uploads
--   https://laravel.com/docs/11/validation#validating-files
+- https://laravel.com/docs/11/requests#file-uploads
+- https://laravel.com/docs/11/validation#validating-files
 
 **Plik:** `app/Http/Controllers/Api/EmployeeController.php`
 
 Metoda `import()`:
 
--   Accept: `POST /api/employees/import` → multipart/form-data: file
--   Autoryzacja: tylko admin
--   Validuj file (must be xlsx/csv)
--   Inject ImportService i parse CSV
--   Return 200 {imported: count, errors: [...]}
+- Accept: `POST /api/employees/import` → multipart/form-data: file
+- Autoryzacja: tylko admin
+- Validuj file (must be xlsx/csv)
+- Inject ImportService i parse CSV
+- Return 200 {imported: count, errors: [...]}
 
 #### Zadanie 21.3: Routes
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/routing#custom-resource-routes
+- https://laravel.com/docs/11/routing#custom-resource-routes
 
 **Plik:** `routes/api.php`
 
@@ -1028,7 +1024,7 @@ Route::post('/employees/import', [EmployeeController::class, 'import'])
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#retrieving-results
+- https://laravel.com/docs/11/eloquent#retrieving-results
 
 **Plik:** `app/Http/Controllers/Api/AvailabilityController.php`
 
@@ -1036,54 +1032,54 @@ Polecenie: `php artisan make:controller Api/AvailabilityController --api`
 
 Metoda `index()`:
 
--   Accept: `GET /api/availabilities?user_id=1` (optional query)
--   Logic:
-    -   Jeśli employee: pokaż tylko swoje availabilities
-    -   Jeśli manager/admin: pokaż wszystkie (opcjonalnie filtruj po user_id)
--   Return: 200 JSON array Availabilities
+- Accept: `GET /api/availabilities?user_id=1` (optional query)
+- Logic:
+    - Jeśli employee: pokaż tylko swoje availabilities
+    - Jeśli manager/admin: pokaż wszystkie (opcjonalnie filtruj po user_id)
+- Return: 200 JSON array Availabilities
 
 #### Zadanie 23.2: AvailabilityController - Store
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#inserting-models
+- https://laravel.com/docs/11/eloquent#inserting-models
 
 **Plik:** `app/Http/Controllers/Api/AvailabilityController.php`
 
 Metoda `store()`:
 
--   Accept: `POST /api/availabilities` → JSON body: {date, is_available, notes}
--   Jeśli employee: pracownik dodaje sam na siebie (user_id = auth()->id())
--   Jeśli manager/admin: może dodać dla kogokolwiek (+ user_id w body)
--   Validuj input:
-    -   user_id: required, exists:users,id
-    -   date: required, date, unique per (user_id, date)
-    -   is_available: required, boolean
-    -   notes: optional, string, max 255
--   submission_date: automatycznie ustawia się na dzisiejszą datę (NIE w $fillable!)
--   Create Availability (updateOrCreate dla existing)
--   Return 201 {availability} lub 200 {availability} (jeśli update)
+- Accept: `POST /api/availabilities` → JSON body: {date, is_available, notes}
+- Jeśli employee: pracownik dodaje sam na siebie (user_id = auth()->id())
+- Jeśli manager/admin: może dodać dla kogokolwiek (+ user_id w body)
+- Validuj input:
+    - user_id: required, exists:users,id
+    - date: required, date, unique per (user_id, date)
+    - is_available: required, boolean
+    - notes: optional, string, max 255
+- submission_date: automatycznie ustawia się na dzisiejszą datę (NIE w $fillable!)
+- Create Availability (updateOrCreate dla existing)
+- Return 201 {availability} lub 200 {availability} (jeśli update)
 
 #### Zadanie 23.3: AvailabilityController - Delete
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#deleting-models
+- https://laravel.com/docs/11/eloquent#deleting-models
 
 **Plik:** `app/Http/Controllers/Api/AvailabilityController.php`
 
 Metoda `destroy(Availability $availability)`:
 
--   Accept: `DELETE /api/availabilities/{id}`
--   Autoryzacja: tylko owner lub manager/admin
--   Delete
--   Return 200 {message}
+- Accept: `DELETE /api/availabilities/{id}`
+- Autoryzacja: tylko owner lub manager/admin
+- Delete
+- Return 200 {message}
 
 #### Zadanie 23.4: Routes
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/routing#resource-controllers
+- https://laravel.com/docs/11/routing#resource-controllers
 
 **Plik:** `routes/api.php`
 
@@ -1103,8 +1099,8 @@ Route::middleware('auth:api')->group(function () {
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#aggregates
--   https://laravel.com/docs/11/eloquent#grouping-results
+- https://laravel.com/docs/11/eloquent#aggregates
+- https://laravel.com/docs/11/eloquent#grouping-results
 
 **Plik:** `app/Http/Controllers/Api/ReportController.php`
 
@@ -1112,54 +1108,54 @@ Polecenie: `php artisan make:controller Api/ReportController`
 
 Metoda `hours($userId)`:
 
--   Accept: `GET /api/reports/hours/{user_id}?month=11&year=2025` (query: month, year)
--   Autoryzacja: employee widzi swoje, manager/admin widzi wszystkie
--   Query Schedule dla user_id w danym miesiącu
--   Aggregate:
-    -   Total hours per month
-    -   Hours per position
-    -   Hours per day
--   Return: 200 JSON {user, month, year, total_hours, by_position: {...}, by_date: {...}}
+- Accept: `GET /api/reports/hours/{user_id}?month=11&year=2025` (query: month, year)
+- Autoryzacja: employee widzi swoje, manager/admin widzi wszystkie
+- Query Schedule dla user_id w danym miesiącu
+- Aggregate:
+    - Total hours per month
+    - Hours per position
+    - Hours per day
+- Return: 200 JSON {user, month, year, total_hours, by_position: {...}, by_date: {...}}
 
 #### Zadanie 25.2: ReportController - Payroll Report
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#raw-expressions
--   https://laravel.com/docs/11/eloquent#selecting-specific-columns
+- https://laravel.com/docs/11/eloquent#raw-expressions
+- https://laravel.com/docs/11/eloquent#selecting-specific-columns
 
 **Plik:** `app/Http/Controllers/Api/ReportController.php`
 
 Metoda `payroll()`:
 
--   Accept: `GET /api/reports/payroll?month=11&year=2025`
--   Autoryzacja: tylko manager/admin
--   Query wszystkich Schedule dla miesiąca
--   Calculate: per pracownik: hours_worked \* hourly_rate = cost
--   Aggregate: total cost per employee, total cost per position, total cost
--   Return: 200 JSON {month, year, employees: [{name, hours, rate, cost}], by_position: {...}, total_cost}
+- Accept: `GET /api/reports/payroll?month=11&year=2025`
+- Autoryzacja: tylko manager/admin
+- Query wszystkich Schedule dla miesiąca
+- Calculate: per pracownik: hours_worked \* hourly_rate = cost
+- Aggregate: total cost per employee, total cost per position, total cost
+- Return: 200 JSON {month, year, employees: [{name, hours, rate, cost}], by_position: {...}, total_cost}
 
 #### Zadanie 25.3: ReportController - Coverage Report
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent#grouping-results
+- https://laravel.com/docs/11/eloquent#grouping-results
 
 **Plik:** `app/Http/Controllers/Api/ReportController.php`
 
 Metoda `coverage()`:
 
--   Accept: `GET /api/reports/coverage?date=2025-11-24`
--   Autoryzacja: manager/admin
--   Query Schedule dla date
--   Group by position: ile osób na każdym stanowisku?
--   Return: 200 JSON {date, positions: {B1: 2, B2: 3, WR: 1, ...}}
+- Accept: `GET /api/reports/coverage?date=2025-11-24`
+- Autoryzacja: manager/admin
+- Query Schedule dla date
+- Group by position: ile osób na każdym stanowisku?
+- Return: 200 JSON {date, positions: {B1: 2, B2: 3, WR: 1, ...}}
 
 #### Zadanie 25.4: Routes
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/routing#route-parameters
+- https://laravel.com/docs/11/routing#route-parameters
 
 **Plik:** `routes/api.php`
 
@@ -1181,9 +1177,9 @@ Route::middleware(['auth:api', 'role:manager,admin'])->group(function () {
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/testing#creating-tests
--   https://laravel.com/docs/11/testing#making-requests
--   https://laravel.com/docs/11/database-testing#introduction
+- https://laravel.com/docs/11/testing#creating-tests
+- https://laravel.com/docs/11/testing#making-requests
+- https://laravel.com/docs/11/database-testing#introduction
 
 **Plik:** `tests/Feature/ScheduleTest.php`
 
@@ -1193,37 +1189,37 @@ Utwórz Feature Tests (każdy test to jedna metoda):
 
 Test 1: `test_manager_can_create_schedule()`
 
--   Stwórz manager i employee z positions
--   POST /api/schedules → 201
--   Assert Schedule created w bazie
+- Stwórz manager i employee z positions
+- POST /api/schedules → 201
+- Assert Schedule created w bazie
 
 Test 2: `test_cannot_exceed_max_hours()`
 
--   Stwórz employee z max_hours=40
--   Dodaj Schedule 35 godzin
--   Spróbuj dodać 10 godzin → 422 validation error
+- Stwórz employee z max_hours=40
+- Dodaj Schedule 35 godzin
+- Spróbuj dodać 10 godzin → 422 validation error
 
 Test 3: `test_cannot_create_with_insufficient_break()`
 
--   Stwórz Schedule 09:00-17:00 na poniedziałek
--   Spróbuj dodać Schedule 02:00-10:00 na wtorek (5 godzin break) → 422
+- Stwórz Schedule 09:00-17:00 na poniedziałek
+- Spróbuj dodać Schedule 02:00-10:00 na wtorek (5 godzin break) → 422
 
 Test 4: `test_employee_sees_only_own_schedules()`
 
--   Stwórz 2 employees
--   Zaloguj się jako employee A
--   GET /api/schedules → widzisz tylko swoje
+- Stwórz 2 employees
+- Zaloguj się jako employee A
+- GET /api/schedules → widzisz tylko swoje
 
 Test 5: `test_schedule_requires_position_permission()`
 
--   Stwórz employee z positions: [position_B1.id]
--   Spróbuj dodać Schedule na position_WR → 422
+- Stwórz employee z positions: [position_B1.id]
+- Spróbuj dodać Schedule na position_WR → 422
 
 #### Zadanie 27.2: AuthTest
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/testing#authenticated-requests
+- https://laravel.com/docs/11/testing#authenticated-requests
 
 **Plik:** `tests/Feature/AuthTest.php`
 
@@ -1231,26 +1227,26 @@ Polecenie: `php artisan make:test AuthTest --type=Feature`
 
 Test 1: `test_login_with_email_password()`
 
--   POST /api/auth/login {email, password} → 200 + token
+- POST /api/auth/login {email, password} → 200 + token
 
 Test 2: `test_login_pin_for_employee()`
 
--   POST /api/auth/login-pin {employee_id, pin} → 200 + token
+- POST /api/auth/login-pin {employee_id, pin} → 200 + token
 
 Test 3: `test_invalid_credentials_return_401()`
 
--   POST /api/auth/login {email, wrong_password} → 401
+- POST /api/auth/login {email, wrong_password} → 401
 
 Test 4: `test_get_current_user()`
 
--   Zaloguj się
--   GET /api/auth/me → 200 + user data
+- Zaloguj się
+- GET /api/auth/me → 200 + user data
 
 #### Zadanie 27.3: PositionTest (NEW - 28.11.2025)
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/testing#creating-tests
+- https://laravel.com/docs/11/testing#creating-tests
 
 **Plik:** `tests/Feature/PositionTest.php`
 
@@ -1258,32 +1254,32 @@ Polecenie: `php artisan make:test PositionTest --type=Feature`
 
 Test 1: `test_admin_can_create_position()`
 
--   POST /api/positions {name: "B9", description: "New position"} → 201
--   Assert Position created
+- POST /api/positions {name: "B9", description: "New position"} → 201
+- Assert Position created
 
 Test 2: `test_cannot_create_duplicate_position()`
 
--   Create Position "B1"
--   Try POST /api/positions {name: "B1"} → 422 (unique constraint)
+- Create Position "B1"
+- Try POST /api/positions {name: "B1"} → 422 (unique constraint)
 
 Test 3: `test_cannot_delete_position_in_use()`
 
--   Create Position i Schedule z tą position_id
--   Try DELETE /api/positions/{id} → 422
+- Create Position i Schedule z tą position_id
+- Try DELETE /api/positions/{id} → 422
 
 Test 4: `test_employee_cannot_manage_positions()`
 
--   Zaloguj się jako employee
--   POST /api/positions → 403 Forbidden
+- Zaloguj się jako employee
+- POST /api/positions → 403 Forbidden
 
 #### Zadanie 27.4: Run tests
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/testing#running-tests
+- https://laravel.com/docs/11/testing#running-tests
 
--   [ ] `php artisan test`
--   [ ] Wszystkie testy powinny pass
+- [ ] `php artisan test`
+- [ ] Wszystkie testy powinny pass
 
 **Commit:** `:test_tube: test(feature): Feature tests for API`
 
@@ -1295,7 +1291,7 @@ Test 4: `test_employee_cannot_manage_positions()`
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/seeding#writing-seeders
+- https://laravel.com/docs/11/seeding#writing-seeders
 
 **Plik:** `database/seeders/PositionSeeder.php`
 
@@ -1303,15 +1299,15 @@ Polecenie: `php artisan make:seeder PositionSeeder`
 
 Seeder powinien utworzyć:
 
--   Default pozycje: B1, B2, B3, B4, B5, B6, B7, B8, PW, WR, WS, TGT
--   Dla każdej: Position::create(['name' => 'B1', 'description' => 'Bileter jeden', 'created_by' => 1])
--   created_by = admin user (ID 1)
+- Default pozycje: B1, B2, B3, B4, B5, B6, B7, B8, PW, WR, WS, TGT
+- Dla każdej: Position::create(['name' => 'B1', 'description' => 'Bileter jeden', 'created_by' => 1])
+- created_by = admin user (ID 1)
 
 #### Zadanie 29.2: UserFactory (ZMIENIONA)
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/eloquent-factories#generating-models
+- https://laravel.com/docs/11/eloquent-factories#generating-models
 
 **Plik:** `database/factories/UserFactory.php`
 
@@ -1319,23 +1315,23 @@ Polecenie: `php artisan make:factory UserFactory --model=User`
 
 Factory powinien generować:
 
--   name: fake()->name()
--   email: unique fake()->email()
--   password: Hash::make('password')
--   role: fake()->randomElement(['employee', 'manager', 'admin'])
--   pin_hashed: Hash::make(fake()->numerify('####')) (jeśli role=employee)
--   is_active: true
--   positions: (jeśli role=employee) Query Position::whereIn('name', fake()->randomElements(['B1', 'B2', 'PW', 'WR', 'WS', 'TGT'], 3))->pluck('id')->toArray()
--   hourly_rate: fake()->numberBetween(15, 30)
--   max_hours_per_month: 160
--   min_break_hours: 11
--   contract_type: fake()->randomElement(['uop', 'zlecenie'])
+- name: fake()->name()
+- email: unique fake()->email()
+- password: Hash::make('password')
+- role: fake()->randomElement(['employee', 'manager', 'admin'])
+- pin_hashed: Hash::make(fake()->numerify('####')) (jeśli role=employee)
+- is_active: true
+- positions: (jeśli role=employee) Query Position::whereIn('name', fake()->randomElements(['B1', 'B2', 'PW', 'WR', 'WS', 'TGT'], 3))->pluck('id')->toArray()
+- hourly_rate: fake()->numberBetween(15, 30)
+- max_hours_per_month: 160
+- min_break_hours: 11
+- contract_type: fake()->randomElement(['uop', 'zlecenie'])
 
 #### Zadanie 29.3: UserSeeder (ZMIENIONA)
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/seeding#writing-seeders
+- https://laravel.com/docs/11/seeding#writing-seeders
 
 **Plik:** `database/seeders/UserSeeder.php`
 
@@ -1343,15 +1339,15 @@ Polecenie: `php artisan make:seeder UserSeeder`
 
 Seeder powinien utworzyć:
 
--   1 admin: email=admin@example.com, password=password, positions=all position_ids
--   2 managers: names=Kierownik 1 & 2, emails=manager1@, manager2@, positions=random 5 positions
--   20 employees: random names, pins, positions (2-4 losowe), rates, contracts
+- 1 admin: email=admin@example.com, password=password, positions=all position_ids
+- 2 managers: names=Kierownik 1 & 2, emails=manager1@, manager2@, positions=random 5 positions
+- 20 employees: random names, pins, positions (2-4 losowe), rates, contracts
 
 #### Zadanie 29.4: ScheduleSeeder
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/seeding#using-factories
+- https://laravel.com/docs/11/seeding#using-factories
 
 **Plik:** `database/seeders/ScheduleSeeder.php`
 
@@ -1359,16 +1355,16 @@ Polecenie: `php artisan make:seeder ScheduleSeeder`
 
 Seeder powinien:
 
--   Pobierz wszystkich employees
--   Dla każdego employee: create 15 Schedule'ów w bieżącym miesiącu
--   Każdy Schedule: random date, random position (z user.positions), random shift (08:00-17:00 lub 09:00-18:00), auto-calc hours
--   Validuj że nie ma konfliktów/naruszenia walidacji biznesowych
+- Pobierz wszystkich employees
+- Dla każdego employee: create 15 Schedule'ów w bieżącym miesiącu
+- Każdy Schedule: random date, random position (z user.positions), random shift (08:00-17:00 lub 09:00-18:00), auto-calc hours
+- Validuj że nie ma konfliktów/naruszenia walidacji biznesowych
 
 #### Zadanie 29.5: DatabaseSeeder
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/seeding#running-seeders
+- https://laravel.com/docs/11/seeding#running-seeders
 
 **Plik:** `database/seeders/DatabaseSeeder.php`
 
@@ -1386,12 +1382,12 @@ $this->call([
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/migrations#seeding-your-database
+- https://laravel.com/docs/11/migrations#seeding-your-database
 
--   [ ] `php artisan migrate:fresh --seed`
--   [ ] Sprawdź w PhpMyAdmin że dane dodane
--   [ ] Sprawdź w API: GET /api/employees z tokenem managera → powinno zwrócić 20 employees
--   [ ] Sprawdź: GET /api/positions → powinno zwrócić 12 default positions
+- [ ] `php artisan migrate:fresh --seed`
+- [ ] Sprawdź w PhpMyAdmin że dane dodane
+- [ ] Sprawdź w API: GET /api/employees z tokenem managera → powinno zwrócić 20 employees
+- [ ] Sprawdź: GET /api/positions → powinno zwrócić 12 default positions
 
 **Commit:** `:seedling: test(seeders): Database seeders with positions`
 
@@ -1403,7 +1399,7 @@ $this->call([
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11
+- https://laravel.com/docs/11
 
 **Plik:** `README.md`
 
@@ -1411,7 +1407,6 @@ README powinno zawierać:
 
 1. **Project overview** — co to jest, dla kogo
 2. **Quick start:**
-
     - Clone repo
     - `cp .env.example .env`
     - `docker-compose up -d`
@@ -1419,7 +1414,6 @@ README powinno zawierać:
     - Access: http://localhost:8000
 
 3. **API Documentation** — tabela endpointów:
-
     - Metoda, Path, Description, Auth required?
     - Przykład request/response dla kilku kluczowych endpointów
 
@@ -1439,15 +1433,15 @@ README powinno zawierać:
 
 **Dokumentacja:**
 
--   https://laravel.com/docs/11/configuration#environment-configuration
+- https://laravel.com/docs/11/configuration#environment-configuration
 
 **Plik:** `.env.example`
 
 Powinno zawierać wszystkie zmienne:
 
--   APP_NAME, APP_ENV, APP_DEBUG, APP_URL
--   DB_CONNECTION, DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
--   JWT_SECRET (albo wygeneruj przy setup)
+- APP_NAME, APP_ENV, APP_DEBUG, APP_URL
+- DB_CONNECTION, DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
+- JWT_SECRET (albo wygeneruj przy setup)
 
 #### Zadanie 31.3: API endpoints listing
 
@@ -1526,9 +1520,9 @@ Listing wszystkich endpointów w formacie:
 
 Dla każdej sesji:
 
--   Atomic commit po ukończeniu zadań
--   Format: `:emoji: type(scope): subject`
--   Subject = krótko co zrobiłeś
+- Atomic commit po ukończeniu zadań
+- Format: `:emoji: type(scope): subject`
+- Subject = krótko co zrobiłeś
 
 Przykłady:
 
@@ -1555,12 +1549,12 @@ Przykłady:
 
 ## 11. PODSUMOWANIE
 
--   **Estymacja:** ~67 godzin (32 sesje po 2h)
--   **Stack:** Laravel 11 + Breeze + JWT + Docker
--   **Approach:** TDD-style — opisane zadania zamiast gotowych snippetów
--   **Struktura:** 32 sesji, każda atomic + commit
--   **Focus:** Nauczenie się zamiast copy-paste
--   **Dokumentacja:** Linki do Laravel docs przy każdym zadaniu
+- **Estymacja:** ~67 godzin (32 sesje po 2h)
+- **Stack:** Laravel 11 + Breeze + JWT + Docker
+- **Approach:** TDD-style — opisane zadania zamiast gotowych snippetów
+- **Struktura:** 32 sesji, każda atomic + commit
+- **Focus:** Nauczenie się zamiast copy-paste
+- **Dokumentacja:** Linki do Laravel docs przy każdym zadaniu
 
 **Ty samy napiszesz kod, będziesz rozumieć każdy kawałek, i nauczysz się Laravela na praktyce!** 🚀
 
