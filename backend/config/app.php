@@ -123,4 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    // Default employee PIN for new accounts created by admin (can be overridden per user)
+    'default_employee_pin' => env('DEFAULT_EMPLOYEE_PIN', '1234'),
+
 ];

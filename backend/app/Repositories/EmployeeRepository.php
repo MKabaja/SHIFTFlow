@@ -139,7 +139,7 @@ class EmployeeRepository
             'name' => $data->name,
             'login' => $login,
             'contract_type' => $data->contractType,
-            'pin_hashed' => 1234,
+            'pin_hashed' => config('app.default_employee_pin'), // Onboarding default — employee changes PIN on first login
             'role' => 'employee',
             'email' => null,
         ];
