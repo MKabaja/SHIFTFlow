@@ -419,24 +419,6 @@ parameters:
 			path: app/Services/Import/EmployeesCsvExtractor.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Schedule\>\:\:active\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: app/Services/ReportService.php
-
-		-
-			message: '#^Relation ''position'' is not found in App\\Models\\Schedule model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: app/Services/ReportService.php
-
-		-
-			message: '#^Relation ''user'' is not found in App\\Models\\Schedule model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Services/ReportService.php
-
-		-
 			message: '#^PHPDoc tag @param has invalid value \(ShiftValidationData Data Transfer Object\)\: Unexpected token "Data", expected variable at offset 200 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
