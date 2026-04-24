@@ -1,0 +1,443 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Relation ''position'' is not found in App\\Models\\Shift model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/Api/ScheduleController.php
+
+		-
+			message: '#^Relation ''user'' is not found in App\\Models\\Shift model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/Api/ScheduleController.php
+
+		-
+			message: '#^Relation ''position'' is not found in App\\Models\\Shift model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/Api/ShiftController.php
+
+		-
+			message: '#^Relation ''schedule'' is not found in App\\Models\\Shift model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Http/Controllers/Api/ShiftController.php
+
+		-
+			message: '#^Relation ''user'' is not found in App\\Models\\Shift model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/Api/ShiftController.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$next$#'
+			identifier: parameter.notFound
+			count: 1
+			path: app/Http/Middleware/RoleMiddleware.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\AvailabilityResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/AvailabilityResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\AvailabilityResource\:\:\$date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/AvailabilityResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\AvailabilityResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/AvailabilityResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\AvailabilityResource\:\:\$is_available\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/AvailabilityResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\AvailabilityResource\:\:\$notes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/AvailabilityResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\AvailabilityResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/AvailabilityResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\AvailabilityResource\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/AvailabilityResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\PositionResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/PositionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\PositionResource\:\:\$created_by\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/PositionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\PositionResource\:\:\$creator\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/PositionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\PositionResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/PositionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\PositionResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/PositionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\PositionResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/PositionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleListResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleListResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleListResource\:\:\$creator\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleListResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleListResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleListResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleListResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleListResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleListResource\:\:\$month\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleListResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleListResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleListResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleListResource\:\:\$published_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleListResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleListResource\:\:\$shifts\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleListResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleListResource\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleListResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleListResource\:\:\$year\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleListResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleResource\:\:\$creator\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleResource\:\:\$month\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleResource\:\:\$published_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleResource\:\:\$shifts\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleResource\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ScheduleResource\:\:\$year\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ScheduleResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$minutes_worked\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$notes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$position\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$position_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$schedule_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$shift_end\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$shift_start\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$user\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ShiftResource\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ShiftResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$contract_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$hourly_rate\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$login\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$max_minutes_per_month\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$max_minutes_per_quarter\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$min_break_minutes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$role\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '''
+				#^PHPDoc tag @return has invalid value \(array\{
+				  valid_rows\: array\<int,array\{name\:string,contract_type\:string,positions\:array\<int,int\>\>\>,
+				  issues\: array\<int,array\<int,string\>\>
+				\}\)\: Unexpected token "\:", expected '\}' at offset 45 on line 3$#
+			'''
+			identifier: phpDoc.parseError
+			count: 1
+			path: app/Services/Import/EmployeeCsvValidator.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$firstCsvRow$#'
+			identifier: parameter.notFound
+			count: 1
+			path: app/Services/Import/EmployeesCsvExtractor.php
+
+		-
+			message: '''
+				#^PHPDoc tag @return has invalid value \(array\{
+				header_map\: array\<int,string\>,
+				rows\: array\<int,array\<int,string\>
+				\} raw Row Data\)\: Unexpected token "\:", expected '\}' at offset 204 on line 7$#
+			'''
+			identifier: phpDoc.parseError
+			count: 1
+			path: app/Services/Import/EmployeesCsvExtractor.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Schedule\>\:\:active\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: app/Services/ReportService.php
+
+		-
+			message: '#^Relation ''position'' is not found in App\\Models\\Schedule model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Services/ReportService.php
+
+		-
+			message: '#^Relation ''user'' is not found in App\\Models\\Schedule model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Services/ReportService.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(ShiftValidationData Data Transfer Object\)\: Unexpected token "Data", expected variable at offset 200 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: app/Services/Validation/ValidationService.php
