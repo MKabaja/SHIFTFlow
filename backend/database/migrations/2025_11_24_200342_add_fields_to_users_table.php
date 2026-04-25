@@ -50,9 +50,9 @@ return new class extends Migration
                 'is_active',
                 'contract_type',
                 'hourly_rate',
-                'max_hours_per_month',
-                'max_hours_per_quarter',
-                'min_break_hours',
+                'max_minutes_per_month',
+                'max_minutes_per_quarter',
+                'min_break_minutes',
 
             ]);
         });
