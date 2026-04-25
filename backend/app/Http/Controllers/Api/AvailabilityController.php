@@ -33,7 +33,7 @@ class AvailabilityController extends Controller
                 && in_array($user->role, ['admin', 'manager']),
                 fn ($q) => $q->where('user_id', $requestedUserId)
             )
-            ->get();
+            ->paginate(20);
 
         return AvailabilityResource::collection($availabilities);
 

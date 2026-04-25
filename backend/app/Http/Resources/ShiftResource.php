@@ -28,7 +28,7 @@ class ShiftResource extends JsonResource
             'shift_end' => $this->shift_end->format('H:i'),
 
             'minutes_worked' => $this->minutes_worked,
-            'hours_worked' => round($this->minutes_worked / 60, 2),
+            'hours_worked' => $this->minutes_worked !== null ? round($this->minutes_worked / 60, 2) : null,
 
             'status' => $this->status,
             'notes' => $this->notes,

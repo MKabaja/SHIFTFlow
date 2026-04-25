@@ -14,7 +14,7 @@ class PositionController extends Controller
 {
     public function index(): JsonResponse
     {
-        $positionsQuery = Position::with('creator')->get();
+        $positionsQuery = Position::with('creator')->paginate(20);
 
         return response()->json($positionsQuery);
     }
@@ -40,7 +40,15 @@ class PositionController extends Controller
      */
     public function show(Position $position)
     {
-        return $position->load(['creator', 'shifts']);
+        return $position->load('creator');
+    }
+
+    /**
+     * Display the shifts for the specified position.
+     */
+    public function shifts(Position $position)
+    {
+        return $position->shifts()->paginate(20);
     }
 
     /**

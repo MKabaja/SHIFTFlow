@@ -69,6 +69,7 @@ Route::middleware(['auth:api', 'role:admin,manager'])
     ->group(function () {
         Route::get('/', 'index');
         Route::get('/{position}', 'show');
+        Route::get('/{position}/shifts', 'shifts');
     });
 // Positions G2
 Route::middleware(['auth:api', 'role:admin'])

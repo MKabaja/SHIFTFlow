@@ -18,6 +18,8 @@ class EmployeeCsvValidator
         'EMPLOY',
     ];
 
+    private const POSITION_ASSIGNED_VALUE = 'TAK';
+
     /**
      * @return array{
      *   valid_rows: array<int,array{name:string,contract_type:string,positions:array<int,int>>>,
@@ -128,7 +130,7 @@ class EmployeeCsvValidator
                 continue;
             }
 
-            if (trim($cellValue) === 'TAK') {
+            if (trim(strtoupper($cellValue)) === self::POSITION_ASSIGNED_VALUE) {
                 $positionIndexes[] = $index;
             }
         }

@@ -43,9 +43,11 @@ test('admin can list positions', function () {
     /** @var \Tests\TestCase $this */
     $this->getJson('/api/positions')
         ->assertOk()
-        ->assertJsonCount(4) // from seed
+        ->assertJsonCount(4, 'data') // from seed
         ->assertJsonStructure([
-            '*' => ['id', 'name', 'description', 'creator'],
+            'data' => [
+                '*' => ['id', 'name', 'description', 'creator'],
+            ],
         ]);
 });
 
