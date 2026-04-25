@@ -17,7 +17,7 @@ services:
             DB_PORT: 3306
             DB_DATABASE: shiftflow_db
             DB_USERNAME: shiftflow_user
-            DB_PASSWORD: shiftflow_pass
+            DB_PASSWORD: ${DB_PASSWORD}
 
     db:
         image: mysql:8.0
@@ -28,8 +28,8 @@ services:
         environment:
             MYSQL_DATABASE: shiftflow_db
             MYSQL_USER: shiftflow_user
-            MYSQL_PASSWORD: shiftflow_pass
-            MYSQL_ROOT_PASSWORD: root
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
         volumes:
             - db_data:/var/lib/mysql
         networks:
@@ -45,7 +45,7 @@ services:
             PMA_HOST: db
             PMA_PORT: 3306
             PMA_USER: root
-            PMA_PASSWORD: root
+            PMA_PASSWORD: ${DB_ROOT_PASSWORD}
         networks:
             - shiftflow_network
 

@@ -54,5 +54,6 @@ docker-compose.override.yml
 .cache/
 
 /backend/vendor/
+.env
 
 /.claude/

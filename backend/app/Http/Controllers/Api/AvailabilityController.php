@@ -13,6 +13,8 @@ class AvailabilityController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Availability::class);
+
         $user = $request->user();
         $requestedUserId = $request->query('user_id');
 
@@ -39,6 +41,8 @@ class AvailabilityController extends Controller
 
     public function store(StoreAvailabilityRequest $request): JsonResponse
     {
+        $this->authorize('create', Availability::class);
+
         $user = $request->user();
         $validated = $request->validated();
 
