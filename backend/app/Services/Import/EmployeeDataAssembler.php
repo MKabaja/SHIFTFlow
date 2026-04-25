@@ -30,7 +30,6 @@ class EmployeeDataAssembler
         return collect($validRows)->map(function ($employeeData) use ($headerMap) {
 
             return new EmployeeImportData(
-
                 name: $employeeData['name'],
                 contractType: $employeeData['contract_type'],
                 positions: $this->mapIndexesToCodes(
@@ -49,7 +48,8 @@ class EmployeeDataAssembler
             ->only($positionIndexes)
             ->values();
 
-        return $headers->flatMap(fn ($header) => self::EXCEL_TO_DATABASE_POSITIONS_MAP[$header] ?? []
+        return $headers->flatMap(
+            fn ($header) => self::EXCEL_TO_DATABASE_POSITIONS_MAP[$header] ?? []
         )->all();
     }
 }

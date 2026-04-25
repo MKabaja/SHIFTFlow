@@ -19,7 +19,8 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 class ScheduleController extends Controller
 {
     public function __construct(
-        private readonly ScheduleService $scheduleService) {}
+        private readonly ScheduleService $scheduleService
+    ) {}
 
     public function index(GetSchedulesRequest $request): AnonymousResourceCollection
     {

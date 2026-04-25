@@ -12,8 +12,6 @@ return new class extends Migration
      * - The 'email' column is optional (nullable).
      * - 'login' is the primary login credential.
      * - 'password'  column is optional we use PIN instead.
-     *
-     * @return void
      */
     public function up(): void
     {

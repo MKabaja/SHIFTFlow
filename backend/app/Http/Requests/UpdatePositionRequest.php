@@ -23,14 +23,15 @@ class UpdatePositionRequest extends FormRequest
     public function rules(): array
     {
         $positionId = $this->route('position');
+
         return [
             'name' => [
                 'required',
                 'string',
                 Rule::unique('positions', 'name')->ignore($positionId),
-                'max:4'
+                'max:4',
             ],
-            'description' => ['nullable', 'string', 'max:255']
+            'description' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

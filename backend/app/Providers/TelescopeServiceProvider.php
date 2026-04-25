@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
-use App\Models\User;
 
 class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 {
@@ -65,6 +65,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
             if ($user) {
                 return $user->role === 'admin';
             }
+
             return false;
         });
     }

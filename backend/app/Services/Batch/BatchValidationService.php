@@ -166,17 +166,21 @@ class BatchValidationService
 
         $startA = TimeHelper::createFullDateTime(
             $shiftA['date'],
-            $shiftA['shift_start']);
+            $shiftA['shift_start']
+        );
         $endA = TimeHelper::createFullDateTime(
             $shiftA['date'],
-            $shiftA['shift_end']);
+            $shiftA['shift_end']
+        );
 
         $startB = TimeHelper::createFullDateTime(
             $shiftB['date'],
-            $shiftB['shift_start']);
+            $shiftB['shift_start']
+        );
         $endB = TimeHelper::createFullDateTime(
             $shiftB['date'],
-            $shiftB['shift_end']);
+            $shiftB['shift_end']
+        );
 
         if ($endA->lessThan($startA)) {
             $endA->addDay();

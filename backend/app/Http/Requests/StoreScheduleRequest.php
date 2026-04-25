@@ -43,8 +43,9 @@ class StoreScheduleRequest extends FormRequest
                 'integer',
                 'between:1,12',
                 Rule::unique('schedules')
-                    ->where(fn ($q) => $q
-                        ->where('year', $this->year)
+                    ->where(
+                        fn ($q) => $q
+                            ->where('year', $this->year)
                     ),
 
             ],

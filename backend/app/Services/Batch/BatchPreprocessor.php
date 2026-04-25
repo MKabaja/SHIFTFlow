@@ -25,12 +25,13 @@ class BatchPreprocessor
 
         return collect($shiftsData)
             ->groupBy('user_id')
-            ->map(fn ($userShifts) => $userShifts
-                ->sortBy([
-                    ['date', 'asc'],
-                    ['shift_start', 'asc'],
-                ])
-                ->values()
+            ->map(
+                fn ($userShifts) => $userShifts
+                    ->sortBy([
+                        ['date', 'asc'],
+                        ['shift_start', 'asc'],
+                    ])
+                    ->values()
             );
 
     }

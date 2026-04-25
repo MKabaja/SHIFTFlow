@@ -26,10 +26,10 @@ class AvailabilityController extends Controller
                 ->role === 'employee', fn ($q) => $q
                 ->where('user_id', $user->id))
 
-            ->when($requestedUserId
+            ->when(
+                $requestedUserId
                 && in_array($user->role, ['admin', 'manager']),
                 fn ($q) => $q->where('user_id', $requestedUserId)
-
             )
             ->get();
 
@@ -52,11 +52,11 @@ class AvailabilityController extends Controller
                 'user_id' => $userId,
                 'date' => $validated['date'],
             ],
-
             [
                 'is_available' => $validated['is_available'],
                 'notes' => $validated['notes'] ?? null,
-            ]);
+            ]
+        );
         if ($availability->wasRecentlyCreated) {
 
             $availability->submission_date = now();

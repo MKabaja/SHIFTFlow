@@ -21,8 +21,10 @@ return new class extends Migration
             $table->unsignedTinyInteger('month');
             $table->year('year');
             $table->index(['month', 'year']);
-            $table->enum('status',
-                ['draft', 'published', 'in_progress'])
+            $table->enum(
+                'status',
+                ['draft', 'published', 'in_progress']
+            )
                 ->default('draft');
 
             $table->timestamp('published_at')

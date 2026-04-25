@@ -27,7 +27,8 @@ beforeEach(function () {
 it('successfully imports employees from csv file', function () {
     /** @var \Tests\TestCase $this */
     $csvFile = UploadedFile::fake()
-        ->createWithContent('employees.csv',
+        ->createWithContent(
+            'employees.csv',
             $this->csvHeader.
             "1,Jan Kowalski,UOP,TAK,\n".
             '2,Anna Nowak,ZLEC,,TAK'
@@ -68,7 +69,8 @@ it('successfully imports employees from csv file', function () {
 it('preserves existing login when re-importing user', function () {
     /** @var \Tests\TestCase $this */
     $csvFile = UploadedFile::fake()
-        ->createWithContent('employees.csv',
+        ->createWithContent(
+            'employees.csv',
             $this->csvHeader.
             "1,Jan Kowalski,UOP,TAK,\n".
             '2,Anna Nowak,ZLEC,,TAK'
@@ -97,7 +99,8 @@ it('preserves existing login when re-importing user', function () {
 it('updates existing user details instead of creating duplicates', function () {
     /** @var \Tests\TestCase $this */
     $csvFile = UploadedFile::fake()
-        ->createWithContent('employees.csv',
+        ->createWithContent(
+            'employees.csv',
             $this->csvHeader.
             "1,Jan Kowalski,UOP,TAK,\n". // <- create
             '2,Jan Kowalski,ZLEC,TAK,' // <- update
@@ -116,7 +119,8 @@ it('updates existing user details instead of creating duplicates', function () {
 it('transliterates polish characters in generated login', function () {
     /** @var \Tests\TestCase $this */
     $csvFile = UploadedFile::fake()
-        ->createWithContent('employees.csv',
+        ->createWithContent(
+            'employees.csv',
             $this->csvHeader.
             '1,Łukasz Ślusarek,UOP,TAK,'
         );
@@ -142,7 +146,8 @@ it('appends numeric suffix to login when collision occurs', function () {
         'login' => 'jkowal',
     ]);
     $csvFile = UploadedFile::fake()
-        ->createWithContent('employees.csv',
+        ->createWithContent(
+            'employees.csv',
             $this->csvHeader.
             '1,Jan Kowalski,UOP,TAK,'
         );
@@ -163,7 +168,8 @@ it('appends numeric suffix to login when collision occurs', function () {
 it('correctly assigns positions based on csv columns', function () {
     /** @var \Tests\TestCase $this */
     $csvFile = UploadedFile::fake()
-        ->createWithContent('employees.csv',
+        ->createWithContent(
+            'employees.csv',
             $this->csvHeader.
             "1,Jan Kowalski,UOP,TAK,\n".
             '2,Anna Nowak,ZLEC,,TAK'

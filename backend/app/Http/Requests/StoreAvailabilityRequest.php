@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreAvailabilityRequest extends FormRequest
 {
@@ -29,12 +28,8 @@ class StoreAvailabilityRequest extends FormRequest
 
             'is_available' => ['required', 'boolean'],
 
-            'date' => ['required', 'date',
+            'date' => ['required', 'date'],
 
-                Rule::unique('availabilities')->where(function ($query) {
-                    return $query->where('user_id', $this->user_id);
-                }),
-            ],
         ];
     }
 }

@@ -36,9 +36,7 @@ class MaxHoursPerQuarterValidator extends BaseHourValidator
             $this->throwExceededLimitException(
                 'quarter',
                 $quarterlyMinuteLimit / 60,
-
                 round($excessMinutes / 60, 1)
-
             );
         }
     }

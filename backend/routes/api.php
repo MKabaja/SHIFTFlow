@@ -8,7 +8,6 @@ use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\ShiftController;
 use Illuminate\Support\Facades\Route;
 
-
 // ===============================================
 
 // Login
@@ -17,21 +16,18 @@ Route::prefix('auth')
     ->group(function () {
         Route::middleware('throttle:5,1') // Limit to 5 attempts per minute
             ->group(function () {
-                
-            Route::post('/login', 'login');
-            Route::post('/login-pin', 'loginPin');
-        });
 
-        
+                Route::post('/login', 'login');
+                Route::post('/login-pin', 'loginPin');
+            });
 
         Route::middleware('auth:api')
             ->group(function () {
-                
+
                 Route::get('/me', 'me');
                 Route::post('/logout', 'logout');
             });
-        });
-
+    });
 
 // Shift Crud
 
@@ -106,5 +102,3 @@ Route::middleware(['auth:api'])
         Route::post('/', 'store');
         Route::delete('/{availability}', 'destroy');
     });
-
-

@@ -15,7 +15,6 @@ abstract class BaseConflictValidator implements ShiftValidatorInterface
      */
     protected function throwConflictException(
         string $message,
-
     ): void {
 
         throw ValidationException::withMessages([

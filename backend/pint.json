@@ -1,0 +1,15 @@
+{
+    "preset": "laravel",
+    "rules": {
+        "single_quote": true,
+        "method_argument_space": {
+            "on_multiline": "ensure_fully_multiline"
+        },
+        "trailing_comma_in_multiline": true,
+        "indentation_type": true,
+        "statement_indentation": true,
+        "no_extra_blank_lines": {
+            "tokens": ["extra"]
+        }
+    }
+}

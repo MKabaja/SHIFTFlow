@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Position;
+use Illuminate\Database\Seeder;
 
 class PositionSeeder extends Seeder
 {
@@ -51,7 +50,7 @@ class PositionSeeder extends Seeder
 
             ['name' => 'BT',  'description' => 'Brine Tower Ticketing Officer'],
         ];
-        foreach($positions as $data){
+        foreach ($positions as $data) {
             Position::firstOrCreate(
                 ['name' => $data['name']],
                 ['description' => $data['description']]
