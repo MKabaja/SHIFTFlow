@@ -11,11 +11,6 @@ class ShiftValidationDataFactory
 {
     private array $attributes = [];
 
-    public static function new(): self
-    {
-        return new self;
-    }
-
     public function withUser(User $user): self
     {
         $this->attributes['userId'] = $user->id;
@@ -115,5 +110,10 @@ class ShiftValidationDataFactory
             ignoreShiftId: $data['ignoreShiftId'],
             accumulatedBatchMinutes: $data['accumulatedBatchMinutes'],
         );
+    }
+
+    public static function new(): self
+    {
+        return new self;
     }
 }

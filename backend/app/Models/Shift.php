@@ -39,17 +39,6 @@ class Shift extends Model
         'notes',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'date' => 'date',
-            'shift_start' => 'datetime:H:i',
-            'shift_end' => 'datetime:H:i',
-            'minutes_worked' => 'integer',
-
-        ];
-    }
-
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -109,5 +98,16 @@ class Shift extends Model
         }
 
         return $query;
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'date' => 'date',
+            'shift_start' => 'datetime:H:i',
+            'shift_end' => 'datetime:H:i',
+            'minutes_worked' => 'integer',
+
+        ];
     }
 }

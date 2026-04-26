@@ -11,16 +11,6 @@ readonly class BatchResult
         private array $errors = [],
     ) {}
 
-    public static function success(Collection $shifts): self
-    {
-        return new self(shifts: $shifts);
-    }
-
-    public static function withErrors(array $errors): self
-    {
-        return new self(shifts: collect(), errors: $errors);
-    }
-
     public function hasErrors(): bool
     {
         return ! empty($this->errors);
@@ -39,5 +29,15 @@ readonly class BatchResult
     public function count(): int
     {
         return $this->shifts->count();
+    }
+
+    public static function success(Collection $shifts): self
+    {
+        return new self(shifts: $shifts);
+    }
+
+    public static function withErrors(array $errors): self
+    {
+        return new self(shifts: collect(), errors: $errors);
     }
 }

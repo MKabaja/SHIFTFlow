@@ -10,18 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    private function deny(string $message, int $code = 403): Response
-    {
-        Log::warning($message, ['user_id' => Auth::id()]);
-
-        return response()->json(['message' => $message], $code);
-    }
-
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
         if (! Auth::check()) {
@@ -43,5 +31,17 @@ class RoleMiddleware
         }
 
         return $next($request);
+    }
+
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    private function deny(string $message, int $code = 403): Response
+    {
+        Log::warning($message, ['user_id' => Auth::id()]);
+
+        return response()->json(['message' => $message], $code);
     }
 }

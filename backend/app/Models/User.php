@@ -57,28 +57,6 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'pin_hashed' => 'hashed',
-            'hourly_rate' => 'decimal:2',
-            'is_active' => 'boolean',
-            'max_minutes_per_month' => 'integer',
-            'max_minutes_per_quarter' => 'integer',
-            'min_break_minutes' => 'integer',
-            'role' => 'string',
-            'contract_type' => 'string',
-
-        ];
-    }
-
-    /**
      * User May have multiple SHIFTS
      *
      * @return HasMany<Shift, User>
@@ -136,5 +114,27 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'pin_hashed' => 'hashed',
+            'hourly_rate' => 'decimal:2',
+            'is_active' => 'boolean',
+            'max_minutes_per_month' => 'integer',
+            'max_minutes_per_quarter' => 'integer',
+            'min_break_minutes' => 'integer',
+            'role' => 'string',
+            'contract_type' => 'string',
+
+        ];
     }
 }

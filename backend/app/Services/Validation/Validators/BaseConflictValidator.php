@@ -9,6 +9,14 @@ use Illuminate\Validation\ValidationException;
 abstract class BaseConflictValidator implements ShiftValidatorInterface
 {
     /**
+     * Validate shift data against specific business rule.
+     * Each child validator must implement its own validation logic.
+     *
+     * @throws ValidationException
+     */
+    abstract public function validate(ShiftValidationData $shift): void;
+
+    /**
      * This method ensures a consistent error message.
      *
      * @throws ValidationException
@@ -21,12 +29,4 @@ abstract class BaseConflictValidator implements ShiftValidatorInterface
             'conflict' => [$message],
         ]);
     }
-
-    /**
-     * Validate shift data against specific business rule.
-     * Each child validator must implement its own validation logic.
-     *
-     * @throws ValidationException
-     */
-    abstract public function validate(ShiftValidationData $shift): void;
 }

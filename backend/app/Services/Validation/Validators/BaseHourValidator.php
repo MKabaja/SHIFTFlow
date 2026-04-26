@@ -11,6 +11,14 @@ use Illuminate\Validation\ValidationException;
 abstract class BaseHourValidator implements ShiftValidatorInterface
 {
     /**
+     * Validate shift data against specific business rule.
+     * Each child validator must implement its own validation logic.
+     *
+     * @throws ValidationException
+     */
+    abstract public function validate(ShiftValidationData $shift): void;
+
+    /**
      * Retrieve total worked minutes for user in date range.
      * Optionally ignores specific shift (for updates via ignoreShiftId).
      *
@@ -45,12 +53,4 @@ abstract class BaseHourValidator implements ShiftValidatorInterface
             'hours' => "hour limit exceeded by {$excess}h in {$periodTime}.(Limit:{$limit}H)",
         ]);
     }
-
-    /**
-     * Validate shift data against specific business rule.
-     * Each child validator must implement its own validation logic.
-     *
-     * @throws ValidationException
-     */
-    abstract public function validate(ShiftValidationData $shift): void;
 }

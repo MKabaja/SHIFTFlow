@@ -28,6 +28,11 @@ class Availability extends Model
 
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     protected function casts(): array
     {
         return [
@@ -35,10 +40,5 @@ class Availability extends Model
             'submission_date' => 'date',
             'is_available' => 'boolean',
         ];
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
     }
 }
