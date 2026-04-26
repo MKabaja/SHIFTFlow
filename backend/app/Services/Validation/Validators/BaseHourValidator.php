@@ -4,6 +4,7 @@ namespace App\Services\Validation\Validators;
 
 use App\DataTransferObjects\ShiftValidationData;
 use App\Models\Shift;
+use App\Services\Validation\ShiftValidatorInterface;
 use Carbon\CarbonInterface;
 use Illuminate\Validation\ValidationException;
 

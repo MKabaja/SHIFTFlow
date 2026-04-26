@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Validation\Validators;
+namespace App\Services\Validation;
 
 use App\DataTransferObjects\ShiftValidationData;
 

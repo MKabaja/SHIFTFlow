@@ -3,7 +3,7 @@
 namespace App\Services\Validation\Validators;
 
 use App\DataTransferObjects\ShiftValidationData;
-use App\Models\Shift;
+use App\Services\Validation\ShiftValidatorInterface;
 use Illuminate\Validation\ValidationException;
 
 abstract class BaseConflictValidator implements ShiftValidatorInterface
