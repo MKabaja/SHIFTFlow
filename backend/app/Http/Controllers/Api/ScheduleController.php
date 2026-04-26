@@ -80,7 +80,7 @@ class ScheduleController extends Controller
         $schedule->delete();
 
         return response()->json([
-            'message' => 'Schedule deleted Successfully',
+            'message' => 'Schedule deleted successfully',
         ], 200);
     }
 
@@ -121,6 +121,10 @@ class ScheduleController extends Controller
             'published_at' => now(),
         ]);
 
-        return response()->json(ScheduleResource::make($schedule));
+        return ScheduleResource::make($schedule)
+            ->additional(['message' => 'Schedule published successfully'])
+            ->response()
+            ->setStatusCode(200);
+
     }
 }

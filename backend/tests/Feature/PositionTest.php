@@ -46,9 +46,24 @@ test('admin can list positions', function () {
         ->assertJsonCount(4, 'data') // from seed
         ->assertJsonStructure([
             'data' => [
-                '*' => ['id', 'name', 'description', 'creator'],
+                '*' => ['id', 'name', 'description'],
             ],
         ]);
+});
+
+test('position created by admin has creator_name in response', function () {
+    /** @var \Tests\TestCase $this */
+    $payload = [
+        'name' => 'C9',
+        'description' => 'Opis stanowiska',
+    ];
+
+    $this->postJson('/api/positions', $payload)
+        ->assertCreated()
+        ->assertJsonStructure([
+            'data' => ['id', 'name', 'description', 'creator_name'],
+        ]);
+
 });
 
 test('admin can create a new position', function () {
@@ -94,7 +109,7 @@ test('admin can delete an unused position', function () {
 
     $this->deleteJson("/api/positions/{$position->id}")
         ->assertOk()
-        ->assertJson(['message' => 'Position deleted Successfully']);
+        ->assertJson(['message' => 'Position deleted successfully']);
 
     $this->assertDatabaseMissing('positions', ['id' => $position->id]);
 });

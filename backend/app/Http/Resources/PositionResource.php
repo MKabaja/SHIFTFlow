@@ -20,7 +20,7 @@ class PositionResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'created_by' => $this->when(! $isSystem, $this->creator?->name),
+            'creator_name' => $this->when(! $isSystem, $this->creator?->name),
             'created_at' => $this->when(! $isSystem, $this->created_at?->toIso8601String()),
 
         ];

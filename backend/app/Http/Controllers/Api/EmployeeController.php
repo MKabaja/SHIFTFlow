@@ -54,7 +54,7 @@ class EmployeeController extends Controller
         $employee = $this->employeeRepository->createEmployee($data);
         $employee->load('positions');
 
-        return (new UserResource($employee))
+        return UserResource::make($employee)
             ->additional(['message' => 'Employee created successfully'])
             ->response()
             ->setStatusCode(201);
@@ -69,7 +69,7 @@ class EmployeeController extends Controller
             abort(404);
         }
 
-        return new UserResource($employee->load('positions'));
+        return UserResource::make($employee->load('positions'));
     }
 
     /**
@@ -84,7 +84,7 @@ class EmployeeController extends Controller
         $updatedEmployee = $this->employeeRepository->updateEmployee($employee, $data);
         $updatedEmployee->load('positions');
 
-        return (new UserResource($updatedEmployee))
+        return UserResource::make($updatedEmployee)
             ->additional(['message' => 'Employee updated successfully'])
             ->response()
             ->setStatusCode(200);

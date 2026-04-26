@@ -88,7 +88,7 @@ class ShiftController extends Controller
 
         $shift->load(['user', 'position', 'schedule']);
 
-        return (new ShiftResource($shift))
+        return ShiftResource::make($shift)
             ->additional(['message' => 'Shift created successfully'])
             ->response()
             ->setStatusCode(201);
@@ -141,7 +141,7 @@ class ShiftController extends Controller
 
         $shift->refresh()->load(['user', 'position', 'schedule']);
 
-        return (new ShiftResource($shift))
+        return ShiftResource::make($shift)
             ->additional(['message' => 'Shift updated successfully'])
             ->response()
             ->setStatusCode(200);
@@ -152,7 +152,7 @@ class ShiftController extends Controller
         $shift->delete();
 
         return response()->json([
-            'message' => 'Shift deleted Successfully',
+            'message' => 'Shift deleted successfully',
         ], 200);
     }
 }

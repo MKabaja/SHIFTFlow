@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePositionRequest;
 use App\Http\Requests\UpdatePositionRequest;
+use App\Http\Resources\PositionResource;
+use App\Http\Resources\ShiftResource;
 use App\Models\Position;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,12 +18,12 @@ class PositionController extends Controller
     {
         $positionsQuery = Position::with('creator')->paginate(20);
 
-        return response()->json($positionsQuery);
+        return PositionResource::collection($positionsQuery)
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
-     * Summary of store
-     *
      * @param  StorePositionRequest  $request  custom request
      */
     public function store(StorePositionRequest $request): JsonResponse
@@ -32,7 +34,10 @@ class PositionController extends Controller
 
         $position = Position::create($data);
 
-        return response()->json($position, 201);
+        return PositionResource::make($position)
+            ->additional(['message' => 'Position created successfully'])
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
@@ -40,7 +45,9 @@ class PositionController extends Controller
      */
     public function show(Position $position)
     {
-        return $position->load('creator');
+        $position->load('creator');
+
+        return PositionResource::make($position);
     }
 
     /**
@@ -48,7 +55,9 @@ class PositionController extends Controller
      */
     public function shifts(Position $position)
     {
-        return $position->shifts()->paginate(20);
+        return ShiftResource::collection($position->shifts()->paginate(20))
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
@@ -59,11 +68,10 @@ class PositionController extends Controller
         $data = $request->validated();
         $position->update($data);
 
-        return response()->json([
-
-            'message' => 'Position updated Successfully',
-            'position' => $position,
-        ], 200);
+        return PositionResource::make($position)
+            ->additional(['message' => 'Position updated successfully'])
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
@@ -72,16 +80,16 @@ class PositionController extends Controller
     public function destroy(Position $position): JsonResponse
     {
         if ($position->shifts()->exists()) {
-            Log::info('Delete blocked:Position ID '.$position->id.' is linked to active schedule.');
+            Log::info('Delete blocked: Position ID '.$position->id.' is linked to active schedule.');
 
             return response()->json([
                 'error' => 'INTEGRITY_VIOLATION: Cannot delete position, it is currently linked to one or more schedules.',
-            ], 409);
+            ], 409); // 409-> conflict
         }
         $position->delete();
 
         return response()->json([
-            'message' => 'Position deleted Successfully',
-        ]);
+            'message' => 'Position deleted successfully',
+        ], 200);
     }
 }

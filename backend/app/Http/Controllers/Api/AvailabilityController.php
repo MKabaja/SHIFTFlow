@@ -75,7 +75,7 @@ class AvailabilityController extends Controller
             ? 'Availability created successfully'
             : 'Availability updated successfully';
 
-        return (new AvailabilityResource($availability))
+        return AvailabilityResource::make($availability)
             ->additional(['message' => $message])
             ->response()
             ->setStatusCode($statusCode);
