@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\DataTransferObjects\ShiftValidationData;
 use App\Models\Position;
 use App\Models\User;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Validation\Validators;
 
 use App\DataTransferObjects\ShiftValidationData;
@@ -29,10 +31,10 @@ abstract class BaseHourValidator implements ShiftValidatorInterface
         CarbonInterface $startDate,
         CarbonInterface $endDate
     ): int {
-        return Shift::where('user_id', $shift->userId)
+        return (int) Shift::where('user_id', $shift->userId)
             ->whereBetween('date', [$startDate, $endDate])
             ->excluding($shift->ignoreShiftId)
-            ->sum('minutes_worked') ?? 0;
+            ->sum('minutes_worked');
     }
 
     /**

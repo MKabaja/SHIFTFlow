@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Validation\Helpers;
 
 use Carbon\Carbon;
@@ -79,6 +81,6 @@ class TimeHelper
             $end->addDay();
         }
 
-        return $start->diffInMinutes($end);
+        return (int) $start->diffInMinutes($end);
     }
 }

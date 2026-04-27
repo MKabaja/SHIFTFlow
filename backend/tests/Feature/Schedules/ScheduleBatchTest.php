@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Position;
 use App\Models\Schedule;
 use App\Models\Shift;

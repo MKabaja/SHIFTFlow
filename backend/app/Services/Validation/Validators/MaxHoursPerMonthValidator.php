@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Validation\Validators;
 
 use App\DataTransferObjects\ShiftValidationData;
@@ -37,7 +39,7 @@ class MaxHoursPerMonthValidator extends BaseHourValidator
 
             $this->throwExceededLimitException(
                 'month',
-                $monthlyMinuteLimit / 60,
+                intdiv($monthlyMinuteLimit, 60),
                 round($excessMinutes / 60, 1)
             );
         }
