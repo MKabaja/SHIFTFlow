@@ -7,27 +7,55 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int|null $schedule_id
+ * @property \Illuminate\Support\Carbon $date
+ * @property int $position_id
+ * @property \Illuminate\Support\Carbon $shift_start
+ * @property \Illuminate\Support\Carbon $shift_end
+ * @property int|null $minutes_worked
+ * @property string $status
+ * @property numeric|null $hourly_rate
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Position $position
+ * @property-read \App\Models\Schedule|null $schedule
+ * @property-read \App\Models\User $user
+ *
+ * @method static Builder<static>|Shift active()
+ * @method static Builder<static>|Shift dateRange(?string $from, ?string $to)
+ * @method static Builder<static>|Shift excluding(?int $id)
+ * @method static \Database\Factories\ShiftFactory factory($count = null, $state = [])
+ * @method static Builder<static>|Shift finishedBefore(string $date, string $time)
+ * @method static Builder<static>|Shift newModelQuery()
+ * @method static Builder<static>|Shift newQuery()
+ * @method static Builder<static>|Shift query()
+ * @method static Builder<static>|Shift whereCreatedAt($value)
+ * @method static Builder<static>|Shift whereDate($value)
+ * @method static Builder<static>|Shift whereHourlyRate($value)
+ * @method static Builder<static>|Shift whereId($value)
+ * @method static Builder<static>|Shift whereMinutesWorked($value)
+ * @method static Builder<static>|Shift whereNotes($value)
+ * @method static Builder<static>|Shift whereOverlapping(string $start, string $end)
+ * @method static Builder<static>|Shift wherePositionId($value)
+ * @method static Builder<static>|Shift whereScheduleId($value)
+ * @method static Builder<static>|Shift whereShiftEnd($value)
+ * @method static Builder<static>|Shift whereShiftStart($value)
+ * @method static Builder<static>|Shift whereStatus($value)
+ * @method static Builder<static>|Shift whereUpdatedAt($value)
+ * @method static Builder<static>|Shift whereUserId($value)
+ *
+ * @mixin \Eloquent
+ */
 class Shift extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-/**
-     * @property int $id
-     * @property int $user_id ID of the employee this schedule belongs to (BelongsTo User).
-     * @property \Illuminate\Support\Carbon $date The date the shift is scheduled for.
-     * @property string $position_id Position code in the mine (e.g., B1, WR).
-     * @property \Illuminate\Support\Carbon $shift_start Shift start time
-     * @property \Illuminate\Support\Carbon $shift_end Shift end time
-     * @property int|null $hours_worked Calculated work hours (by backend).
-     * @property string $status Shift status (scheduled, completed, cancelled, vacation, unavailable).
-     * @property float|null $hourly_rate The employee's current hourly rate, null if not defined.
-     * @property string|null $notes Optional notes or explanation.
-     * @property \Illuminate\Support\Carbon $created_at The timestamp when the record was created
-     * @property \Illuminate\Support\Carbon $updated_at The timestamp when the record was last updated
-     */
     protected $fillable = [
         'user_id',
         'position_id',
@@ -41,17 +69,17 @@ class Shift extends Model
         'notes',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function position()
+    public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class, 'position_id');
     }
 
-    public function schedule()
+    public function schedule(): BelongsTo
     {
         return $this->belongsTo(Schedule::class);
     }

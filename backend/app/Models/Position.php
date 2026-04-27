@@ -10,18 +10,36 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property int|null $created_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User|null $creator
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Shift> $shifts
+ * @property-read int|null $shifts_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property-read int|null $users_count
+ *
+ * @method static \Database\Factories\PositionFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Position whereUpdatedAt($value)
+ *
+ * @mixin \Eloquent
+ */
 class Position extends Model
 {
     use HasFactory;
 
-    /**
-     * @property int $id
-     * @property string $name Position name.
-     * @property string|null $description Explanation of the abbreviation (e.g., B1 -> First Ticket Officer).
-     * @property int|null $created_by Manager ID , who created position.
-     * @property \Illuminate\Support\Carbon $created_at The timestamp when the record was created
-     * @property \Illuminate\Support\Carbon $updated_at The timestamp when the record was last updated
-     */
     protected $fillable = [
         'name',
         'description',
@@ -29,8 +47,6 @@ class Position extends Model
     ];
 
     /**
-     * shows info abaut creator
-     *
      * @return BelongsTo<User, Position>
      */
     public function creator(): BelongsTo
@@ -39,8 +55,6 @@ class Position extends Model
     }
 
     /**
-     * shcedule may have multiple positions
-     *
      * @return HasMany<Schedule, Position>
      */
     public function shifts(): HasMany
@@ -49,8 +63,6 @@ class Position extends Model
     }
 
     /**
-     * Position may belong to many users
-     *
      * @return BelongsToMany<User, Position, \Illuminate\Database\Eloquent\Relations\Pivot>
      */
     public function users(): BelongsToMany
