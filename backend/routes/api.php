@@ -38,7 +38,6 @@ Route::middleware(['auth:api', 'role:admin,manager'])
     ->controller(ShiftController::class)
     ->group(function () {
 
-        Route::post('/', 'store');
         Route::match(['put', 'patch'], '/{shift}', 'update');
         Route::delete('/{shift}', 'destroy');
         Route::get('/{shift}', 'show');

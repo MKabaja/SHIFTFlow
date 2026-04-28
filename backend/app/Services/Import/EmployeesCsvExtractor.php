@@ -9,13 +9,10 @@ use Illuminate\Http\UploadedFile;
 class EmployeesCsvExtractor
 {
     /**
-     * Reads the CSV file and returns the headers and raw rows.
-     *
-     * @param  UploadedFile  $csvFile  file from frontend
      * @return array{
-     * header_map: array<int,string>,
-     * rows: array<int,array<int,string>
-     * } raw Row Data
+     *     header_map: array<int,string>,
+     *     rows: array<int,array<int,string>>
+     * }
      */
     public function extract(UploadedFile $csvFile): array
     {
@@ -36,7 +33,7 @@ class EmployeesCsvExtractor
     }
 
     /**
-     * @return bool|resource
+     * @return resource
      */
     private function readCsvFile(string $filePath)
     {
@@ -101,9 +98,6 @@ class EmployeesCsvExtractor
         return empty($value);
     }
 
-    /**
-     * @param  array  $firstCsvRow
-     */
     private function mapRowHeadersToIndexes($fileResource, string $separator): array
     {
         $firstCsvRow = fgetcsv($fileResource, 0, $separator);

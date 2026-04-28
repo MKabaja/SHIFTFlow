@@ -35,11 +35,6 @@ class RoleMiddleware
         return $next($request);
     }
 
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     private function deny(string $message, int $code = 403): Response
     {
         Log::warning($message, ['user_id' => Auth::id()]);

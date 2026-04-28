@@ -117,7 +117,7 @@ class AuthController extends Controller
         if (! $token) {
             return response()->json(['message' => 'No token provided'], 401);
         }
-        JWTAuth::invalidate($token);
+        JWTAuth::invalidate();
 
         return response()->json(['message' => 'Logged out successfully'], 200);
 

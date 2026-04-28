@@ -24,7 +24,7 @@ class EmployeeCsvValidator
 
     /**
      * @return array{
-     *   valid_rows: array<int,array{name:string,contract_type:string,positions:array<int,int>>>,
+     *   valid_rows: array<int,array{name:string,contract_type:string,positions:array<int,int>}>,
      *   issues: array<int,array<int,string>>
      * }
      */

@@ -9,7 +9,6 @@ use App\Models\Shift;
 use App\Services\Batch\BatchPreprocessor;
 use App\Services\Batch\BatchValidationService;
 use App\Services\Validation\Helpers\TimeHelper;
-use App\Services\Validation\ValidationService;
 use App\ValueObjects\BatchResult;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +17,6 @@ use Illuminate\Support\Facades\DB;
 class ScheduleService
 {
     public function __construct(
-        private ValidationService $validationService,
         private readonly BatchPreprocessor $batchPreprocessor,
         private readonly BatchValidationService $batchValidationService
     ) {}

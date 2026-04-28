@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Api;
 use App\DataTransferObjects\ShiftValidationData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\IndexShiftRequest;
-use App\Http\Requests\StoreShiftRequest;
 use App\Http\Requests\UpdateShiftRequest;
 use App\Http\Resources\ShiftResource;
 use App\Models\Shift;
@@ -46,54 +45,6 @@ class ShiftController extends Controller
             ->paginate($perPage);
 
         return ShiftResource::collection($shifts);
-    }
-
-    public function store(StoreShiftRequest $request)
-    {
-        abort(410, 'Use schedule batch endpoint instead.');
-
-        $shiftData = $request->validated();
-        $user = User::with('positions')
-            ->findOrFail($shiftData['user_id']);
-
-        $dto = new ShiftValidationData(
-            userId: $shiftData['user_id'],
-            date: $shiftData['date'],
-            shiftStart: $shiftData['shift_start'],
-            shiftEnd: $shiftData['shift_end'],
-            positionId: $shiftData['position_id'],
-            allowedPositionIds: $user->positions->pluck('id')->toArray(),
-            maxMinutesPerMonth: $user->max_minutes_per_month,
-            minBreakMinutes: $user->min_break_minutes,
-            maxMinutesPerQuarter: $user->max_minutes_per_quarter,
-            ignoreShiftId: null
-        );
-
-        $this->validationService->validate($dto);
-
-        $minutesWorked = TimeHelper::calculateMinutesDifference(
-            "{$dto->date} {$dto->shiftStart}",
-            "{$dto->date} {$dto->shiftEnd}"
-        );
-
-        $shift = Shift::create([
-            'user_id' => $shiftData['user_id'],
-            'position_id' => $shiftData['position_id'],
-            'date' => $shiftData['date'],
-            'shift_start' => $shiftData['shift_start'],
-            'shift_end' => $shiftData['shift_end'],
-            'minutes_worked' => $minutesWorked,
-            'schedule_id' => $shiftData['schedule_id'] ?? null,
-            'status' => $shiftData['status'] ?? 'scheduled',
-            'notes' => $shiftData['notes'] ?? null,
-        ]);
-
-        $shift->load(['user', 'position', 'schedule']);
-
-        return ShiftResource::make($shift)
-            ->additional(['message' => 'Shift created successfully'])
-            ->response()
-            ->setStatusCode(201);
     }
 
     public function show(Shift $shift)

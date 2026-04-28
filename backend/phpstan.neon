@@ -1,8 +1,14 @@
 includes:
     - vendor/larastan/larastan/extension.neon
-    - phpstan-baseline.neon
+   
 
 parameters:
     paths:
         - app
-    level: 2
+    level: 5
+    treatPhpDocTypesAsCertain: false 
+    ignoreErrors:
+        - path: app/Providers/TelescopeServiceProvider.php
+          messages:
+              - '#If condition is always true#'
+              - '#Unreachable statement#'

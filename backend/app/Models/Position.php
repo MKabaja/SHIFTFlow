@@ -47,7 +47,7 @@ class Position extends Model
     ];
 
     /**
-     * @return BelongsTo<User, Position>
+     * @return BelongsTo<User, $this>
      */
     public function creator(): BelongsTo
     {
@@ -55,7 +55,7 @@ class Position extends Model
     }
 
     /**
-     * @return HasMany<Schedule, Position>
+     * @return HasMany<Shift, $this>
      */
     public function shifts(): HasMany
     {
@@ -63,7 +63,7 @@ class Position extends Model
     }
 
     /**
-     * @return BelongsToMany<User, Position, \Illuminate\Database\Eloquent\Relations\Pivot>
+     * @return BelongsToMany<User, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
      */
     public function users(): BelongsToMany
     {
