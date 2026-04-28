@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 
 class AvailabilityController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Availability::class);
 
@@ -37,7 +37,8 @@ class AvailabilityController extends Controller
             )
             ->paginate(20);
 
-        return AvailabilityResource::collection($availabilities);
+        return AvailabilityResource::collection($availabilities)
+            ->response();
 
     }
 

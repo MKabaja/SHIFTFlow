@@ -13,13 +13,14 @@ use App\Models\Shift;
 use App\Models\User;
 use App\Services\Validation\Helpers\TimeHelper;
 use App\Services\Validation\ValidationService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class ShiftController extends Controller
 {
     public function __construct(protected ValidationService $validationService) {}
 
-    public function index(IndexShiftRequest $request)
+    public function index(IndexShiftRequest $request): JsonResponse
     {
         $user = Auth::user();
         $perPage = $request->validated('per_page') ?? 50;
@@ -44,17 +45,20 @@ class ShiftController extends Controller
             ->orderBy('date')
             ->paginate($perPage);
 
-        return ShiftResource::collection($shifts);
+        return ShiftResource::collection($shifts)
+            ->response();
+
     }
 
-    public function show(Shift $shift)
+    public function show(Shift $shift): JsonResponse
     {
         $shift->load(['user', 'position', 'schedule']);
 
-        return ShiftResource::make($shift);
+        return ShiftResource::make($shift)
+            ->response();
     }
 
-    public function update(UpdateShiftRequest $request, Shift $shift)
+    public function update(UpdateShiftRequest $request, Shift $shift): JsonResponse
     {
         $shiftData = $request->validated();
 
@@ -100,7 +104,7 @@ class ShiftController extends Controller
             ->setStatusCode(200);
     }
 
-    public function destroy(Shift $shift)
+    public function destroy(Shift $shift): JsonResponse
     {
         $shift->delete();
 

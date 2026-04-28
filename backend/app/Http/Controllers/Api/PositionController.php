@@ -45,17 +45,19 @@ class PositionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Position $position)
+    public function show(Position $position): JsonResponse
     {
         $position->load('creator');
 
-        return PositionResource::make($position);
+        return PositionResource::make($position)
+            ->response();
+
     }
 
     /**
      * Display the shifts for the specified position.
      */
-    public function shifts(Position $position)
+    public function shifts(Position $position): JsonResponse
     {
         return ShiftResource::collection($position->shifts()->paginate(20))
             ->response()

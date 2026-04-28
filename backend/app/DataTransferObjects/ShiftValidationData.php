@@ -6,6 +6,7 @@ namespace App\DataTransferObjects;
 
 readonly class ShiftValidationData
 {
+    /** @param list<int> $allowedPositionIds */
     public function __construct(
         public int $userId,
         public string $date,

@@ -8,6 +8,10 @@ use Illuminate\Support\Collection;
 
 readonly class BatchResult
 {
+    /**
+     * @param  Collection<int, \App\Models\Shift>  $shifts
+     * @param  array<string, list<string>>  $errors
+     */
     private function __construct(
         private Collection $shifts,
         private array $errors = [],
@@ -18,11 +22,17 @@ readonly class BatchResult
         return ! empty($this->errors);
     }
 
+    /**
+     * @return array<string, list<string>>
+     */
     public function errors(): array
     {
         return $this->errors;
     }
 
+    /**
+     * @return Collection<int, \App\Models\Shift>
+     */
     public function shifts(): Collection
     {
         return $this->shifts;
@@ -33,11 +43,17 @@ readonly class BatchResult
         return $this->shifts->count();
     }
 
+    /**
+     * @param  Collection<int, \App\Models\Shift>  $shifts
+     */
     public static function success(Collection $shifts): self
     {
         return new self(shifts: $shifts);
     }
 
+    /**
+     * @param  array<string, list<string>>  $errors
+     */
     public static function withErrors(array $errors): self
     {
         return new self(shifts: collect(), errors: $errors);

@@ -84,11 +84,13 @@ class Shift extends Model
         return $this->belongsTo(Schedule::class);
     }
 
+    /** @param Builder<Shift> $query */
     public function scopeActive(Builder $query): void
     {
         $query->whereIn('status', ['scheduled', 'completed']);
     }
 
+    /** @param Builder<Shift> $query */
     public function scopeWhereOverlapping(Builder $query, string $start, string $end): Builder
     {
         return $query
@@ -96,11 +98,13 @@ class Shift extends Model
             ->where('shift_end', '>', $start);
     }
 
+    /** @param Builder<Shift> $query */
     public function scopeExcluding(Builder $query, ?int $id): Builder
     {
         return $query->when($id, fn ($q, $id) => $q->where('id', '!=', $id));
     }
 
+    /** @param Builder<Shift> $query */
     public function scopeFinishedBefore(Builder $query, string $date, string $time): Builder
     {
         return $query->where(function ($q) use ($date, $time) {
@@ -112,6 +116,7 @@ class Shift extends Model
         });
     }
 
+    /** @param Builder<Shift> $query */
     public function scopeDateRange(Builder $query, ?string $from, ?string $to): Builder
     {
 

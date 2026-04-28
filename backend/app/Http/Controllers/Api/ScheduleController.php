@@ -16,7 +16,6 @@ use App\Models\Schedule;
 use App\Models\Shift;
 use App\Services\ScheduleService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ScheduleController extends Controller
 {
@@ -24,7 +23,7 @@ class ScheduleController extends Controller
         private readonly ScheduleService $scheduleService
     ) {}
 
-    public function index(GetSchedulesRequest $request): AnonymousResourceCollection
+    public function index(GetSchedulesRequest $request): JsonResponse
     {
         $perPage = $request->validated('per_page') ?? 20;
 
@@ -43,7 +42,8 @@ class ScheduleController extends Controller
 
             ->paginate($perPage);
 
-        return ScheduleListResource::collection($schedules);
+        return ScheduleListResource::collection($schedules)
+            ->response();
 
     }
 
@@ -58,11 +58,12 @@ class ScheduleController extends Controller
 
     }
 
-    public function show(Schedule $schedule): ScheduleListResource
+    public function show(Schedule $schedule): JsonResponse
     {
         $schedule->load(['creator', 'shifts']);
 
-        return ScheduleListResource::make($schedule);
+        return ScheduleListResource::make($schedule)
+            ->response();
     }
 
     public function update(UpdateScheduleRequest $request, Schedule $schedule): JsonResponse

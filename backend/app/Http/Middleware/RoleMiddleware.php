@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, ...$roles): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (! Auth::check()) {
             return $this->deny('Unauthorized.', 401);
@@ -28,7 +28,7 @@ class RoleMiddleware
             return $this->deny('Middleware roles are not defined', 500);
         }
 
-        if (! in_array($role, $roles)) {
+        if (! in_array($role, $roles, true)) {
             return $this->deny('Role not allowed');
         }
 

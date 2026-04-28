@@ -6,6 +6,7 @@ namespace App\DataTransferObjects;
 
 class EmployeeImportData
 {
+    /** @param list<int> $positions */
     public function __construct(
         public readonly string $name,
         public readonly string $contractType,
