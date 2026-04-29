@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\ShiftFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -54,6 +55,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Shift extends Model
 {
+    /** @use HasFactory<ShiftFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -69,16 +71,25 @@ class Shift extends Model
         'notes',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * @return BelongsTo<Position, $this>
+     */
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class, 'position_id');
     }
 
+    /**
+     * @return BelongsTo<Schedule, $this>
+     */
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(Schedule::class);
@@ -90,7 +101,9 @@ class Shift extends Model
         $query->whereIn('status', ['scheduled', 'completed']);
     }
 
-    /** @param Builder<Shift> $query */
+    /** @param Builder<Shift> $query
+     * @return Builder<Shift>
+     */
     public function scopeWhereOverlapping(Builder $query, string $start, string $end): Builder
     {
         return $query
@@ -98,13 +111,17 @@ class Shift extends Model
             ->where('shift_end', '>', $start);
     }
 
-    /** @param Builder<Shift> $query */
+    /** @param Builder<Shift> $query
+     * @return Builder<Shift>
+     */
     public function scopeExcluding(Builder $query, ?int $id): Builder
     {
         return $query->when($id, fn ($q, $id) => $q->where('id', '!=', $id));
     }
 
-    /** @param Builder<Shift> $query */
+    /** @param Builder<Shift> $query
+     * @return Builder<Shift>
+     */
     public function scopeFinishedBefore(Builder $query, string $date, string $time): Builder
     {
         return $query->where(function ($q) use ($date, $time) {
@@ -116,7 +133,9 @@ class Shift extends Model
         });
     }
 
-    /** @param Builder<Shift> $query */
+    /** @param Builder<Shift> $query
+     * @return Builder<Shift>
+     */
     public function scopeDateRange(Builder $query, ?string $from, ?string $to): Builder
     {
 

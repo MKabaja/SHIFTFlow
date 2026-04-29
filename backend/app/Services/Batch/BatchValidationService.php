@@ -83,7 +83,19 @@ class BatchValidationService
         return $errors;
     }
 
-    private function addUserError(Collection $userShifts, array &$errors)
+    /**
+     * @param  array<string,array<string, array<string>>>  $errors
+     * @param  Collection<int,
+     * array{
+     *      client_temp_id: string,
+     *      user_id: int,
+     *      position_id: int,
+     *      date: string,
+     *      shift_start: string,
+     *      shift_end: string,
+     *      }> $userShifts
+     */
+    private function addUserError(Collection $userShifts, array &$errors): void
     {
         foreach ($userShifts as $shiftData) {
             $errors[$shiftData['client_temp_id']] = [
@@ -102,7 +114,7 @@ class BatchValidationService
      *      position_id: int,
      *    } $shiftData
      */
-    private function createDTO(array $shiftData, User $user, int $accumulatedMinutes)
+    private function createDTO(array $shiftData, User $user, int $accumulatedMinutes): ShiftValidationData
     {
         return new ShiftValidationData(
             userId: $shiftData['user_id'],
