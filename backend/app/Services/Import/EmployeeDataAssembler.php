@@ -25,7 +25,9 @@ class EmployeeDataAssembler
     ];
 
     /**
-     * @return Collection<EmployeeImportData>
+     * @param array<int, array{name:string,contract_type:string,positions:list<int>}> $validRows
+     * @param array<int, string> $headerMap
+     * @return Collection<int, EmployeeImportData>
      */
     public function assemble(array $validRows, array $headerMap): Collection
     {
@@ -43,6 +45,11 @@ class EmployeeDataAssembler
 
     }
 
+    /**
+     * @param list<int> $positionIndexes
+     * @param array<int, string> $headerMap
+     * @return list<string>
+     */
     private function mapIndexesToCodes(array $positionIndexes, array $headerMap): array
     {
 

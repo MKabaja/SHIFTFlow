@@ -23,8 +23,9 @@ class EmployeeCsvValidator
     private const POSITION_ASSIGNED_VALUE = 'TAK';
 
     /**
+     * @param array<int, array<int, string>> $rawRows
      * @return array{
-     *   valid_rows: array<int,array{name:string,contract_type:string,positions:array<int,int>}>,
+     *   valid_rows: array<int,array{name:string,contract_type:string,positions:list<int>}>,
      *   issues: array<int,array<int,string>>
      * }
      */
@@ -123,6 +124,10 @@ class EmployeeCsvValidator
         return false;
     }
 
+    /**
+     * @param array<int, string> $cells
+     * @return list<int>
+     */
     private function mapRowToEmployeeData(array $cells): array
     {
         $positionIndexes = [];

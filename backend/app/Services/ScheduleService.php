@@ -21,6 +21,7 @@ class ScheduleService
         private readonly BatchValidationService $batchValidationService
     ) {}
 
+    /** @param array<string, mixed> $scheduleData */
     public function create(array $scheduleData): Schedule
     {
         return Schedule::create([
@@ -33,6 +34,7 @@ class ScheduleService
         ]);
     }
 
+    /** @param array<int, array<string, mixed>> $shiftsData */
     public function addShiftsBatch(Schedule $schedule, array $shiftsData): BatchResult
     {
         $groupedShifts = $this->batchPreprocessor
@@ -50,6 +52,7 @@ class ScheduleService
     }
 
     /**
+     * @param Collection<int|string, Collection<int, array{client_temp_id: string, user_id: int, position_id: int, date: string, shift_start: string, shift_end: string}>> $groupedShifts
      * @return Collection<int, Shift>
      */
     private function executeShiftsCreation(

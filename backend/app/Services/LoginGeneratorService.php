@@ -12,7 +12,7 @@ class LoginGeneratorService
      * Generates unique login from full name.
      *
      * @param  string  $fullName  e.g., 'Jan Kowalski'
-     * @param  array  $existingLogins  e.g., ['jkowal', 'jkowal1']
+     * @param  list<string>  $existingLogins  e.g., ['jkowal', 'jkowal1']
      * @return string e.g., 'jkowal2'
      */
     public function generate(string $fullName, array $existingLogins = []): string
@@ -44,6 +44,7 @@ class LoginGeneratorService
         return Str::ascii(mb_strtolower($login));
     }
 
+    /** @param list<string> $existingLogins */
     private function findNextAvailableLogin(string $baseLogin, array $existingLogins): string
     {
         $maxNumber = $this->getMaxLoginValue($existingLogins);
@@ -52,6 +53,7 @@ class LoginGeneratorService
         return $baseLogin.$nextNumber;
     }
 
+    /** @param list<string> $logins */
     private function getMaxLoginValue(array $logins): int
     {
         return collect($logins)
@@ -64,6 +66,10 @@ class LoginGeneratorService
             ->max() ?? 0;
     }
 
+    /**
+     * @param list<string> $existingLogins
+     * @return list<string>
+     */
     private function findMatchingLogin(string $baseLogin, array $existingLogins): array
     {
         return collect($existingLogins)

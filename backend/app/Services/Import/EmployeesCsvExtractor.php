@@ -75,6 +75,7 @@ class EmployeesCsvExtractor
         return $detectedSeparator ?? ';';
     }
 
+    /** @param array<string, list<int>> $statistics */
     private function chooseSeparatorFromStatistics(array $statistics): ?string
     {
         foreach ($statistics as $separator => $counts) {
@@ -89,6 +90,7 @@ class EmployeesCsvExtractor
         return null;
     }
 
+    /** @param list<string>|string $value */
     private function shouldSkipEmpty(array|string $value): bool
     {
         if (is_array($value)) {
@@ -98,6 +100,10 @@ class EmployeesCsvExtractor
         return empty($value);
     }
 
+    /**
+     * @param resource $fileResource
+     * @return array<int, string>
+     */
     private function mapRowHeadersToIndexes($fileResource, string $separator): array
     {
         $firstCsvRow = fgetcsv($fileResource, 0, $separator);
@@ -115,8 +121,8 @@ class EmployeesCsvExtractor
     }
 
     /**
-     * @param  mixed  $fileResource
-     * @return array[]
+     * @param resource $fileResource
+     * @return array<int, array<int, string>>
      */
     private function readRowsFromCsv($fileResource, string $separator): array
     {

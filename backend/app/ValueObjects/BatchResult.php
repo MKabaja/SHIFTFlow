@@ -10,7 +10,7 @@ readonly class BatchResult
 {
     /**
      * @param  Collection<int, \App\Models\Shift>  $shifts
-     * @param  array<string, list<string>>  $errors
+     * @param  array<string, array<string, list<string>>>  $errors
      */
     private function __construct(
         private Collection $shifts,
@@ -23,7 +23,7 @@ readonly class BatchResult
     }
 
     /**
-     * @return array<string, list<string>>
+     * @return array<string, array<string, list<string>>>
      */
     public function errors(): array
     {
@@ -52,7 +52,7 @@ readonly class BatchResult
     }
 
     /**
-     * @param  array<string, list<string>>  $errors
+     * @param  array<string, array<string, list<string>>>  $errors
      */
     public static function withErrors(array $errors): self
     {

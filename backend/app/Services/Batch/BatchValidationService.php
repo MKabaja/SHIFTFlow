@@ -20,7 +20,7 @@ class BatchValidationService
     /**
      * Validate a batch of shifts grouped by user.
      *
-     * @param Collection<int, Collection<int, array{
+     * @param Collection<int|string, Collection<int, array{
      *     client_temp_id: string,
      *     user_id: int,
      *     position_id: int,
