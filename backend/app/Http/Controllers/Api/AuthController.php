@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginPinRequest;
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
+use App\Services\JwtBlacklistService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,6 +16,13 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    protected JwtBlacklistService $jwtBlacklistService;
+
+    public function __construct(JwtBlacklistService $jwtBlacklistService)
+    {
+        $this->jwtBlacklistService = $jwtBlacklistService;
+    }
+
     public function login(LoginRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -117,9 +125,23 @@ class AuthController extends Controller
         if (! $token) {
             return response()->json(['message' => 'No token provided'], 401);
         }
-        JWTAuth::invalidate();
+        $tokenInfo = $this->getTokenInfo();
+        $this->jwtBlacklistService->setBlacklist($tokenInfo['jti'], $tokenInfo['ttl']);
 
         return response()->json(['message' => 'Logged out successfully'], 200);
 
+    }
+
+    /**
+     * @return array{ttl: int, jti: string}
+     */
+    private function getTokenInfo(): array
+    {
+        $payload = JWTAuth::parseToken()->getPayload();
+
+        return [
+            'jti' => $payload->get('jti'),
+            'ttl' => $payload->get('exp') - now()->timestamp,
+        ];
     }
 }

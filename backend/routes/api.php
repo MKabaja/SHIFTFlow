@@ -23,7 +23,7 @@ Route::prefix('auth')
                 Route::post('/login-pin', 'loginPin');
             });
 
-        Route::middleware('auth:api')
+        Route::middleware(['auth:api', 'jwt.blacklist']) // Protect logout and me routes
             ->group(function () {
 
                 Route::get('/me', 'me');
@@ -33,7 +33,7 @@ Route::prefix('auth')
 
 // Shift Crud
 
-Route::middleware(['auth:api', 'role:admin,manager'])
+Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager'])
     ->prefix('shifts')
     ->controller(ShiftController::class)
     ->group(function () {
@@ -42,7 +42,7 @@ Route::middleware(['auth:api', 'role:admin,manager'])
         Route::delete('/{shift}', 'destroy');
         Route::get('/{shift}', 'show');
     });
-Route::middleware(['auth:api', 'role:admin,manager,employee']) // Shifts — employee read-only (index only, filtered by role in controller)
+Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager,employee']) // Shifts — employee read-only (index only, filtered by role in controller)
     ->prefix('shifts')
     ->controller(ShiftController::class)
     ->group(function () {
@@ -50,7 +50,7 @@ Route::middleware(['auth:api', 'role:admin,manager,employee']) // Shifts — emp
 
     });
 // Schedule Crud + Batch
-Route::middleware(['auth:api', 'role:admin,manager'])
+Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager'])
     ->prefix('schedules')
     ->controller(ScheduleController::class)
     ->group(function () {
@@ -64,7 +64,7 @@ Route::middleware(['auth:api', 'role:admin,manager'])
     });
 
 // Positions G1
-Route::middleware(['auth:api', 'role:admin,manager'])
+Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager'])
     ->prefix('positions')
     ->controller(PositionController::class)
     ->group(function () {
@@ -73,7 +73,7 @@ Route::middleware(['auth:api', 'role:admin,manager'])
         Route::get('/{position}/shifts', 'shifts');
     });
 // Positions G2
-Route::middleware(['auth:api', 'role:admin'])
+Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin'])
     ->prefix('positions')
     ->controller(PositionController::class)
     ->group(function () {
@@ -83,7 +83,7 @@ Route::middleware(['auth:api', 'role:admin'])
     });
 
 // Employee Management (CRUD)
-Route::middleware(['auth:api', 'role:admin'])
+Route::middleware(['auth:api', 'jwt.blacklist',  'role:admin'])
     ->prefix('employees')
     ->controller(EmployeeController::class)
     ->group(function () {
@@ -96,7 +96,7 @@ Route::middleware(['auth:api', 'role:admin'])
     });
 
 // Availabilities
-Route::middleware(['auth:api'])
+Route::middleware(['auth:api', 'jwt.blacklist'])
     ->prefix('availabilities')
     ->controller(AvailabilityController::class)
     ->group(function () {
