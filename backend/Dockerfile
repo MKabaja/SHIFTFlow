@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# ========== INSTALACJA ZALEŻNOŚCI SYSTEMOWYCH ==========
+# ========== SYSTEM DEPENDENCIES ==========
 RUN apt-get update && apt-get install -y \
     libzip-dev \
     zlib1g-dev \
@@ -11,33 +11,33 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     && rm -rf /var/lib/apt/lists/*
 
-# ========== INSTALACJA ROZSZERZEŃ PHP ==========
+# ========== PHP EXTENSIONS ==========
 RUN docker-php-ext-install pdo_mysql zip
 
-# ========== INSTALACJA COMPOSER ==========
+# ========== COMPOSER ==========
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
-# ========== KONFIGURACJA NGINX ==========
+# ========== NGINX CONFIGURATION ==========
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY default.conf /etc/nginx/sites-available/default
 
-# ========== KONFIGURACJA SUPERVISOR ==========
+# ========== SUPERVISOR CONFIGURATION ==========
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# ========== USTAWIENIE KATALOGU ROBOCZEGO ==========
+# ========== WORKING DIRECTORY ==========
 WORKDIR /var/www
 
-# ========== KOPIOWANIE PLIKÓW APLIKACJI ==========
+# ========== APPLICATION FILES ==========
 COPY . .
 
-# ========== INSTALACJA ZALEŻNOŚCI COMPOSER ==========
+# ========== COMPOSER DEPENDENCIES ==========
 RUN composer install --no-interaction --prefer-dist
 
-# ========== USTAWIENIE UPRAWNIEŃ ==========
+# ========== PERMISSIONS ==========
 RUN chown -R www-data:www-data /var/www
 
-# ========== EXPONOWANIE PORTÓW ==========
+# ========== PORTS ==========
 EXPOSE 8000 9000
 
-# ========== URUCHOMIENIE SUPERVISOR (zarządza PHP-FPM i Nginx) ==========
+# ========== START SUPERVISOR (manages PHP-FPM and Nginx) ==========
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

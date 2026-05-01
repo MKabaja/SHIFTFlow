@@ -10,6 +10,7 @@ services:
             - '8000:8000'
         depends_on:
             - db
+            - redis
         networks:
             - shiftflow_network
         environment:
@@ -35,17 +36,16 @@ services:
         networks:
             - shiftflow_network
 
-    phpmyadmin:
-        image: phpmyadmin/phpmyadmin
-        container_name: shiftflow_phpmyadmin
+    redis:
+        image: redis:7-alpine
+        container_name: shiftflow_redis
         restart: unless-stopped
         ports:
-            - '8080:80'
-        environment:
-            PMA_HOST: db
-            PMA_PORT: 3306
-            PMA_USER: root
-            PMA_PASSWORD: ${DB_ROOT_PASSWORD}
+            - ${FORWARD_REDIS_PORT:-6379}:6379
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            timeout: 5s
+            retries: 3
         networks:
             - shiftflow_network
 
