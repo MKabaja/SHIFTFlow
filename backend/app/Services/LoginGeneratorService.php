@@ -67,7 +67,7 @@ class LoginGeneratorService
     }
 
     /**
-     * @param list<string> $existingLogins
+     * @param  list<string>  $existingLogins
      * @return list<string>
      */
     private function findMatchingLogin(string $baseLogin, array $existingLogins): array

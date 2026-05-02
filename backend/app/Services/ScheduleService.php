@@ -52,7 +52,7 @@ class ScheduleService
     }
 
     /**
-     * @param Collection<int|string, Collection<int, array{client_temp_id: string, user_id: int, position_id: int, date: string, shift_start: string, shift_end: string}>> $groupedShifts
+     * @param  Collection<int|string, Collection<int, array{client_temp_id: string, user_id: int, position_id: int, date: string, shift_start: string, shift_end: string}>>  $groupedShifts
      * @return Collection<int, Shift>
      */
     private function executeShiftsCreation(

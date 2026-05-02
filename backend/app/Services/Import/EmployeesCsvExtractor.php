@@ -101,7 +101,7 @@ class EmployeesCsvExtractor
     }
 
     /**
-     * @param resource $fileResource
+     * @param  resource  $fileResource
      * @return array<int, string>
      */
     private function mapRowHeadersToIndexes($fileResource, string $separator): array
@@ -121,7 +121,7 @@ class EmployeesCsvExtractor
     }
 
     /**
-     * @param resource $fileResource
+     * @param  resource  $fileResource
      * @return array<int, array<int, string>>
      */
     private function readRowsFromCsv($fileResource, string $separator): array

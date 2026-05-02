@@ -20,6 +20,7 @@ class PositionFactory extends Factory
         return [
             'name' => 'T'.str_pad((string) self::$counter, 2, '0', STR_PAD_LEFT),  // T01-T99
             'description' => fake()->sentence(),
+            'color' => null,
             'created_by' => null,
         ];
     }

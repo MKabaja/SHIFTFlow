@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id
  * @property string $name
  * @property string|null $description
+ * @property string|null $color
  * @property int|null $created_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -45,6 +46,7 @@ class Position extends Model
     protected $fillable = [
         'name',
         'description',
+        'color',
         'created_by',
     ];
 
