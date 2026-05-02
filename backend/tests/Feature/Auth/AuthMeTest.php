@@ -10,10 +10,10 @@ test('me returns authenticated user data with positions', function () {
 
     $this->getJson('/api/auth/me')
         ->assertOk()
-        ->assertJsonStructure(['id', 'name', 'login', 'role', 'positions', 'status', 'hourly_rate'])
-        ->assertJsonPath('name', $this->employee->name)
-        ->assertJsonPath('role', $this->employee->role)
-        ->assertJsonIsArray('positions');
+        ->assertJsonStructure(['data' => ['id', 'name', 'login', 'role', 'positions', 'is_active', 'hourly_rate']])
+        ->assertJsonPath('data.name', $this->employee->name)
+        ->assertJsonPath('data.role', $this->employee->role)
+        ->assertJsonIsArray('data.positions');
 });
 
 test('me returns empty positions array when user has none', function () {
@@ -22,7 +22,7 @@ test('me returns empty positions array when user has none', function () {
 
     $this->getJson('/api/auth/me')
         ->assertOk()
-        ->assertJsonPath('positions', []);
+        ->assertJsonPath('data.positions', []);
 });
 
 test('me fails without token', function () {

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginPinRequest;
 use App\Http\Requests\LoginRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\JwtBlacklistService;
 use Illuminate\Http\JsonResponse;
@@ -106,16 +107,8 @@ class AuthController extends Controller
         $user = $request->user();
         $user->load('positions');
 
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
-            'positions' => $user->positions,
-            'status' => $user->is_active,
-            'hourly_rate' => $user->hourly_rate,
-            'login' => $user->login,
-        ]);
+        return UserResource::make($user)->response();
+
     }
 
     public function logout(): JsonResponse
