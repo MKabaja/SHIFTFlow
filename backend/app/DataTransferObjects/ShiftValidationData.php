@@ -13,11 +13,12 @@ readonly class ShiftValidationData
         public string $shiftStart,
         public int $positionId,
         public string $shiftEnd,
+        public bool $isUserActive,
         public array $allowedPositionIds,
         public ?int $maxMinutesPerMonth,
         public ?int $minBreakMinutes,
         public ?int $maxMinutesPerQuarter,
         public ?int $ignoreShiftId = null,
-        public int $accumulatedBatchMinutes = 0
+        public int $accumulatedBatchMinutes = 0,
     ) {}
 }

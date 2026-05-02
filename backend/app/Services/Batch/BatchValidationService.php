@@ -121,6 +121,7 @@ class BatchValidationService
             date: $shiftData['date'],
             shiftStart: $shiftData['shift_start'],
             shiftEnd: $shiftData['shift_end'],
+            isUserActive: $user->is_active,
             positionId: $shiftData['position_id'],
             allowedPositionIds: $user->positions->pluck('id')->toArray(),
             maxMinutesPerMonth: $user->max_minutes_per_month,

@@ -16,6 +16,7 @@ class ShiftValidationDataFactory
     public function withUser(User $user): self
     {
         $this->attributes['userId'] = $user->id;
+        $this->attributes['isUserActive'] = $user->is_active;
         $this->attributes['allowedPositionIds'] = $user->positions->pluck('id')->toArray();
         $this->attributes['maxMinutesPerMonth'] = $user->max_minutes_per_month;
         $this->attributes['minBreakMinutes'] = $user->min_break_minutes;
@@ -85,6 +86,7 @@ class ShiftValidationDataFactory
     {
         $defaults = [
             'userId' => 1,
+            'isUserActive' => true,
             'date' => Carbon::today()->format('Y-m-d'),
             'shiftStart' => '08:00',
             'shiftEnd' => '16:00',
@@ -104,6 +106,7 @@ class ShiftValidationDataFactory
             date: $data['date'],
             shiftStart: $data['shiftStart'],
             shiftEnd: $data['shiftEnd'],
+            isUserActive: $data['isUserActive'],
             positionId: $data['positionId'],
             allowedPositionIds: $data['allowedPositionIds'],
             maxMinutesPerMonth: $data['maxMinutesPerMonth'],

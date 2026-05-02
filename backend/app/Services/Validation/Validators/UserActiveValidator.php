@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Validation\Validators;
 
 use App\DataTransferObjects\ShiftValidationData;
-use App\Models\User;
 
 class UserActiveValidator extends BaseConflictValidator
 {
@@ -19,8 +18,6 @@ class UserActiveValidator extends BaseConflictValidator
 
     private function hasConflict(ShiftValidationData $shift): bool
     {
-        return User::where('id', $shift->userId)
-            ->where('is_active', false)
-            ->exists();
+        return ! $shift->isUserActive;
     }
 }
