@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Models\User;
 
-const LOGIN_PIN_URL = '/api/auth/login-pin';
-
 beforeEach(function () {
     /** @var \Tests\TestCase $this */
     $this->pin = '2222';
@@ -13,9 +11,10 @@ beforeEach(function () {
 
 test('login pin succeeds with valid pin', function () {
     /** @var \Tests\TestCase $this */
+    /** @var User $employee */
     $employee = User::factory()->employee()->withPin($this->pin)->create();
 
-    $this->postJson(LOGIN_PIN_URL, [
+    $this->postJson('/api/auth/login-pin', [
         'login' => $employee->login,
         'pin' => $this->pin,
     ])
@@ -32,9 +31,10 @@ test('login pin succeeds with valid pin', function () {
 
 test('login pin fails with wrong pin', function () {
     /** @var \Tests\TestCase $this */
+    /** @var User $employee */
     $employee = User::factory()->employee()->withPin($this->pin)->create();
 
-    $this->postJson(LOGIN_PIN_URL, [
+    $this->postJson('/api/auth/login-pin', [
         'login' => $employee->login,
         'pin' => '9999',
     ])
@@ -44,9 +44,10 @@ test('login pin fails with wrong pin', function () {
 
 test('login pin fails when user is inactive', function () {
     /** @var \Tests\TestCase $this */
+    /** @var User $employee */
     $employee = User::factory()->employee()->inactive()->withPin($this->pin)->create();
 
-    $this->postJson(LOGIN_PIN_URL, [
+    $this->postJson('/api/auth/login-pin', [
         'login' => $employee->login,
         'pin' => $this->pin,
     ])
@@ -56,9 +57,10 @@ test('login pin fails when user is inactive', function () {
 
 test('login pin fails when user has no pin set', function () {
     /** @var \Tests\TestCase $this */
+    /** @var User $employee */
     $employee = User::factory()->employee()->create();
 
-    $this->postJson(LOGIN_PIN_URL, [
+    $this->postJson('/api/auth/login-pin', [
         'login' => $employee->login,
         'pin' => $this->pin,
     ])

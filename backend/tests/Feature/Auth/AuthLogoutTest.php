@@ -1,9 +1,8 @@
 <?php
 
 declare(strict_types=1);
-use App\Models\User;
 
-const LOGOUT_URL = '/api/auth/logout';
+use App\Models\User;
 
 beforeEach(function () {
     /** @var \Tests\TestCase $this */
@@ -12,40 +11,38 @@ beforeEach(function () {
 
 test('logout succeeds with valid token', function () {
     /** @var \Tests\TestCase $this */
-    $manager = User::factory()->manager()->create([
-        'password' => $this->password,
-    ]);
-    $request = $this->postJson(LOGIN_URL, [
+    /** @var User $manager */
+    $manager = User::factory()->manager()->create(['password' => $this->password]);
+
+    $token = $this->postJson('/api/auth/login', [
         'login' => $manager->login,
         'password' => $this->password,
-    ]);
-    $token = $request->json('access_token');
+    ])->json('access_token');
 
-    $this->withToken($token)->postJson(LOGOUT_URL)
+    $this->withToken($token)->postJson('/api/auth/logout')
         ->assertOk()
         ->assertJson(['message' => 'Logged out successfully']);
 });
 
 test('logout fails without token', function () {
     /** @var \Tests\TestCase $this */
-    $this->postJson(LOGOUT_URL)
+    $this->postJson('/api/auth/logout')
         ->assertUnauthorized();
 });
 
 test('blacklisted token is rejected after logout', function () {
     /** @var \Tests\TestCase $this */
-    $manager = User::factory()->manager()->create([
-        'password' => $this->password,
-    ]);
-    $request = $this->postJson(LOGIN_URL, [
+    /** @var User $manager */
+    $manager = User::factory()->manager()->create(['password' => $this->password]);
+
+    $token = $this->postJson('/api/auth/login', [
         'login' => $manager->login,
         'password' => $this->password,
-    ]);
-    $token = $request->json('access_token');
+    ])->json('access_token');
 
-    $this->withToken($token)->postJson(LOGOUT_URL)
+    $this->withToken($token)->postJson('/api/auth/logout')
         ->assertOk();
 
-    $this->withToken($token)->getJson(AUTH_ME_URL)
+    $this->withToken($token)->getJson('/api/auth/me')
         ->assertUnauthorized();
 });

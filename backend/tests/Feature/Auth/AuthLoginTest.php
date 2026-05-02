@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Models\User;
 
-const LOGIN_URL = '/api/auth/login';
-
 beforeEach(function () {
     /** @var \Tests\TestCase $this */
     $this->password = 'Secret123!';
@@ -13,11 +11,10 @@ beforeEach(function () {
 
 test('login succeeds with valid credentials', function () {
     /** @var \Tests\TestCase $this */
-    $manager = User::factory()->manager()->create([
-        'password' => $this->password,
-    ]);
+    /** @var User $manager */
+    $manager = User::factory()->manager()->create(['password' => $this->password]);
 
-    $this->postJson(LOGIN_URL, [
+    $this->postJson('/api/auth/login', [
         'login' => $manager->login,
         'password' => $this->password,
     ])
@@ -29,9 +26,10 @@ test('login succeeds with valid credentials', function () {
 
 test('login fails with wrong password', function () {
     /** @var \Tests\TestCase $this */
+    /** @var User $manager */
     $manager = User::factory()->manager()->create();
 
-    $this->postJson(LOGIN_URL, [
+    $this->postJson('/api/auth/login', [
         'login' => $manager->login,
         'password' => 'wrongpassword',
     ])
@@ -41,7 +39,7 @@ test('login fails with wrong password', function () {
 
 test('login fails with wrong login', function () {
     /** @var \Tests\TestCase $this */
-    $this->postJson(LOGIN_URL, [
+    $this->postJson('/api/auth/login', [
         'login' => 'wronglogin',
         'password' => 'whatEver',
     ])
@@ -51,11 +49,10 @@ test('login fails with wrong login', function () {
 
 test('login fails when user is inactive', function () {
     /** @var \Tests\TestCase $this */
-    $manager = User::factory()->manager()->inactive()->create([
-        'password' => $this->password,
-    ]);
+    /** @var User $manager */
+    $manager = User::factory()->manager()->inactive()->create(['password' => $this->password]);
 
-    $this->postJson(LOGIN_URL, [
+    $this->postJson('/api/auth/login', [
         'login' => $manager->login,
         'password' => $this->password,
     ])
@@ -65,7 +62,7 @@ test('login fails when user is inactive', function () {
 
 test('login fails with missing fields', function () {
     /** @var \Tests\TestCase $this */
-    $this->postJson(LOGIN_URL, ['login' => 'onlylogin'])
+    $this->postJson('/api/auth/login', ['login' => 'onlylogin'])
         ->assertUnprocessable()
         ->assertJsonStructure(['message', 'errors']);
 });
