@@ -37,7 +37,7 @@ Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager'])
     ->prefix('shifts')
     ->controller(ShiftController::class)
     ->group(function () {
-
+        Route::post('/', 'store');
         Route::match(['put', 'patch'], '/{shift}', 'update');
         Route::delete('/{shift}', 'destroy');
         Route::get('/{shift}', 'show');

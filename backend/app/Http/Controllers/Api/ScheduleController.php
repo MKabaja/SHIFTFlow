@@ -62,7 +62,7 @@ class ScheduleController extends Controller
     {
         $schedule->load(['creator', 'shifts']);
 
-        return ScheduleListResource::make($schedule)
+        return ScheduleResource::make($schedule)
             ->response();
     }
 

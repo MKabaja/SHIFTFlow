@@ -59,7 +59,8 @@ class PositionController extends Controller
      */
     public function shifts(Position $position): JsonResponse
     {
-        return ShiftResource::collection($position->shifts()->paginate(20))
+        return ShiftResource::collection($position->shifts()->with(['user', 'position'])
+            ->paginate(20))
             ->response()
             ->setStatusCode(200);
     }
@@ -87,7 +88,7 @@ class PositionController extends Controller
             Log::info('Delete blocked: Position ID '.$position->id.' is linked to active schedule.');
 
             return response()->json([
-                'error' => 'INTEGRITY_VIOLATION: Cannot delete position, it is currently linked to one or more schedules.',
+                'message' => 'Cannot delete position with linked shifts.',
             ], 409); // 409-> conflict
         }
         $position->delete();

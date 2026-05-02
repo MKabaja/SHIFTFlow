@@ -58,6 +58,11 @@ class ShiftController extends Controller
             ->response();
     }
 
+    public function store(): JsonResponse
+    {
+        abort(410, 'Use POST /api/schedules/{id}/shifts/batch instead');
+    }
+
     public function update(UpdateShiftRequest $request, Shift $shift): JsonResponse
     {
         $shiftData = $request->validated();
