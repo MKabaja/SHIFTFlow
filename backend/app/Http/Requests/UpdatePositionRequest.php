@@ -34,6 +34,11 @@ class UpdatePositionRequest extends FormRequest
                 'max:4',
             ],
             'description' => ['nullable', 'string', 'max:255'],
+            'color' => [
+                'nullable',
+                'string',
+                'regex:/^#[A-Fa-f0-9]{6}$/',
+            ],
         ];
     }
 }

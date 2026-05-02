@@ -35,6 +35,11 @@ class StorePositionRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'color' => [
+                'nullable',
+                'string',
+                'regex:/^#[A-Fa-f0-9]{6}$/',
+            ],
         ];
     }
 }
