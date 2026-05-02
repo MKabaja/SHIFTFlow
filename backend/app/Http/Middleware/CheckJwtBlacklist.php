@@ -30,7 +30,7 @@ class CheckJwtBlacklist
                 return response()->json(['error' => 'Token is blacklisted'], 401);
             }
         } catch (JWTException $e) {
-            return response()->json(['error' => 'Invalid token'], 401);
+            return $next($request);
         }
 
         return $next($request);

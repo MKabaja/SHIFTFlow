@@ -68,7 +68,7 @@ class AuthController extends Controller
 
         $user = User::where('login', $validated['login'])->first();
 
-        if (! $user || ! Hash::check($validated['pin'], $user->pin_hashed)) {
+        if (! $user || ! Hash::check($validated['pin'], $user->pin_hashed ?? '')) {
             return response()->json(
                 [
                     'message' => 'Invalid pin or login',

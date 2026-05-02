@@ -14,6 +14,10 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 uses(RefreshDatabase::class);
 abstract class TestCase extends BaseTestCase
 {
+    public string $password;
+
+    public string $pin;
+
     public User $manager;
 
     public User $employee;

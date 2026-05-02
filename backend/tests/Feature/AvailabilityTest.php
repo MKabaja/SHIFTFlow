@@ -29,7 +29,7 @@ test('employee can declare their own availability', function () {
     $this->assertDatabaseHas('availabilities', [
         'user_id' => $this->employee->id,
         'date' => '2026-01-15',
-        'is_available' => 1,
+        'is_available' => true,
     ]);
 });
 
