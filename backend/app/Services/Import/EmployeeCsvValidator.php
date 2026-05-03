@@ -51,10 +51,10 @@ class EmployeeCsvValidator
 
             $newType = $this->detectContractTypeFromCell($contractCell);
 
+            // Contract type is declared once in a section-header row and inherited by
+            // all employee rows that follow — it persists until the next header is found.
             if ($newType) {
-
                 $contractType = $newType;
-
             }
             $nameKey = $this->checkRightNameFormat($nameCell);
 

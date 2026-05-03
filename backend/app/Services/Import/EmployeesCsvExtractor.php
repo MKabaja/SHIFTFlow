@@ -78,6 +78,8 @@ class EmployeesCsvExtractor
     /** @param array<string, list<int>> $statistics */
     private function chooseSeparatorFromStatistics(array $statistics): ?string
     {
+        // A separator is valid when it appears the same number of times in every
+        // sampled row (all counts identical) and at least once (count > 0).
         foreach ($statistics as $separator => $counts) {
             $onlyUniquesValues = array_unique($counts);
 
@@ -111,6 +113,7 @@ class EmployeesCsvExtractor
         $cellNameToIndex = [];
 
         foreach ($firstCsvRow as $cellIndex => $cellName) {
+            // Column 0 = row number, column 1 = employee name — not position headers
             if ($cellIndex <= 1) {
                 continue;
             }

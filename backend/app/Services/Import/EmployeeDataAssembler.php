@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 
 class EmployeeDataAssembler
 {
+    // One Excel column can represent multiple DB positions (e.g. 'B' covers B1-B8).
     private const EXCEL_TO_DATABASE_POSITIONS_MAP = [
         'PW' => ['PW', 'PW2'],
         'B' => ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],

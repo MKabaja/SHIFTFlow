@@ -50,6 +50,8 @@ class BatchValidationService
                 continue;
             }
 
+            // Running total of minutes in this batch — passed to ValidationService so
+            // month/quarter hour-limit validators see batch shifts before they hit the DB.
             $accumulatedMinutes = 0;
             $previousShiftsInBatch = [];
 
@@ -197,6 +199,7 @@ class BatchValidationService
             $shiftB['shift_end']
         );
 
+        // end < start means the shift crosses midnight — advance end to next day
         if ($endA->lessThan($startA)) {
             $endA->addDay();
         }
