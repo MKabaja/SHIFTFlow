@@ -63,12 +63,14 @@ jobs:
             - name: Set test environment variables
               working-directory: backend
               run: |
-                  sed -i "s/^DB_HOST=.*/DB_HOST=127.0.0.1/" .env.testing
-                  sed -i "s/^DB_USERNAME=.*/DB_USERNAME=root/" .env.testing
-                  sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=password/" .env.testing
-                  echo "REDIS_HOST=127.0.0.1" >> .env.testing
+                  sed -i "s|^DB_HOST=.*|DB_HOST=127.0.0.1|" .env.testing
+                  sed -i "s|^DB_USERNAME=.*|DB_USERNAME=root|" .env.testing
+                  sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=password|" .env.testing
+                  sed -i "s|^DB_PORT=.*|DB_PORT=3306|" .env.testing
                   JWT=$(grep "^JWT_SECRET=" .env | cut -d '=' -f2-)
-                  sed -i "s/^JWT_SECRET=.*/JWT_SECRET=$JWT/" .env.testing
+                  sed -i "s|^JWT_SECRET=.*|JWT_SECRET=$JWT|" .env.testing
+                  echo "REDIS_HOST=127.0.0.1" >> .env.testing
+                  cat .env.testing | grep DB_
 
             - name: Run migrations
               working-directory: backend
