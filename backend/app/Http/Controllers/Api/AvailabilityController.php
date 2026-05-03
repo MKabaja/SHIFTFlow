@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -11,30 +13,39 @@ use Illuminate\Http\Request;
 
 class AvailabilityController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $this->authorize('viewAny', Availability::class);
 
-        if ($request->query('user_id') && $user->role === 'employee') {
+        $user = $request->user();
+        $requestedUserId = $request->query('user_id');
+
+        if ($requestedUserId && $user->role === 'employee') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $availabilities = Availability::query()
 
-            ->when($user->role === 'employee', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->when($request->query('user_id') && in_array($user->role, ['admin', 'manager']), function ($query, $userId) {
-                return $query->where('user_id', $userId);
-            })
-            ->get();
+            ->when($user
+                ->role === 'employee', fn ($q) => $q
+                ->where('user_id', $user->id))
 
-        return AvailabilityResource::collection($availabilities);
+            ->when(
+                $requestedUserId
+                && in_array($user->role, ['admin', 'manager']),
+                fn ($q) => $q->where('user_id', $requestedUserId)
+            )
+            ->paginate(20);
+
+        return AvailabilityResource::collection($availabilities)
+            ->response();
 
     }
 
     public function store(StoreAvailabilityRequest $request): JsonResponse
     {
+        $this->authorize('create', Availability::class);
+
         $user = $request->user();
         $validated = $request->validated();
 
@@ -48,11 +59,11 @@ class AvailabilityController extends Controller
                 'user_id' => $userId,
                 'date' => $validated['date'],
             ],
-
             [
                 'is_available' => $validated['is_available'],
                 'notes' => $validated['notes'] ?? null,
-            ]);
+            ]
+        );
         if ($availability->wasRecentlyCreated) {
 
             $availability->submission_date = now();
@@ -67,7 +78,7 @@ class AvailabilityController extends Controller
             ? 'Availability created successfully'
             : 'Availability updated successfully';
 
-        return (new AvailabilityResource($availability))
+        return AvailabilityResource::make($availability)
             ->additional(['message' => $message])
             ->response()
             ->setStatusCode($statusCode);

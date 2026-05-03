@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Batch;
 
 use App\DataTransferObjects\ShiftValidationData;
@@ -18,7 +20,7 @@ class BatchValidationService
     /**
      * Validate a batch of shifts grouped by user.
      *
-     * @param Collection<int, Collection<int, array{
+     * @param Collection<int|string, Collection<int, array{
      *     client_temp_id: string,
      *     user_id: int,
      *     position_id: int,
@@ -48,6 +50,8 @@ class BatchValidationService
                 continue;
             }
 
+            // Running total of minutes in this batch — passed to ValidationService so
+            // month/quarter hour-limit validators see batch shifts before they hit the DB.
             $accumulatedMinutes = 0;
             $previousShiftsInBatch = [];
 
@@ -81,7 +85,19 @@ class BatchValidationService
         return $errors;
     }
 
-    private function addUserError(Collection $userShifts, array &$errors)
+    /**
+     * @param  array<string,array<string, array<string>>>  $errors
+     * @param  Collection<int,
+     * array{
+     *      client_temp_id: string,
+     *      user_id: int,
+     *      position_id: int,
+     *      date: string,
+     *      shift_start: string,
+     *      shift_end: string,
+     *      }> $userShifts
+     */
+    private function addUserError(Collection $userShifts, array &$errors): void
     {
         foreach ($userShifts as $shiftData) {
             $errors[$shiftData['client_temp_id']] = [
@@ -100,13 +116,14 @@ class BatchValidationService
      *      position_id: int,
      *    } $shiftData
      */
-    private function createDTO(array $shiftData, User $user, int $accumulatedMinutes)
+    private function createDTO(array $shiftData, User $user, int $accumulatedMinutes): ShiftValidationData
     {
         return new ShiftValidationData(
             userId: $shiftData['user_id'],
             date: $shiftData['date'],
             shiftStart: $shiftData['shift_start'],
             shiftEnd: $shiftData['shift_end'],
+            isUserActive: $user->is_active,
             positionId: $shiftData['position_id'],
             allowedPositionIds: $user->positions->pluck('id')->toArray(),
             maxMinutesPerMonth: $user->max_minutes_per_month,
@@ -166,18 +183,23 @@ class BatchValidationService
 
         $startA = TimeHelper::createFullDateTime(
             $shiftA['date'],
-            $shiftA['shift_start']);
+            $shiftA['shift_start']
+        );
         $endA = TimeHelper::createFullDateTime(
             $shiftA['date'],
-            $shiftA['shift_end']);
+            $shiftA['shift_end']
+        );
 
         $startB = TimeHelper::createFullDateTime(
             $shiftB['date'],
-            $shiftB['shift_start']);
+            $shiftB['shift_start']
+        );
         $endB = TimeHelper::createFullDateTime(
             $shiftB['date'],
-            $shiftB['shift_end']);
+            $shiftB['shift_end']
+        );
 
+        // end < start means the shift crosses midnight — advance end to next day
         if ($endA->lessThan($startA)) {
             $endA->addDay();
         }

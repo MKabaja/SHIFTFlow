@@ -1,21 +1,17 @@
 <?php
 
-use App\DataTransferObjects\ShiftValidationData;
+declare(strict_types=1);
+
 use App\Models\Position;
 use App\Models\Shift;
 use App\Models\User;
 use App\Services\Validation\Validators\TimeConflictValidator;
 use Illuminate\Validation\ValidationException;
+use Tests\Factories\ShiftValidationDataFactory;
 
 it('passes when there is no time conflict', function () {
-
     $user = User::factory()->create();
-
-    $position = Position::create([
-        'name' => 'B1',
-        'description' => 'Bileter',
-    ]);
-
+    $position = Position::create(['name' => 'B1', 'description' => 'Bileter']);
     $user->positions()->attach($position->id);
 
     Shift::create([
@@ -28,30 +24,19 @@ it('passes when there is no time conflict', function () {
 
     $validator = new TimeConflictValidator;
 
-    $dto = new ShiftValidationData(
-        userId: $user->id,
-        date: '2026-05-10',
-        shiftStart: '16:00',
-        shiftEnd: '22:00',
-        positionId: 1,
-        allowedPositionIds: [1, 2, 3],
-        maxMinutesPerMonth: null,
-        minBreakMinutes: null,
-        maxMinutesPerQuarter: null,
-    );
-    expect(fn () => $validator->validate($dto))
-        ->not->toThrow(ValidationException::class);
+    $dto = ShiftValidationDataFactory::new()
+        ->withUser($user)
+        ->onDate('2026-05-10')
+        ->withShiftTime('16:00', '22:00')
+        ->withNoLimits()
+        ->create();
 
+    expect(fn () => $validator->validate($dto))->not->toThrow(ValidationException::class);
 });
 
 it('throws exception when shifts overlap', function () {
-
     $user = User::factory()->create();
-    $position = Position::create([
-        'name' => 'B1',
-        'description' => 'Bileter',
-    ]);
-
+    $position = Position::create(['name' => 'B1', 'description' => 'Bileter']);
     $user->positions()->attach($position->id);
 
     Shift::create([
@@ -64,31 +49,19 @@ it('throws exception when shifts overlap', function () {
 
     $validator = new TimeConflictValidator;
 
-    $dto = new ShiftValidationData(
-        userId: $user->id,
-        date: '2026-05-10',
-        shiftStart: '12:00',
-        shiftEnd: '14:00',
-        positionId: 1,
-        allowedPositionIds: [1, 2, 3],
-        maxMinutesPerMonth: null,
-        minBreakMinutes: null,
-        maxMinutesPerQuarter: null,
-    );
+    $dto = ShiftValidationDataFactory::new()
+        ->withUser($user)
+        ->onDate('2026-05-10')
+        ->withShiftTime('12:00', '14:00')
+        ->withNoLimits()
+        ->create();
 
-    expect(fn () => $validator->validate($dto))
-        ->toThrow(ValidationException::class);
-
+    expect(fn () => $validator->validate($dto))->toThrow(ValidationException::class);
 });
 
 it('ignores the shift being currently edited', function () {
-
     $user = User::factory()->create();
-    $position = Position::create([
-        'name' => 'B1',
-        'description' => 'Bileter',
-    ]);
-
+    $position = Position::create(['name' => 'B1', 'description' => 'Bileter']);
     $user->positions()->attach($position->id);
 
     $shiftToEdit = Shift::create([
@@ -101,20 +74,13 @@ it('ignores the shift being currently edited', function () {
 
     $validator = new TimeConflictValidator;
 
-    $dto = new ShiftValidationData(
-        userId: $user->id,
-        date: '2026-05-10',
-        shiftStart: '09:00',
-        shiftEnd: '17:00',
-        positionId: 1,
-        allowedPositionIds: [1, 2, 3],
-        maxMinutesPerMonth: null,
-        minBreakMinutes: null,
-        maxMinutesPerQuarter: null,
-        ignoreShiftId: $shiftToEdit->id
-    );
+    $dto = ShiftValidationDataFactory::new()
+        ->withUser($user)
+        ->onDate('2026-05-10')
+        ->withShiftTime('09:00', '17:00')
+        ->withNoLimits()
+        ->forUpdate($shiftToEdit->id)
+        ->create();
 
-    expect(fn () => $validator->validate($dto))
-        ->not->toThrow(ValidationException::class);
-
+    expect(fn () => $validator->validate($dto))->not->toThrow(ValidationException::class);
 });

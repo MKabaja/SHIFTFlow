@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\DataTransferObjects\EmployeeImportData;
@@ -15,6 +17,10 @@ class EmployeeRepository
         private readonly LoginGeneratorService $loginGeneratorService
     ) {}
 
+    /**
+     * @param  Collection<int, EmployeeImportData>  $employeeDataCollection
+     * @return array{created: int, updated: int}
+     */
     public function saveMany(Collection $employeeDataCollection): array
     {
         $positionsMap = Position::pluck('id', 'name');
@@ -24,6 +30,7 @@ class EmployeeRepository
         });
     }
 
+    /** @param array<string, mixed> $data */
     public function createEmployee(array $data): User
     {
         return DB::transaction(function () use ($data) {
@@ -48,6 +55,7 @@ class EmployeeRepository
         });
     }
 
+    /** @param array<string, mixed> $data */
     public function updateEmployee(User $user, array $data): User
     {
         return DB::transaction(function () use ($data, $user) {
@@ -74,6 +82,11 @@ class EmployeeRepository
         });
     }
 
+    /**
+     * @param  Collection<int, EmployeeImportData>  $employeeDataCollection
+     * @param  Collection<string, int>  $positionsMap
+     * @return array{created: int, updated: int}
+     */
     private function persistImportedEmployees(Collection $employeeDataCollection, Collection $positionsMap): array
     {
         $created = 0;
@@ -105,6 +118,10 @@ class EmployeeRepository
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $employeeData
+     * @param  Collection<int, int>  $positionIDs
+     */
     private function saveEmployee(array $employeeData, Collection $positionIDs): User
     {
         $user = User::updateOrCreate([
@@ -117,14 +134,24 @@ class EmployeeRepository
 
     }
 
+    /**
+     * @param  list<string>  $positionNames
+     * @param  Collection<string, int>  $positionsMap
+     * @return Collection<int, int>
+     */
     private function getPositionIds(array $positionNames, Collection $positionsMap): Collection
     {
         return collect($positionNames)
             ->map(fn ($name) => $positionsMap[$name] ?? null)
-            ->filter()
+            ->filter(fn ($id) => $id !== null)
             ->values();
     }
 
+    /**
+     * @param  list<string>  $allExistingLogins
+     * @param  Collection<string, string>  $existingUsersByName
+     * @return array<string, mixed>
+     */
     private function prepareEmployeePersistenceData(EmployeeImportData $data, array $allExistingLogins, Collection $existingUsersByName): array
     {
         if ($existingUsersByName->has($data->name)) {
@@ -139,12 +166,16 @@ class EmployeeRepository
             'name' => $data->name,
             'login' => $login,
             'contract_type' => $data->contractType,
-            'pin_hashed' => 1234,
+            'pin_hashed' => config('app.default_employee_pin'), // Onboarding default — employee changes PIN on first login
             'role' => 'employee',
             'email' => null,
         ];
     }
 
+    /**
+     * @param  Collection<int, EmployeeImportData>  $collection
+     * @return Collection<string, string>
+     */
     private function getExistingUsers(Collection $collection): Collection
     {
         return User::whereIn('name', $collection

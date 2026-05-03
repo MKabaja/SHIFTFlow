@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Schedule;
@@ -7,7 +9,6 @@ use App\Models\Shift;
 use App\Services\Batch\BatchPreprocessor;
 use App\Services\Batch\BatchValidationService;
 use App\Services\Validation\Helpers\TimeHelper;
-use App\Services\Validation\ValidationService;
 use App\ValueObjects\BatchResult;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -16,11 +17,11 @@ use Illuminate\Support\Facades\DB;
 class ScheduleService
 {
     public function __construct(
-        private ValidationService $validationService,
         private readonly BatchPreprocessor $batchPreprocessor,
         private readonly BatchValidationService $batchValidationService
     ) {}
 
+    /** @param array<string, mixed> $scheduleData */
     public function create(array $scheduleData): Schedule
     {
         return Schedule::create([
@@ -33,6 +34,7 @@ class ScheduleService
         ]);
     }
 
+    /** @param array<int, array<string, mixed>> $shiftsData */
     public function addShiftsBatch(Schedule $schedule, array $shiftsData): BatchResult
     {
         $groupedShifts = $this->batchPreprocessor
@@ -50,6 +52,7 @@ class ScheduleService
     }
 
     /**
+     * @param  Collection<int|string, Collection<int, array{client_temp_id: string, user_id: int, position_id: int, date: string, shift_start: string, shift_end: string}>>  $groupedShifts
      * @return Collection<int, Shift>
      */
     private function executeShiftsCreation(

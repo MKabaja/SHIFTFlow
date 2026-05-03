@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\Availability;
@@ -12,7 +14,7 @@ class AvailabilityPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -20,7 +22,7 @@ class AvailabilityPolicy
      */
     public function view(User $user, Availability $availability): bool
     {
-        return false;
+        return $user->id === $availability->user_id || in_array($user->role, ['admin', 'manager']);
     }
 
     /**
@@ -28,7 +30,7 @@ class AvailabilityPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'employee']);
     }
 
     /**
@@ -36,7 +38,7 @@ class AvailabilityPolicy
      */
     public function update(User $user, Availability $availability): bool
     {
-        return false;
+        return $user->id === $availability->user_id || $user->role === 'admin';
     }
 
     /**
@@ -44,7 +46,7 @@ class AvailabilityPolicy
      */
     public function delete(User $user, Availability $availability): bool
     {
-        return $user->id === $availability->user_id || in_array($user->role, ['admin', 'manager']);
+        return $user->id === $availability->user_id || $user->role === 'admin';
     }
 
     /**

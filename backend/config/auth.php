@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -40,7 +42,7 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-        'api'=> [
+        'api' => [
             'driver' => 'jwt',
             'provider' => 'users',
         ],

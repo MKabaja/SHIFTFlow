@@ -1,0 +1,6 @@
+ID,Imie i Nazwisko,Typ umowy,PD,B,WR,WS,K,OTG,PTG,SR,TG,TGT,BT,PW
+1,Jan Kowalski,UOP,TAK,TAK,,,,,,,,
+2,Anna Nowak,ZLEC,,TAK,,TAK,,,,,,
+3,Piotr Wisniewski,UOP,,,TAK,,,,,,,TAK
+4,Katarzyna Zajac,ZLEC,,,,,,,TAK,,,TAK,
+5,Tomasz Dabrowsk,UOP,,TAK,,,,,,,TAK,,

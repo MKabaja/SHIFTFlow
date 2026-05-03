@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -12,13 +14,12 @@ use App\Repositories\EmployeeRepository;
 use App\Services\Import\ImportService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class EmployeeController extends Controller
 {
-    protected $employeeRepository;
+    protected EmployeeRepository $employeeRepository;
 
-    protected $importService;
+    protected ImportService $importService;
 
     public function __construct(EmployeeRepository $employeeRepository, ImportService $importService)
     {
@@ -29,7 +30,7 @@ class EmployeeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(IndexEmployeeRequest $request): AnonymousResourceCollection
+    public function index(IndexEmployeeRequest $request): JsonResponse
     {
         $perPage = $request->validated('per_page') ?? 50;
         $employees = User::where('role', 'employee')
@@ -41,20 +42,21 @@ class EmployeeController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return UserResource::collection($employees);
+        return UserResource::collection($employees)
+            ->response();
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreEmployeeRequest $request)
+    public function store(StoreEmployeeRequest $request): JsonResponse
     {
         $data = $request->validated();
 
         $employee = $this->employeeRepository->createEmployee($data);
         $employee->load('positions');
 
-        return (new UserResource($employee))
+        return UserResource::make($employee)
             ->additional(['message' => 'Employee created successfully'])
             ->response()
             ->setStatusCode(201);
@@ -63,13 +65,14 @@ class EmployeeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $employee): UserResource
+    public function show(User $employee): JsonResponse
     {
         if ($employee->role !== 'employee') {
             abort(404);
         }
 
-        return new UserResource($employee->load('positions'));
+        return UserResource::make($employee->load('positions'))
+            ->response();
     }
 
     /**
@@ -84,7 +87,7 @@ class EmployeeController extends Controller
         $updatedEmployee = $this->employeeRepository->updateEmployee($employee, $data);
         $updatedEmployee->load('positions');
 
-        return (new UserResource($updatedEmployee))
+        return UserResource::make($updatedEmployee)
             ->additional(['message' => 'Employee updated successfully'])
             ->response()
             ->setStatusCode(200);

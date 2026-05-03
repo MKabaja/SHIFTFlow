@@ -1,0 +1,40 @@
+name: PHPStan
+
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main]
+
+jobs:
+    phpstan:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.2'
+                  tools: composer:v2
+
+            - name: Install dependencies
+              working-directory: backend
+              run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+            - name: Copy .env
+              working-directory: backend
+              run: cp .env.example .env
+
+            - name: Generate app key
+              working-directory: backend
+              run: php artisan key:generate
+
+            - name: Generate JWT secret
+              working-directory: backend
+              run: php artisan jwt:secret --force
+
+            - name: Run PHPStan
+              working-directory: backend
+              run: php vendor/bin/phpstan analyse --memory-limit=512M

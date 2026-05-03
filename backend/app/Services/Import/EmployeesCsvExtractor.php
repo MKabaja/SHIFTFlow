@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Import;
 
 use Illuminate\Http\UploadedFile;
@@ -7,13 +9,10 @@ use Illuminate\Http\UploadedFile;
 class EmployeesCsvExtractor
 {
     /**
-     * Reads the CSV file and returns the headers and raw rows.
-     *
-     * @param  UploadedFile  $csvFile  file from frontend
      * @return array{
-     * header_map: array<int,string>,
-     * rows: array<int,array<int,string>
-     * } raw Row Data
+     *     header_map: array<int,string>,
+     *     rows: array<int,array<int,string>>
+     * }
      */
     public function extract(UploadedFile $csvFile): array
     {
@@ -34,7 +33,7 @@ class EmployeesCsvExtractor
     }
 
     /**
-     * @return bool|resource
+     * @return resource
      */
     private function readCsvFile(string $filePath)
     {
@@ -76,8 +75,11 @@ class EmployeesCsvExtractor
         return $detectedSeparator ?? ';';
     }
 
+    /** @param array<string, list<int>> $statistics */
     private function chooseSeparatorFromStatistics(array $statistics): ?string
     {
+        // A separator is valid when it appears the same number of times in every
+        // sampled row (all counts identical) and at least once (count > 0).
         foreach ($statistics as $separator => $counts) {
             $onlyUniquesValues = array_unique($counts);
 
@@ -90,6 +92,7 @@ class EmployeesCsvExtractor
         return null;
     }
 
+    /** @param list<string>|string $value */
     private function shouldSkipEmpty(array|string $value): bool
     {
         if (is_array($value)) {
@@ -100,7 +103,8 @@ class EmployeesCsvExtractor
     }
 
     /**
-     * @param  array  $firstCsvRow
+     * @param  resource  $fileResource
+     * @return array<int, string>
      */
     private function mapRowHeadersToIndexes($fileResource, string $separator): array
     {
@@ -109,6 +113,7 @@ class EmployeesCsvExtractor
         $cellNameToIndex = [];
 
         foreach ($firstCsvRow as $cellIndex => $cellName) {
+            // Column 0 = row number, column 1 = employee name — not position headers
             if ($cellIndex <= 1) {
                 continue;
             }
@@ -119,8 +124,8 @@ class EmployeesCsvExtractor
     }
 
     /**
-     * @param  mixed  $fileResource
-     * @return array[]
+     * @param  resource  $fileResource
+     * @return array<int, array<int, string>>
      */
     private function readRowsFromCsv($fileResource, string $separator): array
     {

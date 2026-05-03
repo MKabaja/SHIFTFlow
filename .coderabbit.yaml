@@ -1,0 +1,53 @@
+language: 'pl'
+reviews:
+    profile: 'chill'
+    request_changes_workflow: false
+    high_level_summary: true
+    poem: false
+    review_status: true
+    collapse_walkthrough: false
+    path_instructions:
+        - path: 'backend/app/Services/**'
+          instructions: |
+            Sprawdź:
+            - Czy logika biznesowa nie wyciekła do kontrolera (SRP).
+            - Czy serwisy operują na typed DTO zamiast surowych tablic.
+            - Dla ValidationService: czy nowy validator implementuje ShiftValidatorInterface
+              i jest zarejestrowany w AppServiceProvider — nie hardkodowany w serwisie.
+        - path: 'backend/app/Http/Controllers/**'
+          instructions: |
+            Kontroler powinien TYLKO delegować do serwisów i zwracać Resources.
+            Flaguj bezpośrednie zapytania DB, logikę biznesową, warunki if na danych domenowych.
+            Nie flaguj: wstrzykiwania serwisów, prostego return response()->json().
+        - path: 'backend/tests/**'
+          instructions: |
+            Sprawdź:
+            - Jeden assert na jeden przypadek (jeden powód do failure).
+            - Testy happy-path (2xx) powinny sprawdzać konkretny efekt:
+              assertJson shape, assertDatabaseHas lub assertDatabaseMissing —
+              sam assertOk()/assertCreated() bez treści odpowiedzi to za mało.
+            - Wyjątek: testy autoryzacji (401, 403) — sam assertForbidden()
+              lub assertUnauthorized() jest wystarczający, nie flaguj braku assertJson.
+            - Czy użyto factory states (->admin(), ->manager(), ->employee())
+              zamiast ręcznego ustawiania ról lub haseł.
+            - Nie flaguj braku docblocków ani komentarzy w testach.
+        - path: 'backend/app/Http/Controllers/Api/AuthController.php'
+          instructions: |
+            Zmiany w AuthController są wrażliwe na bezpieczeństwo. Sprawdź:
+            - Czy is_active jest weryfikowany w obu metodach logowania (login i loginPin).
+            - Czy logout poprawnie unieważnia token (Redis blacklist).
+            - Czy żadne dane wrażliwe (pin_hashed, password) nie wyciekają w response.
+        - path: 'backend/app/Services/Import/**'
+          instructions: |
+            Import CSV jest krytyczną ścieżką danych. Sprawdź:
+            - Czy limit 500 wierszy jest egzekwowany przed przetwarzaniem.
+            - Czy cały import jest opakowany w transakcję DB.
+            - Czy błędy walidacji są zbierane i zwracane (nie przerywają całego importu).
+        - path: 'backend/database/migrations/**'
+          instructions: |
+            Sprawdź:
+            - Czy metoda down() poprawnie odwraca up() — identyczne nazwy kolumn, typy, kolejność.
+            - Czy FK mają właściwy ON DELETE (cascade / set null).
+            - Czy nie brakuje indeksów na kolumnach używanych w WHERE lub JOIN.
+chat:
+    auto_reply: true

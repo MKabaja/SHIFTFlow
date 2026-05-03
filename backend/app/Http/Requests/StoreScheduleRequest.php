@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -7,9 +9,6 @@ use Illuminate\Validation\Rule;
 
 class StoreScheduleRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         $user = $this->user();
@@ -22,8 +21,6 @@ class StoreScheduleRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -43,8 +40,9 @@ class StoreScheduleRequest extends FormRequest
                 'integer',
                 'between:1,12',
                 Rule::unique('schedules')
-                    ->where(fn ($q) => $q
-                        ->where('year', $this->year)
+                    ->where(
+                        fn ($q) => $q
+                            ->where('year', $this->year)
                     ),
 
             ],
@@ -61,6 +59,7 @@ class StoreScheduleRequest extends FormRequest
         ];
     }
 
+    /** @return array<string, string> */
     public function messages(): array
     {
         return [

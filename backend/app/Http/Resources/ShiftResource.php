@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin \App\Models\Shift */
 class ShiftResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
-     *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
@@ -28,7 +29,7 @@ class ShiftResource extends JsonResource
             'shift_end' => $this->shift_end->format('H:i'),
 
             'minutes_worked' => $this->minutes_worked,
-            'hours_worked' => round($this->minutes_worked / 60, 2),
+            'hours_worked' => $this->minutes_worked !== null ? round($this->minutes_worked / 60, 2) : null,
 
             'status' => $this->status,
             'notes' => $this->notes,

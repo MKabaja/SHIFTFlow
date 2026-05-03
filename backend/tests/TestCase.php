@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
 use App\Models\Availability;
@@ -12,6 +14,10 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 uses(RefreshDatabase::class);
 abstract class TestCase extends BaseTestCase
 {
+    public string $password;
+
+    public string $pin;
+
     public User $manager;
 
     public User $employee;
@@ -41,6 +47,15 @@ abstract class TestCase extends BaseTestCase
             ->create();
 
         return $this->actingAs($this->admin, 'api');
+    }
+
+    public function actingAsManager(): self
+    {
+        $this->manager = User::factory()
+            ->manager()
+            ->create();
+
+        return $this->actingAs($this->manager, 'api');
     }
 
     public function actingAsEmployee(): self

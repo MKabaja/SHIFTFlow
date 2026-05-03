@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -22,8 +24,22 @@ class StorePositionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'unique:positions,name', 'max:4'],
-            'description' => ['nullable', 'string', 'max:255']
+            'name' => [
+                'required',
+                'string',
+                'unique:positions,name',
+                'max:4'],
+
+            'description' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'color' => [
+                'nullable',
+                'string',
+                'regex:/^#[A-Fa-f0-9]{6}$/',
+            ],
         ];
     }
 }

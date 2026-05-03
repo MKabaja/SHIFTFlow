@@ -1,21 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
-use App\Models\User;
 
 class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        // Telescope::night();
 
         $this->hideSensitiveRequestDetails();
 
@@ -65,6 +63,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
             if ($user) {
                 return $user->role === 'admin';
             }
+
             return false;
         });
     }

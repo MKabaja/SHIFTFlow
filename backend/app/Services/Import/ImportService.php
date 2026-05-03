@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Import;
 
 use App\Repositories\EmployeeRepository;
@@ -17,6 +19,7 @@ class ImportService
         protected EmployeeRepository $repository,
     ) {}
 
+    /** @return array<string, mixed> */
     public function import(UploadedFile $file): array
     {
         $headersAndRows = $this->extractor->extract($file);

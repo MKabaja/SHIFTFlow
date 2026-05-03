@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Position;
 use App\Models\Schedule;
 use App\Models\Shift;
@@ -43,10 +45,27 @@ test('admin can list positions', function () {
     /** @var \Tests\TestCase $this */
     $this->getJson('/api/positions')
         ->assertOk()
-        ->assertJsonCount(4) // from seed
+        ->assertJsonCount(4, 'data') // from seed
         ->assertJsonStructure([
-            '*' => ['id', 'name', 'description', 'creator'],
+            'data' => [
+                '*' => ['id', 'name', 'description'],
+            ],
         ]);
+});
+
+test('position created by admin has creator_name in response', function () {
+    /** @var \Tests\TestCase $this */
+    $payload = [
+        'name' => 'C9',
+        'description' => 'Opis stanowiska',
+    ];
+
+    $this->postJson('/api/positions', $payload)
+        ->assertCreated()
+        ->assertJsonStructure([
+            'data' => ['id', 'name', 'description', 'creator_name'],
+        ]);
+
 });
 
 test('admin can create a new position', function () {
@@ -88,11 +107,46 @@ test('admin can update a position', function () {
 
 test('admin can delete an unused position', function () {
     /** @var \Tests\TestCase $this */
+    /** @var Position $position */
     $position = Position::factory()->create();
 
     $this->deleteJson("/api/positions/{$position->id}")
         ->assertOk()
-        ->assertJson(['message' => 'Position deleted Successfully']);
+        ->assertJson(['message' => 'Position deleted successfully']);
 
     $this->assertDatabaseMissing('positions', ['id' => $position->id]);
+});
+
+test('manager cannot create a position', function () {
+    /** @var \Tests\TestCase $this */
+    $this->actingAsManager()
+        ->postJson('/api/positions', ['name' => 'X1', 'description' => 'test'])
+        ->assertForbidden();
+});
+
+test('manager cannot update a position', function () {
+    /** @var \Tests\TestCase $this */
+    /** @var Position $position */
+    $position = Position::factory()->create();
+
+    $this->actingAsManager()
+        ->putJson("/api/positions/{$position->id}", ['name' => 'Updated', 'description' => 'test'])
+        ->assertForbidden();
+});
+
+test('manager cannot delete a position', function () {
+    /** @var \Tests\TestCase $this */
+    /** @var Position $position */
+    $position = Position::factory()->create();
+
+    $this->actingAsManager()
+        ->deleteJson("/api/positions/{$position->id}")
+        ->assertForbidden();
+});
+
+test('employee cannot access positions', function () {
+    /** @var \Tests\TestCase $this */
+    $this->actingAsEmployee()
+        ->getJson('/api/positions')
+        ->assertForbidden();
 });

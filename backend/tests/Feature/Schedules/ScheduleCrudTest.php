@@ -1,92 +1,58 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Schedule;
-use App\Models\User;
 
-it('allows manager to list and filter schedules', function () {
-    /** @var \Tests\TestCase $this
-     * @var \App\Models\User $manager
-     */
-    // 1. Arrange:
-    $manager = User::factory()
-        ->manager()
-        ->create();
-
-    $targetSchedule = Schedule::factory()
-        ->month(1)
-        ->draft()
-        ->create();
-
-    Schedule::factory()
-        ->month(2)
-        ->draft()
-        ->create();
-    // 2. Act:
-    $response = $this->actingAs($manager)
-        ->getJson('/api/schedules?month=1&year=2026');
-    // 3. Assert:
-    $response->assertStatus(200);
-
-    $response->assertJsonStructure([
-        'data' => [
-            '*' => [
-                'id',
-                'name',
-                'month',
-                'year',
-                'status',
-                'description',
-                'published_at',
-                'created_by',
-                'total_shifts',
-                'created_at',
-            ],
-        ],
-        'meta' => [
-            'current_page',
-            'last_page',
-            'total',
-        ],
-        'links' => [
-            'first',
-            'last',
-            'prev',
-            'next',
-        ],
-
-    ]);
-    $response->assertJsonCount(1, 'data');
-    $response->assertJsonFragment([
-        'id' => $targetSchedule->id,
-        'month' => 1,
-        'year' => 2026,
-    ]);
-
+beforeEach(function () {
+    /** @var \Tests\TestCase $this */
+    $this->actingAsManager();
 });
 
-it('allows manager to create a schedule', function () {
-    /** @var \Tests\TestCase $this
-     * @var \App\Models\User $manager
-     */
+test('manager can list and filter schedules', function () {
+    /** @var \Tests\TestCase $this */
+    /** @var Schedule $targetSchedule */
+    $targetSchedule = Schedule::factory()->month(1)->draft()->create();
 
-    // 1. Arrange
-    $manager = User::factory()
-        ->manager()
-        ->create();
+    Schedule::factory()->month(2)->draft()->create();
 
-    $payload = [
+    $this->getJson('/api/schedules?month=1&year=2026')
+        ->assertOk()
+        ->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'id',
+                    'name',
+                    'month',
+                    'year',
+                    'status',
+                    'description',
+                    'published_at',
+                    'created_by',
+                    'total_shifts',
+                    'created_at',
+                ],
+            ],
+            'meta' => ['current_page', 'last_page', 'total'],
+            'links' => ['first', 'last', 'prev', 'next'],
+        ])
+        ->assertJsonCount(1, 'data')
+        ->assertJsonFragment([
+            'id' => $targetSchedule->id,
+            'month' => 1,
+            'year' => 2026,
+        ]);
+});
+
+test('manager can create a schedule', function () {
+    /** @var \Tests\TestCase $this */
+    $this->postJson('/api/schedules', [
         'name' => 'Grafik Marzec 2026',
         'month' => 3,
         'year' => 2026,
         'description' => 'Wersja robocza',
-    ];
-
-    // 2. Act
-    $response = $this->actingAs($manager)
-        ->postJson('/api/schedules', $payload);
-
-    // 3. Assert
-    $response->assertStatus(201)
+    ])
+        ->assertCreated()
         ->assertJsonFragment([
             'name' => 'Grafik Marzec 2026',
             'status' => 'draft',
@@ -95,37 +61,22 @@ it('allows manager to create a schedule', function () {
     $this->assertDatabaseHas('schedules', [
         'month' => 3,
         'year' => 2026,
-        'created_by' => $manager->id,
+        'created_by' => $this->manager->id,
         'status' => 'draft',
     ]);
 });
 
-it('allows manager to update name but ignores month change', function () {
-    /** @var \Tests\TestCase $this
-     * @var \App\Models\User $manager
-     */
-    // 1. Arrange
-    $manager = User::factory()
-        ->manager()
-        ->create();
-    $schedule = Schedule::factory()->create([
-        'month' => 5,
-        'year' => 2026,
-        'name' => 'Stara Nazwa',
-    ]);
+test('manager can update schedule name but month change is ignored', function () {
+    /** @var \Tests\TestCase $this */
+    /** @var Schedule $schedule */
+    $schedule = Schedule::factory()->create(['month' => 5, 'year' => 2026, 'name' => 'Stara Nazwa']);
 
-    $updatePayload = [
+    $this->putJson("/api/schedules/{$schedule->id}", [
         'name' => 'Nowa Nazwa',
         'description' => 'Zaktualizowany opis',
         'month' => 12,
-    ];
-
-    // 2. Act
-    $response = $this->actingAs($manager)
-        ->putJson("/api/schedules/{$schedule->id}", $updatePayload);
-
-    // 3. Assert
-    $response->assertStatus(200)
+    ])
+        ->assertOk()
         ->assertJsonFragment(['name' => 'Nowa Nazwa']);
 
     $this->assertDatabaseHas('schedules', [
@@ -134,26 +85,14 @@ it('allows manager to update name but ignores month change', function () {
         'month' => 5,
     ]);
 });
-it('allows manager to delete a schedule', function () {
-    /** @var \Tests\TestCase $this
-     * @var \App\Models\User $manager
-     */
-    // 1. Arrange
-    $manager = User::factory()
-        ->manager()
-        ->create();
 
-    $schedule = Schedule::factory()
-        ->create();
+test('manager can delete a schedule', function () {
+    /** @var \Tests\TestCase $this */
+    /** @var Schedule $schedule */
+    $schedule = Schedule::factory()->create();
 
-    // 2. Act
-    $response = $this->actingAs($manager)
-        ->deleteJson("/api/schedules/{$schedule->id}");
+    $this->deleteJson("/api/schedules/{$schedule->id}")
+        ->assertOk();
 
-    // 3. Assert
-    $response->assertStatus(200);
-
-    $this->assertDatabaseMissing('schedules', [
-        'id' => $schedule->id,
-    ]);
+    $this->assertDatabaseMissing('schedules', ['id' => $schedule->id]);
 });

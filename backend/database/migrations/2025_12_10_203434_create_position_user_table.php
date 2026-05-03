@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,20 +15,19 @@ return new class extends Migration
     {
         Schema::create('position_user', function (Blueprint $table) {
 
-            //user Key
+            // user Key
             $table->id();
             $table->foreignId('user_id')
                 ->constrained()
                 ->onDelete('cascade');
 
-            //position Key
+            // position Key
             $table->foreignId('position_id')
                 ->constrained()
                 ->onDelete('cascade');
 
-
             $table->timestamps();
-            //safely against dublicates
+            // safely against dublicates
             $table->unique(['user_id', 'position_id']);
         });
     }

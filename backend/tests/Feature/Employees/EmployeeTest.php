@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 
 beforeEach(function () {
@@ -39,10 +41,9 @@ test('admin can update an employee with valid data', function () {
     /** @var \Tests\TestCase $this
      * @var \App\Models\User $admin
      */
-    $employee = User::factory()->create([
+    $employee = User::factory()->employee()->create([
         'name' => 'bad name',
         'login' => 'jkowal',
-        'role' => 'employee',
         'max_minutes_per_month' => null,
         'max_minutes_per_quarter' => null,
         'min_break_minutes' => null,
@@ -98,15 +99,13 @@ test('it can search for employees by name', function () {
     /** @var \Tests\TestCase $this
      * @var \App\Models\User $admin
      */
-    User::factory()->create([
+    User::factory()->employee()->create([
         'name' => 'Jan Kowalski',
         'login' => 'jkowal',
-        'role' => 'employee',
     ]);
-    User::factory()->create([
+    User::factory()->employee()->create([
         'name' => 'Anna Nowak',
         'login' => 'anowak',
-        'role' => 'employee',
     ]);
     $this->getJson('/api/employees?search=Kowal')
         ->assertOk()
@@ -119,10 +118,9 @@ test('it returns an empty list when search yields no results', function () {
     /** @var \Tests\TestCase $this
      * @var \App\Models\User $admin
      */
-    User::factory()->create([
+    User::factory()->employee()->create([
         'name' => 'Anna Nowak',
         'login' => 'anowak',
-        'role' => 'employee',
     ]);
     $this->getJson('/api/employees?search=XYZ')
         ->assertOk()

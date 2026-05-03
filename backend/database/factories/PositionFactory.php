@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Position;
@@ -16,8 +18,9 @@ class PositionFactory extends Factory
         self::$counter++;
 
         return [
-            'name' => 'T'.str_pad(self::$counter, 2, '0', STR_PAD_LEFT),  // T01-T99
+            'name' => 'T'.str_pad((string) self::$counter, 2, '0', STR_PAD_LEFT),  // T01-T99
             'description' => fake()->sentence(),
+            'color' => null,
             'created_by' => null,
         ];
     }

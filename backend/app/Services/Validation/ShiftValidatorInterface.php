@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\Validation;
+
+use App\DataTransferObjects\ShiftValidationData;
+
+interface ShiftValidatorInterface
+{
+    /**
+     * Validate shift data against specific business rule.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function validate(ShiftValidationData $shift): void;
+}

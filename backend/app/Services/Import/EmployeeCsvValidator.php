@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Import;
 
 class EmployeeCsvValidator
@@ -18,9 +20,12 @@ class EmployeeCsvValidator
         'EMPLOY',
     ];
 
+    private const POSITION_ASSIGNED_VALUE = 'TAK';
+
     /**
+     * @param  array<int, array<int, string>>  $rawRows
      * @return array{
-     *   valid_rows: array<int,array{name:string,contract_type:string,positions:array<int,int>>>,
+     *   valid_rows: array<int,array{name:string,contract_type:string,positions:list<int>}>,
      *   issues: array<int,array<int,string>>
      * }
      */
@@ -46,10 +51,10 @@ class EmployeeCsvValidator
 
             $newType = $this->detectContractTypeFromCell($contractCell);
 
+            // Contract type is declared once in a section-header row and inherited by
+            // all employee rows that follow — it persists until the next header is found.
             if ($newType) {
-
                 $contractType = $newType;
-
             }
             $nameKey = $this->checkRightNameFormat($nameCell);
 
@@ -119,6 +124,10 @@ class EmployeeCsvValidator
         return false;
     }
 
+    /**
+     * @param  array<int, string>  $cells
+     * @return list<int>
+     */
     private function mapRowToEmployeeData(array $cells): array
     {
         $positionIndexes = [];
@@ -128,7 +137,7 @@ class EmployeeCsvValidator
                 continue;
             }
 
-            if (trim($cellValue) === 'TAK') {
+            if (trim(strtoupper($cellValue)) === self::POSITION_ASSIGNED_VALUE) {
                 $positionIndexes[] = $index;
             }
         }

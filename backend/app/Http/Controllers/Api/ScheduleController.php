@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -14,15 +16,16 @@ use App\Models\Schedule;
 use App\Models\Shift;
 use App\Services\ScheduleService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ScheduleController extends Controller
 {
     public function __construct(
-        private readonly ScheduleService $scheduleService) {}
+        private readonly ScheduleService $scheduleService
+    ) {}
 
-    public function index(GetSchedulesRequest $request): AnonymousResourceCollection
+    public function index(GetSchedulesRequest $request): JsonResponse
     {
+        $perPage = $request->validated('per_page') ?? 20;
 
         $schedules = Schedule::with(['creator', 'shifts'])
             ->when($request
@@ -33,9 +36,14 @@ class ScheduleController extends Controller
                 ->input('year'), fn ($q, $y) => $q
                 ->where('year', $y))
 
-            ->paginate(20);
+            ->when($request
+                ->validated('search'), fn ($q, $s) => $q
+                ->where('name', 'like', '%'.$s.'%'))
 
-        return ScheduleListResource::collection($schedules);
+            ->paginate($perPage);
+
+        return ScheduleListResource::collection($schedules)
+            ->response();
 
     }
 
@@ -50,11 +58,12 @@ class ScheduleController extends Controller
 
     }
 
-    public function show(Schedule $schedule): ScheduleListResource
+    public function show(Schedule $schedule): JsonResponse
     {
         $schedule->load(['creator', 'shifts']);
 
-        return ScheduleListResource::make($schedule);
+        return ScheduleResource::make($schedule)
+            ->response();
     }
 
     public function update(UpdateScheduleRequest $request, Schedule $schedule): JsonResponse
@@ -74,7 +83,7 @@ class ScheduleController extends Controller
         $schedule->delete();
 
         return response()->json([
-            'message' => 'Schedule deleted Successfully',
+            'message' => 'Schedule deleted successfully',
         ], 200);
     }
 
@@ -104,12 +113,21 @@ class ScheduleController extends Controller
 
     public function publish(Schedule $schedule): JsonResponse
     {
+        if ($schedule->status === 'published') {
+            return response()->json([
+                'message' => 'Schedule is already published',
+            ], 409);
+        }
 
         $schedule->update([
             'status' => 'published',
             'published_at' => now(),
         ]);
 
-        return response()->json(ScheduleResource::make($schedule));
+        return ScheduleResource::make($schedule)
+            ->additional(['message' => 'Schedule published successfully'])
+            ->response()
+            ->setStatusCode(200);
+
     }
 }

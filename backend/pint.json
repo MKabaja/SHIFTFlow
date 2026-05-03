@@ -1,0 +1,39 @@
+{
+    "preset": "laravel",
+    "rules": {
+        "single_quote": true,
+        "declare_strict_types": true,
+        "method_argument_space": {
+            "on_multiline": "ensure_fully_multiline"
+        },
+        "trailing_comma_in_multiline": true,
+        "indentation_type": true,
+        "statement_indentation": true,
+        "no_extra_blank_lines": {
+            "tokens": ["extra"]
+        },
+        "ordered_class_elements": {
+            "order": [
+                "use_trait",
+                "constant_public",
+                "constant_protected",
+                "constant_private",
+                "property_public",
+                "property_public_static",
+                "property_protected",
+                "property_protected_static",
+                "property_private",
+                "property_private_static",
+                "construct",
+                "destruct",
+                "magic",
+                "method_public",
+                "method_public_static",
+                "method_protected",
+                "method_protected_static",
+                "method_private",
+                "method_private_static"
+            ]
+        }
+    }
+}

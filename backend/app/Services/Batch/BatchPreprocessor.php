@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Batch;
 
 use App\Models\Schedule;
@@ -11,6 +13,23 @@ use Illuminate\Validation\ValidationException;
 
 class BatchPreprocessor
 {
+    /**
+     * @param  array<int,  array{ client_temp_id: string,
+     *     user_id: int,
+     *     position_id: int,
+     *     date: string,
+     *     shift_start: string,
+     *     shift_end: string}>  $shiftsData
+     * @return Collection<int|string,
+     * Collection<int,array{ client_temp_id: string,
+     *     user_id: int,
+     *     position_id: int,
+     *     date: string,
+     *     shift_start: string,
+     *     shift_end: string}>>
+     *
+     * @throws ValidationException
+     */
     public function prepare(array $shiftsData, Schedule $schedule): Collection
     {
         $validator = $this->validateArrayFormat($shiftsData);
@@ -25,16 +44,20 @@ class BatchPreprocessor
 
         return collect($shiftsData)
             ->groupBy('user_id')
-            ->map(fn ($userShifts) => $userShifts
-                ->sortBy([
-                    ['date', 'asc'],
-                    ['shift_start', 'asc'],
-                ])
-                ->values()
+            ->map(
+                fn ($userShifts) => $userShifts
+                    ->sortBy([
+                        ['date', 'asc'],
+                        ['shift_start', 'asc'],
+                    ])
+                    ->values()
             );
 
     }
 
+    /**
+     * @param  array<int, array<string, mixed>>  $data
+     */
     private function validateArrayFormat(array $data): Validator
     {
         $messages = [
@@ -82,7 +105,10 @@ class BatchPreprocessor
         ], $messages);
     }
 
-    private function areDatesConsistentWithSchedule(array $shiftsData, Schedule $schedule, Validator $validator)
+    /**
+     * @param  array<int, array<string, mixed>>  $shiftsData
+     */
+    private function areDatesConsistentWithSchedule(array $shiftsData, Schedule $schedule, Validator $validator): void
     {
         foreach ($shiftsData as $index => $shift) {
             try {

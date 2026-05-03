@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Validation\Validators;
 
 use App\DataTransferObjects\ShiftValidationData;
@@ -35,10 +37,8 @@ class MaxHoursPerQuarterValidator extends BaseHourValidator
 
             $this->throwExceededLimitException(
                 'quarter',
-                $quarterlyMinuteLimit / 60,
-
+                intdiv($quarterlyMinuteLimit, 60),
                 round($excessMinutes / 60, 1)
-
             );
         }
     }

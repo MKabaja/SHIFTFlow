@@ -1,21 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DataTransferObjects;
 
 readonly class ShiftValidationData
 {
+    /** @param list<int> $allowedPositionIds */
     public function __construct(
         public int $userId,
         public string $date,
         public string $shiftStart,
         public int $positionId,
         public string $shiftEnd,
+        public bool $isUserActive,
         public array $allowedPositionIds,
         public ?int $maxMinutesPerMonth,
         public ?int $minBreakMinutes,
         public ?int $maxMinutesPerQuarter,
         public ?int $ignoreShiftId = null,
-        public int $accumulatedBatchMinutes = 0
-
+        public int $accumulatedBatchMinutes = 0,
     ) {}
 }

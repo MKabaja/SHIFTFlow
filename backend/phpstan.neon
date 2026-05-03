@@ -1,0 +1,17 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+   
+
+parameters:
+     
+
+
+    paths:
+        - app
+    level: 6
+    treatPhpDocTypesAsCertain: false 
+    ignoreErrors:
+        - path: app/Providers/TelescopeServiceProvider.php
+          messages:
+              - '#If condition is always true#'
+              - '#Unreachable statement#'
