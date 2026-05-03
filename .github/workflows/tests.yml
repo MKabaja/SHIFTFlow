@@ -63,14 +63,33 @@ jobs:
             - name: Set test environment variables
               working-directory: backend
               run: |
-                  sed -i "s|^DB_HOST=.*|DB_HOST=127.0.0.1|" .env.testing
-                  sed -i "s|^DB_USERNAME=.*|DB_USERNAME=root|" .env.testing
-                  sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=password|" .env.testing
-                  sed -i "s|^DB_PORT=.*|DB_PORT=3306|" .env.testing
+                  cat > .env.testing << 'EOF'
+                  APP_NAME=Laravel
+                  APP_ENV=testing
+                  APP_KEY=
+                  APP_DEBUG=true
+                  APP_URL=http://localhost:8000
+
+                  DB_CONNECTION=mysql
+                  DB_HOST=127.0.0.1
+                  DB_PORT=3306
+                  DB_DATABASE=shiftflow_test
+                  DB_USERNAME=root
+                  DB_PASSWORD=password
+
+                  CACHE_DRIVER=array
+                  SESSION_DRIVER=array
+                  QUEUE_CONNECTION=sync
+
+                  REDIS_HOST=127.0.0.1
+
+                  JWT_SECRET=
+                  EOF
+
+                  APP_KEY=$(grep "^APP_KEY=" .env | cut -d '=' -f2-)
                   JWT=$(grep "^JWT_SECRET=" .env | cut -d '=' -f2-)
+                  sed -i "s|^APP_KEY=.*|APP_KEY=$APP_KEY|" .env.testing
                   sed -i "s|^JWT_SECRET=.*|JWT_SECRET=$JWT|" .env.testing
-                  echo "REDIS_HOST=127.0.0.1" >> .env.testing
-                  cat .env.testing | grep DB_
 
             - name: Run migrations
               working-directory: backend
