@@ -5,7 +5,19 @@
 [![Tests](https://img.shields.io/badge/tests-122%20passing-brightgreen)](#running-tests)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level%206-blue)](https://phpstan.org)
 
-REST API for managing employee shift schedules at Wieliczka Salt Mine. Handles three roles (admin, manager, employee), 20+ mine positions, business validation for shift conflicts and hour limits, JWT authentication, and CSV import for bulk employee onboarding.
+REST API for managing employee shift schedules at Wieliczka Salt Mine.
+
+---
+
+## About the Project
+
+Wieliczka Salt Mine handles tourist traffic through a team of employees working across 27 specialised positions — ticket booths, parking wardens, tram operators, guides, and more. Every month, a manager is responsible for building a schedule that covers all positions while respecting each employee's availability, contract limits, and required rest periods.
+
+Until now, that work was done entirely in Excel — manually, one shift at a time, with no validation and no single source of truth. SHIFTFlow was built to replace that workflow.
+
+The system gives managers a structured way to create and publish monthly schedules, import employees from a CSV export of their existing spreadsheet, and enforce business rules automatically — shift conflicts, position permissions, hour limits, and minimum breaks are all validated on the server before a shift is saved. Employees can log in to view their own shifts from published schedules and declare their availability for upcoming months.
+
+The current version is a fully tested REST API. A React SPA frontend is planned as the next phase, which will let managers build schedules visually in the browser rather than through API calls.
 
 ---
 
@@ -19,6 +31,16 @@ REST API for managing employee shift schedules at Wieliczka Salt Mine. Handles t
 - **JWT Auth** — `tymon/jwt-auth`
 - **Testing** — PestPHP (feature tests against real MySQL, no SQLite)
 - **Static analysis** — PHPStan / Larastan, level 6, no baseline
+
+---
+
+## Roles
+
+| Role | Permissions |
+|------|-------------|
+| `admin` | Full access — manages employees, positions, schedules, and availabilities |
+| `manager` | Creates and publishes schedules, adds shifts, reads positions and availabilities |
+| `employee` | Reads own shifts from published schedules, manages own availability |
 
 ---
 
@@ -55,6 +77,127 @@ Each stage has a single responsibility and operates on typed DTOs (`EmployeeImpo
 
 **Value Objects — batch shift creation**
 `BatchResult` is a readonly DTO returned from `ScheduleService::addShiftsBatch()`. `ShiftValidationData` carries validated shift data through the validator chain without mutation.
+
+### Mine positions
+
+The mine operates 27 positions across functional groups: dispatchers (`PD`), ticketing booths (`B1`–`B8`), parking wardens (`PW`, `PW2`), route wardens (`WR`, `WR2`, `WR3`), security (`WS`, `WS2`), stockrooms (`SR`), tram operators (`TGT`, `TG`), guides (`PTG`, `PTG2`, `OTG`, `OTG2`), ticket booths (`K1`, `K2`), information booth (`BT`), and employee leave placeholder (`U`). Each position stores a hex color used for schedule visualization.
+
+---
+
+## Project Structure
+
+```
+SHIFTFlow/
+├── backend/                        # Laravel application
+│   ├── app/
+│   │   ├── Http/
+│   │   │   ├── Controllers/Api/    # Thin controllers — delegate to services
+│   │   │   ├── Middleware/         # RoleMiddleware, CheckJwtBlacklist
+│   │   │   ├── Requests/           # FormRequests — validation layer
+│   │   │   └── Resources/          # JSON serialization
+│   │   ├── Services/
+│   │   │   ├── Batch/              # BatchPreprocessor, BatchValidationService
+│   │   │   ├── Import/             # CSV pipeline (Extract → Validate → Assemble → Persist)
+│   │   │   └── Validation/         # ValidationService + 7 shift validators
+│   │   ├── Repositories/           # EmployeeRepository (CSV import writes)
+│   │   └── DTOs/                   # ShiftValidationData, BatchResult
+│   ├── database/
+│   │   ├── migrations/
+│   │   └── seeders/                # Demo data — 7 accounts, 27 positions, 2 schedules
+│   └── tests/
+│       ├── Feature/                # API endpoint tests (real MySQL)
+│       └── Unit/                   # Validator and helper unit tests
+├── docker/                         # MySQL init scripts
+├── docs/                           # Postman collection, CSV import template
+└── docker-compose.yml
+```
+
+---
+
+## Database Schema
+
+```mermaid
+erDiagram
+  users {
+    bigint id PK
+    string name
+    string email "nullable, unique"
+    string login "unique"
+    string password "nullable"
+    string pin_hashed "nullable, 60 chars"
+    boolean is_active "default true"
+    enum role "employee|manager|admin"
+    decimal hourly_rate "nullable, 8-2"
+    mediumint max_minutes_per_month "nullable"
+    mediumint max_minutes_per_quarter "nullable"
+    mediumint min_break_minutes "nullable"
+    enum contract_type "employment|mandate"
+    timestamp deleted_at "soft delete"
+    timestamps created_at
+  }
+
+  positions {
+    bigint id PK
+    string name "unique"
+    string description "nullable"
+    string color "hex, default #6366f1"
+    bigint created_by FK "nullable"
+    timestamps created_at
+  }
+
+  position_user {
+    bigint id PK
+    bigint user_id FK
+    bigint position_id FK
+    timestamps created_at
+  }
+
+  schedules {
+    bigint id PK
+    string name
+    text description "nullable"
+    tinyint month
+    year year
+    enum status "draft|published|in_progress"
+    timestamp published_at "nullable"
+    bigint created_by FK "nullable"
+    timestamps created_at
+  }
+
+  shifts {
+    bigint id PK
+    bigint user_id FK
+    bigint schedule_id FK "nullable"
+    bigint position_id FK
+    date date
+    time shift_start
+    time shift_end
+    smallint minutes_worked "nullable"
+    enum status "scheduled|cancelled"
+    decimal hourly_rate "nullable, 8-2"
+    text notes "nullable"
+    timestamps created_at
+  }
+
+  availabilities {
+    bigint id PK
+    bigint user_id FK
+    date date
+    boolean is_available "default true"
+    date submission_date "nullable"
+    text notes "nullable"
+    timestamps created_at
+  }
+
+  users ||--o{ position_user : "holds job permissions"
+  positions ||--o{ position_user : "granted to employee"
+  users ||--o{ shifts : "assigned to shift"
+  schedules ||--o{ shifts : "groups shifts"
+  positions ||--o{ shifts : "performed at position"
+  users ||--o{ availabilities : "submits availability"
+  users ||--o{ schedules : "created by manager"
+  users ||--o{ positions : "added by admin"
+```
 
 ---
 
@@ -121,25 +264,37 @@ Employees log in via `POST /api/auth/login-pin` with `login` + `pin`.
 
 ---
 
+## Environment Variables
+
+Root `.env` (Docker Compose level):
+
+| Variable | Description |
+|----------|-------------|
+| `DB_PASSWORD` | MySQL user password — must match `backend/.env` |
+| `DB_ROOT_PASSWORD` | MySQL root password |
+
+`backend/.env` (Laravel application):
+
+| Variable | Description |
+|----------|-------------|
+| `APP_ENV` | `local` for development, `production` for deployment |
+| `APP_DEBUG` | `true` locally, `false` in production |
+| `APP_KEY` | Generated by `php artisan key:generate` |
+| `JWT_SECRET` | Generated by `php artisan jwt:secret` |
+| `DB_HOST` | `db` inside Docker (service name) |
+| `DB_DATABASE` | Application database name |
+| `DB_USERNAME` | MySQL user |
+| `DB_PASSWORD` | Must match root `.env` |
+| `REDIS_HOST` | `redis` inside Docker |
+| `DEFAULT_EMPLOYEE_PIN` | PIN assigned to all CSV-imported accounts (default `1234`) |
+
+---
+
 ## Testing the API
 
 ### Postman collection
 
-Import `docs/SHIFTFLOW_API.postman_collection.json`. The collection uses a `base_url` variable (default: `http://localhost:8000`). A second environment targeting the production hosting URL will be added after deployment.
-
-### Automated tests
-
-```bash
-docker compose exec app php artisan test
-```
-
-122 tests across 19 test files. Tests run against a separate `shiftflow_test` database (created automatically on first `docker compose up` by `docker/mysql/init.sql`).
-
-Run a single file:
-
-```bash
-docker compose exec app php artisan test tests/Feature/Schedules/ScheduleBatchTest.php
-```
+Import `docs/SHIFTFLOW_API.postman_collection.json`. The collection uses a `base_url` variable (default: `http://localhost:8000`). A second environment targeting the production URL will be added after deployment.
 
 ---
 
@@ -397,8 +552,6 @@ Add multiple shifts in a single atomic transaction. If any shift fails validatio
 }
 ```
 
-No `data` wrapper — flat response with `message`, `count`, `shifts`.
-
 **Error 422 — business validation failed:**
 ```json
 {
@@ -411,7 +564,7 @@ No `data` wrapper — flat response with `message`, `count`, `shifts`.
 }
 ```
 
-Errors are keyed by `client_temp_id`. Error type (`conflict`, etc.) is the inner key.
+Errors are keyed by `client_temp_id`.
 
 ---
 
@@ -705,7 +858,7 @@ Same user + date = update (returns 200). New record = create (returns 201).
 }
 ```
 
-**Response 200:** Same shape, `message: "Availability updated successfully"`. `created_at` unchanged, `updated_at` reflects the update.
+**Response 200:** Same shape, `message: "Availability updated successfully"`.
 
 ---
 
@@ -735,13 +888,10 @@ Same user + date = update (returns 200). New record = create (returns 201).
 All duration and limit fields (`minutes_worked`, `max_minutes_per_month`, `max_minutes_per_quarter`, `min_break_minutes`) are stored as integers in minutes. This avoids floating-point precision issues for 7.5-hour shifts, makes arithmetic exact, and prevents limit-check drift from fractional-hour accumulation across many shifts.
 
 **PIN onboarding flow**
-Employees imported via CSV receive a default PIN from the `DEFAULT_EMPLOYEE_PIN` environment variable (defaults to `1234`). The employee changes the PIN on first login. This avoids generating and distributing unique PINs for bulk imports, while keeping the default configurable per deployment environment.
+For bulk imports, all accounts receive the default PIN — the employee sets a personal PIN on first login. The default is configurable per deployment via the `DEFAULT_EMPLOYEE_PIN` environment variable.
 
 **JWT blacklist via Redis**
 Standard JWT is stateless — once issued, a token is valid until its expiry time regardless of logout. To make logout actually revoke a token, the `jti` claim is stored in Redis on logout with TTL equal to the token's remaining lifetime. Every authenticated request checks the blacklist before processing.
-
-**Reports module disabled**
-Routes and controller for `/api/reports/*` are removed from the codebase. The underlying `ReportService` was querying the `Schedule` model instead of `Shift` — a structural mismatch left from an early refactor. The module will be rewritten from scratch once React SPA frontend requirements are defined.
 
 **ValidationService with Dependency Inversion**
 Validators are injected as an ordered array into `ValidationService` via `AppServiceProvider`. Adding or reordering a validator requires no changes to `ValidationService` itself. The chain runs fast→slow (permission and availability checks before expensive query-heavy validations) to fail early and avoid unnecessary DB queries.
@@ -761,18 +911,16 @@ Validators are injected as an ordered array into `ValidationService` via `AppSer
 ## Known Issues
 
 - **CORS wildcard** — `*` is acceptable during development, must be restricted to the frontend domain before any public deployment
-- **CSV import timeout** — files over ~300 rows time out due to N+1 writes: `EmployeeRepository::saveMany()` runs one `updateOrCreate` query per row inside a loop; no batching
-- **Reports module non-functional** — intentionally removed; `ReportService` was querying the wrong model (`Schedule` instead of `Shift`); routes and controller are absent from the codebase
+- **CSV import performance** — measured with real data: ~100 rows take ~10 seconds, ~300 rows exceed the request timeout. Root cause: `EmployeeRepository::saveMany()` runs one `updateOrCreate` query per row in a loop (N+1 writes), no batching.
 
 ---
 
 ## Planned Improvements
 
-- **Fix CSV import** — replace the per-row loop with `DB::upsert()` and dispatch to a queued job (Laravel Horizon) for files over ~50 rows
-- **Rewrite reports module** — rebuild from scratch once React SPA frontend requirements are finalized
+- **CSV import rewrite** — replace N+1 loop with `DB::upsert()`, dispatch to a queued Job via Laravel Horizon for files above ~50 rows; refactor `EmployeesCsvExtractor` to auto-detect file structure instead of requiring a fixed column template
+- **Reports module** — planned after React SPA frontend requirements are defined
 - **Restrict CORS** — lock `ALLOWED_ORIGINS` to the frontend domain after deployment
 - **React SPA frontend** — planned as a separate repository; all required API fields are documented in `docs/SHIFTFLOW_API.postman_collection.json`
-- **Position color coding** — `color` column is already in the DB and returned by all position and shift responses; ready for frontend rendering
 
 ---
 
@@ -782,10 +930,12 @@ Validators are injected as an ordered array into `ValidationService` via `AppSer
 docker compose exec app php artisan test
 ```
 
-122 tests across 19 test files. Feature tests run against a real MySQL `shiftflow_test` database (no SQLite, no mocks). Unit tests cover `ValidationService` validators, `LoginGeneratorService`, and `TimeHelper`.
+122 tests, 19 test files. Feature tests run against a real MySQL `shiftflow_test` database — no SQLite, no mocks. Unit tests cover individual shift validators, `LoginGeneratorService`, and `TimeHelper`.
 
-Run PHPStan (level 6, no baseline):
+Static analysis — PHPStan level 6 via Larastan, zero errors, no suppression baseline:
 
 ```bash
 docker compose exec app php -d memory_limit=512M vendor/bin/phpstan analyse --no-progress
 ```
+
+Level 6 checks include: strict return types, typed collections with generics, nullable handling, and dead code detection. No errors are suppressed via baseline or `@phpstan-ignore`.
