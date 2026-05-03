@@ -1,0 +1,821 @@
+{
+	"info": {
+		"_postman_id": "shiftflow-api-v2",
+		"name": "SHIFTFLOW_API — Hetzner (204.168.235.115)",
+		"description": "# SHIFTFlow API\n\nREST API for managing tourist guide shift schedules at the Wieliczka Salt Mine.\n\n---\n\n## Quick Start\n\n1. Make sure containers are running: `shiftflow up -d`\n2. Run **🔐 Authentication → JWT Login** — token is saved automatically\n3. All other requests use `{{access_token}}` automatically\n\n---\n\n## Collection Variables\n\n| Variable | Default | Description |\n|---------|-----------------|------|\n| `base_url` | `http://204.168.235.115:8000` | API base URL |\n| `access_token` | *(auto after login)* | JWT token (9h TTL) |\n| `schedule_id` | `1` | Schedule ID for testing (April 2026, published) |\n| `shift_id` | `1` | Shift ID for testing |\n| `employee_id` | `2` | User ID for testing (akowal, manager) |\n| `position_id` | `1` | Position ID for testing |\n\n---\n\n## Test Accounts (after migrate:fresh --seed)\n\n| Login | Password / PIN | Role |\n|-------|------------|------|\n| `admin` | `password` | admin |\n| `akowal` | `password` | manager |\n| `tnowak` | PIN `1234` | employee |\n| `jwisn` | PIN `1111` | employee |\n| `knowak` | PIN `2222` | employee |\n| `pzajac` | PIN `3333` | employee |\n| `adabrow` | PIN `4444` | employee |\n\n---\n\n## Role Permissions\n\n| Endpoint | admin | manager | employee |\n|----------|-------|---------|----------|\n| Schedules CRUD | ✅ | ✅ | ❌ |\n| Shifts write | ✅ | ✅ | ❌ |\n| Shifts read | ✅ all | ✅ all | ✅ own (published only) |\n| Positions write | ✅ | ❌ | ❌ |\n| Positions read | ✅ | ✅ | ❌ |\n| Employees CRUD | ✅ | ❌ | ❌ |\n| Availabilities own | ✅ | ❌ | ✅ |\n| Availabilities all | ✅ | ✅ read only | ❌ |\n\n---\n\n## Key API Behaviours\n\n- `POST /shifts` → **410 Gone** — use `POST /schedules/{id}/shifts/batch` instead\n- CSV Import: hard limit of **500 rows** (501+ returns 422)\n- Availabilities: same user + date → **UPDATE** (upsert behaviour)\n- Shift times stored in **minutes** in the database (not hours)\n- Employees use soft deletes — historical shift data is preserved\n- JWT tokens are blacklisted on logout (Redis-backed)\n- Position `color` must be a valid hex color in `#RRGGBB` format",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://204.168.235.115:8000",
+			"type": "string"
+		},
+		{ "key": "access_token", "value": "", "type": "string" },
+		{ "key": "schedule_id", "value": "1", "type": "string" },
+		{ "key": "shift_id", "value": "1", "type": "string" },
+		{ "key": "employee_id", "value": "2", "type": "string" },
+		{ "key": "position_id", "value": "1", "type": "string" }
+	],
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "JWT Login (admin/manager)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var json = pm.response.json();",
+									"    pm.collectionVariables.set('access_token', json.access_token);",
+									"    console.log('Token saved. Role: ' + json.user.role);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"admin\",\n  \"password\": \"password\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "PIN Login (employee)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var json = pm.response.json();",
+									"    pm.collectionVariables.set('access_token', json.access_token);",
+									"    console.log('Token saved. User: ' + json.user.login);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"tnowak\",\n  \"pin\": 1234\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login-pin",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login-pin"]
+						}
+					}
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "me"]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    pm.collectionVariables.set('access_token', '');",
+									"    console.log('Token cleared.');",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "logout"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📅 Schedules",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/schedules?month=5&year=2026",
+							"host": ["{{base_url}}"],
+							"path": ["api", "schedules"],
+							"query": [
+								{
+									"key": "month",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "year",
+									"value": "2026",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Grafik Czerwiec 2026\",\n  \"month\": 6,\n  \"year\": 2026,\n  \"description\": \"Harmonogram na czerwiec\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/schedules",
+							"host": ["{{base_url}}"],
+							"path": ["api", "schedules"]
+						}
+					}
+				},
+				{
+					"name": "Show",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/schedules/{{schedule_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "schedules", "{{schedule_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Grafik Czerwiec 2026 — zaktualizowany\",\n  \"description\": \"Nowy opis\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/schedules/{{schedule_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "schedules", "{{schedule_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/schedules/{{schedule_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "schedules", "{{schedule_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Batch Add Shifts",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shifts\": [\n    {\n      \"client_temp_id\": \"row_1\",\n      \"user_id\": 3,\n      \"position_id\": 1,\n      \"date\": \"2026-05-10\",\n      \"shift_start\": \"07:00\",\n      \"shift_end\": \"15:00\",\n      \"notes\": \"Morning shift\"\n    },\n    {\n      \"client_temp_id\": \"row_2\",\n      \"user_id\": 3,\n      \"position_id\": 1,\n      \"date\": \"2026-05-15\",\n      \"shift_start\": \"07:00\",\n      \"shift_end\": \"15:00\"\n    }\n  ]\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/schedules/2/shifts/batch",
+							"host": ["{{base_url}}"],
+							"path": ["api", "schedules", "2", "shifts", "batch"]
+						}
+					}
+				},
+				{
+					"name": "Publish",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/schedules/{{schedule_id}}/publish",
+							"host": ["{{base_url}}"],
+							"path": [
+								"api",
+								"schedules",
+								"{{schedule_id}}",
+								"publish"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "⏰ Shifts",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shifts?from=2026-05-01&to=2026-05-31",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shifts"],
+							"query": [
+								{ "key": "from", "value": "2026-05-01" },
+								{ "key": "to", "value": "2026-05-31" },
+								{
+									"key": "user_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "date",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "50",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Show",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shifts/{{shift_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shifts", "{{shift_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user_id\": 2,\n  \"position_id\": 1,\n  \"date\": \"2026-05-10\",\n  \"shift_start\": \"09:00\",\n  \"shift_end\": \"17:00\",\n  \"notes\": \"Zaktualizowana notatka\",\n  \"schedule_id\": 1,\n  \"status\": \"scheduled\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shifts/{{shift_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shifts", "{{shift_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shifts/{{shift_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shifts", "{{shift_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Store — DEPRECATED (410)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"description": "Ten endpoint zwraca 410 Gone. Używaj POST /schedules/{id}/shifts/batch.",
+						"url": {
+							"raw": "{{base_url}}/api/shifts",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shifts"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📍 Positions",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/positions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "positions"]
+						}
+					}
+				},
+				{
+					"name": "Show",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/positions/{{position_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "positions", "{{position_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Shifts for Position",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"description": "Paginowany endpoint — zmiany przypisane do danego stanowiska.",
+						"url": {
+							"raw": "{{base_url}}/api/positions/{{position_id}}/shifts",
+							"host": ["{{base_url}}"],
+							"path": [
+								"api",
+								"positions",
+								"{{position_id}}",
+								"shifts"
+							]
+						}
+					}
+				},
+				{
+					"name": "Store (admin only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"B9\",\n  \"description\": \"Nowe stanowisko kasowe\",\n  \"color\": \"#FFF200\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/positions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "positions"]
+						}
+					}
+				},
+				{
+					"name": "Update (admin only)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"B9\",\n  \"description\": \"Zaktualizowany opis\",\n  \"color\": \"#FF0000\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/positions/{{position_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "positions", "{{position_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete (admin only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/positions/{{position_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "positions", "{{position_id}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "👥 Employees",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/employees",
+							"host": ["{{base_url}}"],
+							"path": ["api", "employees"],
+							"query": [
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "50",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Nowy Pracownik\",\n  \"pin\": 9999,\n  \"positions\": [1, 2],\n  \"hourly_rate\": 28.50,\n  \"contract_type\": \"employment_contract\",\n  \"max_minutes_per_month\": 9600,\n  \"max_minutes_per_quarter\": 28800,\n  \"min_break_minutes\": 660\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/employees",
+							"host": ["{{base_url}}"],
+							"path": ["api", "employees"]
+						}
+					}
+				},
+				{
+					"name": "Show",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/employees/{{employee_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "employees", "{{employee_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Zaktualizowany Pracownik\",\n  \"hourly_rate\": 32.00,\n  \"positions\": [1, 3],\n  \"max_minutes_per_month\": 10080\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/employees/{{employee_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "employees", "{{employee_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/employees/{{employee_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "employees", "{{employee_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Import CSV",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "csv",
+									"type": "file",
+									"src": "",
+									"description": "Wybierz plik CSV z pracownikami (max 500 wierszy)"
+								}
+							]
+						},
+						"description": "Format CSV:\nid_pracownika;imie_nazwisko;typ_umowy;PD;B1;WR...\n\nSeparator: ; (średnik)\nTypy umów: employment, mandate\nPozycje: TAK = przypisana\n\nPliki testowe w: backend/storage/app/test-imports/",
+						"url": {
+							"raw": "{{base_url}}/api/employees/import",
+							"host": ["{{base_url}}"],
+							"path": ["api", "employees", "import"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📋 Availabilities (Dyspozycje)",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/availabilities",
+							"host": ["{{base_url}}"],
+							"path": ["api", "availabilities"],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "2",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Store / Update (upsert)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user_id\": 2,\n  \"date\": \"2026-06-15\",\n  \"is_available\": true,\n  \"notes\": \"Mogę tylko rano\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"description": "Jeśli dyspozycja dla user_id + date już istnieje → UPDATE (200). Jeśli nie → CREATE (201).",
+						"url": {
+							"raw": "{{base_url}}/api/availabilities",
+							"host": ["{{base_url}}"],
+							"path": ["api", "availabilities"]
+						}
+					}
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/availabilities/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "availabilities", "1"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

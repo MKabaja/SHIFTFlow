@@ -6,6 +6,7 @@ services:
         working_dir: /var/www
         volumes:
             - ./backend:/var/www
+            - /var/www/vendor
         ports:
             - '8000:8000'
         depends_on:
