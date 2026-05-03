@@ -33,4 +33,4 @@ jobs:
 
             - name: Run PHPStan
               working-directory: backend
-              run: ./vendor/bin/phpstan analyse --memory-limit=512M
+              run: php vendor/bin/phpstan analyse --memory-limit=512M
