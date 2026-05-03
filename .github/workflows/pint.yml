@@ -1,4 +1,4 @@
-name: PHPStan
+name: Code Style
 
 on:
     push:
@@ -7,7 +7,7 @@ on:
         branches: [main]
 
 jobs:
-    phpstan:
+    pint:
         runs-on: ubuntu-latest
 
         steps:
@@ -23,14 +23,6 @@ jobs:
               working-directory: backend
               run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-            - name: Copy .env
+            - name: Run Pint
               working-directory: backend
-              run: cp .env.example .env
-
-            - name: Generate app key
-              working-directory: backend
-              run: php artisan key:generate
-
-            - name: Run PHPStan
-              working-directory: backend
-              run: ./vendor/bin/phpstan analyse --memory-limit=512M
+              run: ./vendor/bin/pint --test
