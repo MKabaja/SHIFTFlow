@@ -50,16 +50,22 @@ Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager,employee']) 
         Route::get('/', 'index');
 
     });
-// Schedule Crud + Batch
-Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager'])
+// Schedules — read (all roles; employee sees only published — filtered in controller)
+Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager,employee'])
     ->prefix('schedules')
     ->controller(ScheduleController::class)
     ->group(function () {
         Route::get('/', 'index');
+        Route::get('/{schedule}', 'show');
+    });
+// Schedules — write (admin, manager only)
+Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager'])
+    ->prefix('schedules')
+    ->controller(ScheduleController::class)
+    ->group(function () {
         Route::post('/', 'store');
         Route::match(['put', 'patch'], '/{schedule}', 'update');
         Route::delete('/{schedule}', 'destroy');
-        Route::get('/{schedule}', 'show');
         Route::post('/{schedule}/shifts/batch', 'addShiftsBatch');
         Route::post('/{schedule}/publish', 'publish');
     });

@@ -25,9 +25,16 @@ class ScheduleController extends Controller
 
     public function index(GetSchedulesRequest $request): JsonResponse
     {
+        $this->authorize('viewAny', Schedule::class);
+
+        $user = $request->user();
+
+        $isEmployee = $user->role === 'employee';
         $perPage = $request->validated('per_page') ?? 20;
 
         $schedules = Schedule::with(['creator', 'shifts'])
+            ->when($isEmployee, fn ($q) => $q->where('status', 'published'))
+
             ->when($request
                 ->input('month'), fn ($q, $m) => $q
                 ->where('month', $m))
@@ -60,6 +67,8 @@ class ScheduleController extends Controller
 
     public function show(Schedule $schedule): JsonResponse
     {
+        $this->authorize('view', $schedule);
+
         $schedule->load(['creator', 'shifts']);
 
         return ScheduleResource::make($schedule)

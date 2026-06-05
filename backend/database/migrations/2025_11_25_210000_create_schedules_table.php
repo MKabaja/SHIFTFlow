@@ -25,7 +25,7 @@ return new class extends Migration
             $table->index(['month', 'year']);
             $table->enum(
                 'status',
-                ['draft', 'published', 'in_progress']
+                ['draft', 'published']
             )
                 ->default('draft');
 
