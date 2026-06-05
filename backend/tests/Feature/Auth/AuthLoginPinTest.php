@@ -14,19 +14,17 @@ test('login pin succeeds with valid pin', function () {
     /** @var User $employee */
     $employee = User::factory()->employee()->withPin($this->pin)->create();
 
-    $this->postJson('/api/auth/login-pin', [
+    $response = $this->postJson('/api/auth/login-pin', [
         'login' => $employee->login,
         'pin' => $this->pin,
-    ])
+    ]);
+
+    $response
         ->assertOk()
-        ->assertJsonStructure([
-            'access_token',
-            'token_type',
-            'expires_in',
-            'user' => ['id', 'name', 'login', 'role'],
-        ])
-        ->assertJsonPath('token_type', 'bearer')
+        ->assertJsonStructure(['user'])
         ->assertJsonPath('user.role', 'employee');
+
+    expect($response->getCookie('jwt_token', false))->not->toBeNull();
 });
 
 test('login pin fails with wrong pin', function () {

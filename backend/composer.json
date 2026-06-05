@@ -12,7 +12,6 @@
         "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "predis/predis": "^3.4",
         "tymon/jwt-auth": "^2.2"
     },
     "require-dev": {
@@ -26,7 +25,8 @@
         "nunomaduro/collision": "^8.6",
         "pestphp/pest": "*",
         "pestphp/pest-plugin-laravel": "^3.2",
-        "phpunit/phpunit": "^11.5.3"
+        "phpunit/phpunit": "^11.5.3",
+        "predis/predis": "*"
     },
     "autoload": {
         "psr-4": {
@@ -41,7 +41,14 @@
         }
     },
     "scripts": {
-        "pint": "vendor/bin/pint",
+        "lint": "./vendor/bin/pint",
+        "analyse": "./vendor/bin/phpstan analyse",
+        "test_pest": "./vendor/bin/pest",
+        "check": [
+            "@lint",
+            "@analyse",
+            "@test_pest"
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",

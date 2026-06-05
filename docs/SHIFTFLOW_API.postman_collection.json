@@ -2,18 +2,11 @@
 	"info": {
 		"_postman_id": "shiftflow-api-v2",
 		"name": "SHIFTFLOW_API_SPEC",
-		"description": "# SHIFTFlow API\n\nREST API for managing tourist guide shift schedules at the Wieliczka Salt Mine.\n\n---\n\n## Quick Start\n\n1. Make sure containers are running: `shiftflow up -d`\n2. Run **🔐 Authentication → JWT Login** — token is saved automatically\n3. All other requests use `{{access_token}}` automatically\n\n---\n\n## Collection Variables\n\n| Variable | Default | Description |\n|---------|-----------------|------|\n| `base_url` | `http://localhost:8000` | API base URL |\n| `access_token` | *(auto after login)* | JWT token (9h TTL) |\n| `schedule_id` | `1` | Schedule ID for testing (April 2026, published) |\n| `shift_id` | `1` | Shift ID for testing |\n| `employee_id` | `2` | User ID for testing (akowal, manager) |\n| `position_id` | `1` | Position ID for testing |\n\n---\n\n## Test Accounts (after migrate:fresh --seed)\n\n| Login | Password / PIN | Role |\n|-------|------------|------|\n| `admin` | `password` | admin |\n| `akowal` | `password` | manager |\n| `tnowak` | PIN `1234` | employee |\n| `jwisn` | PIN `1111` | employee |\n| `knowak` | PIN `2222` | employee |\n| `pzajac` | PIN `3333` | employee |\n| `adabrow` | PIN `4444` | employee |\n\n---\n\n## Role Permissions\n\n| Endpoint | admin | manager | employee |\n|----------|-------|---------|----------|\n| Schedules CRUD | ✅ | ✅ | ❌ |\n| Shifts write | ✅ | ✅ | ❌ |\n| Shifts read | ✅ all | ✅ all | ✅ own (published only) |\n| Positions write | ✅ | ❌ | ❌ |\n| Positions read | ✅ | ✅ | ❌ |\n| Employees CRUD | ✅ | ❌ | ❌ |\n| Availabilities own | ✅ | ❌ | ✅ |\n| Availabilities all | ✅ | ✅ read only | ❌ |\n\n---\n\n## Key API Behaviours\n\n- `POST /shifts` → **410 Gone** — use `POST /schedules/{id}/shifts/batch` instead\n- CSV Import: hard limit of **500 rows** (501+ returns 422)\n- Availabilities: same user + date → **UPDATE** (upsert behaviour)\n- Shift times stored in **minutes** in the database (not hours)\n- Employees use soft deletes — historical shift data is preserved\n- JWT tokens are blacklisted on logout (Redis-backed)\n- Position `color` must be a valid hex color in `#RRGGBB` format",
+		"description": "# SHIFTFlow API\n\nREST API for managing tourist guide shift schedules at the Wieliczka Salt Mine.\n\n---\n\n## Quick Start\n\n1. Make sure containers are running: `shiftflow up -d`\n2. Run **🔐 Authentication → JWT Login** — `jwt_token` cookie is saved automatically by Postman\n3. All other requests use the cookie automatically (Postman Cookie Jar)\n\n> **Auth method changed (B1):** JWT is now stored as an `httpOnly` cookie instead of a response body token. Postman handles this transparently via the Cookie Jar — no manual token copying needed.\n\n---\n\n## Collection Variables\n\n| Variable | Default | Description |\n|---------|-----------------|------|\n| `base_url` | `http://localhost:8000` | API base URL |\n| `schedule_id` | `1` | Schedule ID for testing (April 2026, published) |\n| `shift_id` | `1` | Shift ID for testing |\n| `employee_id` | `2` | User ID for testing (akowal, manager) |\n| `position_id` | `1` | Position ID for testing |\n\n---\n\n## Test Accounts (after migrate:fresh --seed)\n\n| Login | Password / PIN | Role |\n|-------|------------|------|\n| `admin` | `password` | admin |\n| `akowal` | `password` | manager |\n| `tnowak` | PIN `1234` | employee |\n| `jwisn` | PIN `1111` | employee |\n| `knowak` | PIN `2222` | employee |\n| `pzajac` | PIN `3333` | employee |\n| `adabrow` | PIN `4444` | employee |\n\n---\n\n## Role Permissions\n\n| Endpoint | admin | manager | employee |\n|----------|-------|---------|----------|\n| Schedules CRUD | ✅ | ✅ | ❌ |\n| Shifts write | ✅ | ✅ | ❌ |\n| Shifts read | ✅ all | ✅ all | ✅ own (published only) |\n| Positions write | ✅ | ❌ | ❌ |\n| Positions read | ✅ | ✅ | ❌ |\n| Employees CRUD | ✅ | ❌ | ❌ |\n| Availabilities own | ✅ | ❌ | ✅ |\n| Availabilities all | ✅ | ✅ read only | ❌ |\n\n---\n\n## Key API Behaviours\n\n- `POST /shifts` → **410 Gone** — use `POST /schedules/{id}/shifts/batch` instead\n- CSV Import: hard limit of **500 rows** (501+ returns 422)\n- Availabilities: same user + date → **UPDATE** (upsert behaviour)\n- Shift times stored in **minutes** in the database (not hours)\n- Employees use soft deletes — historical shift data is preserved\n- JWT tokens are blacklisted on logout (Redis-backed)\n- Position `color` must be a valid hex color in `#RRGGBB` format",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{access_token}}",
-				"type": "string"
-			}
-		]
+		"type": "noauth"
 	},
 	"variable": [
 		{
@@ -21,7 +14,6 @@
 			"value": "http://localhost:8000",
 			"type": "string"
 		},
-		{ "key": "access_token", "value": "", "type": "string" },
 		{ "key": "schedule_id", "value": "1", "type": "string" },
 		{ "key": "shift_id", "value": "1", "type": "string" },
 		{ "key": "employee_id", "value": "2", "type": "string" },
@@ -41,8 +33,7 @@
 								"exec": [
 									"if (pm.response.code === 200) {",
 									"    var json = pm.response.json();",
-									"    pm.collectionVariables.set('access_token', json.access_token);",
-									"    console.log('Token saved. Role: ' + json.user.role);",
+									"    console.log('Logged in. Role: ' + json.user.role + ' | Cookie set automatically by Postman.');",
 									"}"
 								]
 							}
@@ -72,7 +63,8 @@
 							"raw": "{{base_url}}/api/auth/login",
 							"host": ["{{base_url}}"],
 							"path": ["api", "auth", "login"]
-						}
+						},
+						"description": "Returns `{user}` and sets `jwt_token` httpOnly cookie. Postman stores the cookie automatically — no manual token handling needed."
 					}
 				},
 				{
@@ -85,8 +77,7 @@
 								"exec": [
 									"if (pm.response.code === 200) {",
 									"    var json = pm.response.json();",
-									"    pm.collectionVariables.set('access_token', json.access_token);",
-									"    console.log('Token saved. User: ' + json.user.login);",
+									"    console.log('Logged in. User: ' + json.user.login + ' | Cookie set automatically by Postman.');",
 									"}"
 								]
 							}
@@ -116,7 +107,8 @@
 							"raw": "{{base_url}}/api/auth/login-pin",
 							"host": ["{{base_url}}"],
 							"path": ["api", "auth", "login-pin"]
-						}
+						},
+						"description": "Returns `{user}` and sets `jwt_token` httpOnly cookie."
 					}
 				},
 				{
@@ -146,8 +138,7 @@
 								"type": "text/javascript",
 								"exec": [
 									"if (pm.response.code === 200) {",
-									"    pm.collectionVariables.set('access_token', '');",
-									"    console.log('Token cleared.');",
+									"    console.log('Logged out. Cookie cleared automatically (Set-Cookie: Max-Age=0).');",
 									"}"
 								]
 							}
@@ -166,7 +157,8 @@
 							"raw": "{{base_url}}/api/auth/logout",
 							"host": ["{{base_url}}"],
 							"path": ["api", "auth", "logout"]
-						}
+						},
+						"description": "Blacklists the JWT (Redis) and clears the `jwt_token` cookie via `Set-Cookie: Max-Age=0`."
 					}
 				}
 			]

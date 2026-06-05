@@ -14,14 +14,17 @@ test('login succeeds with valid credentials', function () {
     /** @var User $manager */
     $manager = User::factory()->manager()->create(['password' => $this->password]);
 
-    $this->postJson('/api/auth/login', [
+    $response = $this->postJson('/api/auth/login', [
         'login' => $manager->login,
         'password' => $this->password,
-    ])
+    ]);
+
+    $response
         ->assertOk()
-        ->assertJsonStructure(['access_token', 'token_type', 'expires_in', 'user'])
-        ->assertJsonPath('token_type', 'bearer')
+        ->assertJsonStructure(['user'])
         ->assertJsonPath('user.login', $manager->login);
+
+    expect($response->getCookie('jwt_token', false))->not->toBeNull();
 });
 
 test('login fails with wrong password', function () {
