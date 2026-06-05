@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AvailabilityController;
 use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\PositionController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\ShiftController;
@@ -93,6 +94,24 @@ Route::middleware(['auth:api', 'jwt.blacklist',  'role:admin'])
         Route::match(['put', 'patch'], '/{employee}', 'update');
         Route::delete('/{employee}', 'destroy');
         Route::get('/{employee}', 'show');
+    });
+
+// News — read (all authenticated roles)
+Route::middleware(['auth:api', 'jwt.blacklist'])
+    ->prefix('news')
+    ->controller(NewsController::class)
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{newsPost}', 'show');
+    });
+// News — write (admin only)
+Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin'])
+    ->prefix('news')
+    ->controller(NewsController::class)
+    ->group(function () {
+        Route::post('/', 'store');
+        Route::match(['put', 'patch'], '/{newsPost}', 'update');
+        Route::delete('/{newsPost}', 'destroy');
     });
 
 // Availabilities
