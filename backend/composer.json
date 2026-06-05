@@ -41,9 +41,9 @@
         }
     },
     "scripts": {
-        "lint": "./vendor/bin/pint",
-        "analyse": "./vendor/bin/phpstan analyse",
-        "test_pest": "./vendor/bin/pest",
+        "lint": "php vendor/bin/pint",
+        "analyse": "php vendor/bin/phpstan analyse --memory-limit=512M",
+        "test_pest": "php vendor/bin/pest",
         "check": [
             "@lint",
             "@analyse",
