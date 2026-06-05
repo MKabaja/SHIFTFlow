@@ -11,7 +11,6 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\JwtBlacklistService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -104,15 +103,6 @@ class AuthController extends Controller
         );
 
         return response()->json(['user' => new UserResource($user)])->withCookie($cookie);
-    }
-
-    public function me(Request $request): JsonResponse
-    {
-        $user = $request->user();
-        $user->load('positions');
-
-        return UserResource::make($user)->response();
-
     }
 
     public function logout(): JsonResponse

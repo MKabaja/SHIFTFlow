@@ -38,7 +38,7 @@ test('me works with cookie auth', function () {
 
     $this->withCredentials()
         ->withUnencryptedCookies(['jwt_token' => $cookieValue])
-        ->getJson('/api/auth/me')
+        ->getJson('/api/me')
         ->assertOk()
         ->assertJsonPath('data.login', $manager->login);
 });

@@ -49,6 +49,6 @@ test('blacklisted token is rejected after logout', function () {
 
     $this->withCredentials()
         ->withUnencryptedCookies(['jwt_token' => $cookieValue])
-        ->getJson('/api/auth/me')
+        ->getJson('/api/me')
         ->assertUnauthorized();
 });

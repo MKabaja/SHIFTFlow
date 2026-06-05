@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AvailabilityController;
 use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\PositionController;
 use App\Http\Controllers\Api\ScheduleController;
@@ -24,10 +25,9 @@ Route::prefix('auth')
                 Route::post('/login-pin', 'loginPin');
             });
 
-        Route::middleware(['auth:api', 'jwt.blacklist']) // Protect logout and me routes
+        Route::middleware(['auth:api', 'jwt.blacklist']) // Protect logout route
             ->group(function () {
 
-                Route::get('/me', 'me');
                 Route::post('/logout', 'logout');
             });
     });
@@ -112,6 +112,16 @@ Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin'])
         Route::post('/', 'store');
         Route::match(['put', 'patch'], '/{newsPost}', 'update');
         Route::delete('/{newsPost}', 'destroy');
+    });
+
+// Me — password & PIN changes
+Route::middleware(['auth:api', 'jwt.blacklist'])
+    ->prefix('me')
+    ->controller(MeController::class)
+    ->group(function () {
+        Route::get('/', 'me');
+        Route::middleware('role:admin,manager')->patch('/password', 'changePassword');
+        Route::middleware('role:employee')->patch('/pin', 'changePin');
     });
 
 // Availabilities
