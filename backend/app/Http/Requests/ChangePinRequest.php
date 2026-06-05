@@ -23,10 +23,10 @@ class ChangePinRequest extends FormRequest
         $hasPin = $this->user()->pin_hashed !== null;
 
         return [
-            'current_pin'          => $hasPin
+            'current_pin' => $hasPin
                 ? ['required', 'digits:4', $this->currentPinRule()]
                 : ['nullable', 'digits:4'],
-            'new_pin'              => ['required', 'digits:4', 'confirmed'],
+            'new_pin' => ['required', 'digits:4', 'confirmed'],
             'new_pin_confirmation' => ['required', 'digits:4'],
         ];
     }

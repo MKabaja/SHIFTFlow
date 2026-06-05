@@ -27,6 +27,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property string|null $pin_hashed
  * @property bool $is_active
  * @property string $role
+ * @property string $locale
  * @property numeric|null $hourly_rate
  * @property int|null $max_minutes_per_month
  * @property int|null $max_minutes_per_quarter
@@ -91,6 +92,11 @@ class User extends Authenticatable implements JWTSubject
         'min_break_minutes',
         'contract_type',
         'role',
+        'locale',
+    ];
+
+    protected $attributes = [
+        'locale' => 'pl',
     ];
 
     protected $hidden = [

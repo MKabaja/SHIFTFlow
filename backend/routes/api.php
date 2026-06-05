@@ -120,6 +120,7 @@ Route::middleware(['auth:api', 'jwt.blacklist'])
     ->controller(MeController::class)
     ->group(function () {
         Route::get('/', 'me');
+        Route::patch('/locale', 'changeLocale');
         Route::middleware('role:admin,manager')->patch('/password', 'changePassword');
         Route::middleware('role:employee')->patch('/pin', 'changePin');
     });

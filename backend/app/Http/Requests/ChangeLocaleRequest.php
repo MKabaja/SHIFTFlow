@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class ChangePasswordRequest extends FormRequest
+class ChangeLocaleRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -19,9 +20,7 @@ class ChangePasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'current_password' => ['required', 'current_password'],
-            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
-            'new_password_confirmation' => ['required'],
+            'locale' => ['required', 'string', Rule::in(['pl', 'en'])],
         ];
     }
 }

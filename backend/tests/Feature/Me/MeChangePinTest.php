@@ -15,8 +15,8 @@ test('employee can change PIN with correct current PIN', function () {
     $this->actingAs($this->employee, 'api');
 
     $this->patchJson('/api/me/pin', [
-        'current_pin'          => $this->pin,
-        'new_pin'              => '5678',
+        'current_pin' => $this->pin,
+        'new_pin' => '5678',
         'new_pin_confirmation' => '5678',
     ])
         ->assertOk()
@@ -28,7 +28,7 @@ test('employee can set first PIN when no PIN is set', function () {
     $this->actingAsEmployee();
 
     $this->patchJson('/api/me/pin', [
-        'new_pin'              => '5678',
+        'new_pin' => '5678',
         'new_pin_confirmation' => '5678',
     ])
         ->assertOk()
@@ -41,8 +41,8 @@ test('change PIN fails with wrong current PIN', function () {
     $this->actingAs($this->employee, 'api');
 
     $this->patchJson('/api/me/pin', [
-        'current_pin'          => '0000',
-        'new_pin'              => '5678',
+        'current_pin' => '0000',
+        'new_pin' => '5678',
         'new_pin_confirmation' => '5678',
     ])
         ->assertUnprocessable()
@@ -55,8 +55,8 @@ test('change PIN fails when new PINs do not match', function () {
     $this->actingAs($this->employee, 'api');
 
     $this->patchJson('/api/me/pin', [
-        'current_pin'          => $this->pin,
-        'new_pin'              => '5678',
+        'current_pin' => $this->pin,
+        'new_pin' => '5678',
         'new_pin_confirmation' => '9999',
     ])
         ->assertUnprocessable()
@@ -68,7 +68,7 @@ test('change PIN fails when PIN is not 4 digits', function () {
     $this->actingAsEmployee();
 
     $this->patchJson('/api/me/pin', [
-        'new_pin'              => '12',
+        'new_pin' => '12',
         'new_pin_confirmation' => '12',
     ])
         ->assertUnprocessable()
@@ -80,7 +80,7 @@ test('admin cannot change PIN', function () {
     $this->actingAsAdmin();
 
     $this->patchJson('/api/me/pin', [
-        'new_pin'              => '5678',
+        'new_pin' => '5678',
         'new_pin_confirmation' => '5678',
     ])
         ->assertForbidden();
@@ -91,7 +91,7 @@ test('manager cannot change PIN', function () {
     $this->actingAsManager();
 
     $this->patchJson('/api/me/pin', [
-        'new_pin'              => '5678',
+        'new_pin' => '5678',
         'new_pin_confirmation' => '5678',
     ])
         ->assertForbidden();
@@ -100,7 +100,7 @@ test('manager cannot change PIN', function () {
 test('change PIN requires authentication', function () {
     /** @var \Tests\TestCase $this */
     $this->patchJson('/api/me/pin', [
-        'new_pin'              => '5678',
+        'new_pin' => '5678',
         'new_pin_confirmation' => '5678',
     ])
         ->assertUnauthorized();

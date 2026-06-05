@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ChangeLocaleRequest;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\ChangePinRequest;
 use App\Http\Resources\UserResource;
@@ -39,5 +40,15 @@ class MeController extends Controller
         $user->update(['pin_hashed' => $newPin]);
 
         return response()->json(['message' => 'PIN changed successfully.']);
+    }
+
+    public function changeLocale(ChangeLocaleRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $locale = $request->validated('locale');
+
+        $user->update(['locale' => $locale]);
+
+        return response()->json(['message' => 'Locale changed successfully.']);
     }
 }
