@@ -112,24 +112,6 @@
 					}
 				},
 				{
-					"name": "Get Current User",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/auth/me",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "me"]
-						}
-					}
-				},
-				{
 					"name": "Logout",
 					"event": [
 						{
@@ -159,6 +141,172 @@
 							"path": ["api", "auth", "logout"]
 						},
 						"description": "Blacklists the JWT (Redis) and clears the `jwt_token` cookie via `Set-Cookie: Max-Age=0`."
+					}
+				}
+			]
+		},
+		{
+			"name": "👤 Me",
+			"item": [
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": {
+							"raw": "{{base_url}}/api/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "me"]
+						},
+						"description": "Returns the authenticated user's data including locale. Replaces the old GET /api/auth/me (breaking change B4)."
+					}
+				},
+				{
+					"name": "Change Password (admin/manager)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"current_password\": \"password\",\n  \"new_password\": \"newpassword\",\n  \"new_password_confirmation\": \"newpassword\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/me/password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "me", "password"]
+						},
+						"description": "Admin and Manager only. Employees use PIN login."
+					}
+				},
+				{
+					"name": "Change PIN (employee)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"current_pin\": \"1234\",\n  \"new_pin\": \"5678\",\n  \"new_pin_confirmation\": \"5678\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/me/pin",
+							"host": ["{{base_url}}"],
+							"path": ["api", "me", "pin"]
+						},
+						"description": "Employee only. Omit current_pin on first-time setup (when no PIN is set yet)."
+					}
+				},
+				{
+					"name": "Change Locale",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"locale\": \"en\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/me/locale",
+							"host": ["{{base_url}}"],
+							"path": ["api", "me", "locale"]
+						},
+						"description": "All roles. Supported: pl, en."
+					}
+				}
+			]
+		},
+		{
+			"name": "📰 News",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": {
+							"raw": "{{base_url}}/api/news",
+							"host": ["{{base_url}}"],
+							"path": ["api", "news"],
+							"query": [
+								{ "key": "search", "value": "", "disabled": true }
+							]
+						},
+						"description": "All authenticated users. Paginated (20/page)."
+					}
+				},
+				{
+					"name": "Show",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": {
+							"raw": "{{base_url}}/api/news/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "news", "1"]
+						}
+					}
+				},
+				{
+					"name": "Store (admin only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Ogłoszenie testowe\",\n  \"content\": \"Treść ogłoszenia testowego z wystarczającą ilością znaków.\",\n  \"is_important\": false\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/news",
+							"host": ["{{base_url}}"],
+							"path": ["api", "news"]
+						}
+					}
+				},
+				{
+					"name": "Update (admin only)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Accept", "value": "application/json", "type": "text" },
+							{ "key": "Content-Type", "value": "application/json", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Zaktualizowane ogłoszenie\",\n  \"is_important\": true\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/news/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "news", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete (admin only)",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Accept", "value": "application/json", "type": "text" }],
+						"url": {
+							"raw": "{{base_url}}/api/news/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "news", "1"]
+						}
 					}
 				}
 			]
