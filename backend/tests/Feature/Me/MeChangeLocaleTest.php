@@ -19,6 +19,8 @@ test('manager can change locale', function () {
 
     $this->patchJson('/api/me/locale', ['locale' => 'en'])
         ->assertOk();
+
+    expect($this->manager->fresh()->locale)->toBe('en');
 });
 
 test('employee can change locale', function () {
@@ -27,6 +29,8 @@ test('employee can change locale', function () {
 
     $this->patchJson('/api/me/locale', ['locale' => 'en'])
         ->assertOk();
+
+    expect($this->employee->fresh()->locale)->toBe('en');
 });
 
 test('locale defaults to pl for new user', function () {

@@ -10,7 +10,9 @@ test('employee can list news posts', function () {
 
     $this->actingAsEmployee()
         ->getJson('/api/news')
-        ->assertOk();
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJsonStructure(['data' => [['id', 'title', 'content', 'is_important', 'created_at', 'updated_at']]]);
 });
 
 test('employee can view a single news post', function () {
@@ -19,7 +21,9 @@ test('employee can view a single news post', function () {
 
     $this->actingAsEmployee()
         ->getJson("/api/news/{$newsPost->id}")
-        ->assertOk();
+        ->assertOk()
+        ->assertJsonPath('data.id', $newsPost->id)
+        ->assertJsonStructure(['data' => ['id', 'title', 'content', 'is_important', 'created_at', 'updated_at']]);
 });
 
 test('manager can list news posts', function () {
@@ -28,7 +32,9 @@ test('manager can list news posts', function () {
 
     $this->actingAsManager()
         ->getJson('/api/news')
-        ->assertOk();
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJsonStructure(['data' => [['id', 'title', 'content', 'is_important', 'created_at', 'updated_at']]]);
 });
 
 test('employee cannot create a news post', function () {

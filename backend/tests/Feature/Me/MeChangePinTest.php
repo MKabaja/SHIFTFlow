@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 beforeEach(function () {
     /** @var \Tests\TestCase $this */
@@ -33,6 +34,8 @@ test('employee can set first PIN when no PIN is set', function () {
     ])
         ->assertOk()
         ->assertJson(['message' => 'PIN changed successfully.']);
+
+    expect(Hash::check('5678', $this->employee->fresh()->pin_hashed))->toBeTrue();
 });
 
 test('change PIN fails with wrong current PIN', function () {

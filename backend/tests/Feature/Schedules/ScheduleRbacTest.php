@@ -48,19 +48,22 @@ test('employee cannot view draft schedule', function () {
         ->assertForbidden();
 });
 
-test('manager can view both published and draft schedules', function () {
+test('manager can list all schedules', function () {
     /** @var \Tests\TestCase $this */
     $this->actingAs($this->manager)
         ->getJson('/api/schedules')
         ->assertOk()
         ->assertJsonCount(2, 'data');
+});
 
+test('manager can view draft schedule', function () {
+    /** @var \Tests\TestCase $this */
     $this->actingAs($this->manager)
         ->getJson("/api/schedules/{$this->draftSchedule->id}")
         ->assertOk();
 });
 
-test('employee cannot write schedules', function () {
+test('employee cannot create schedule', function () {
     /** @var \Tests\TestCase $this */
     $this->actingAs($this->employee)
         ->postJson('/api/schedules', [
@@ -69,7 +72,10 @@ test('employee cannot write schedules', function () {
             'year' => 2026,
         ])
         ->assertForbidden();
+});
 
+test('employee cannot delete schedule', function () {
+    /** @var \Tests\TestCase $this */
     $this->actingAs($this->employee)
         ->deleteJson("/api/schedules/{$this->publishedSchedule->id}")
         ->assertForbidden();

@@ -93,6 +93,11 @@ test('author is set to the authenticated user on create', function () {
     ])
         ->assertCreated()
         ->assertJsonPath('data.author.id', $this->admin->id);
+
+    $this->assertDatabaseHas('news_posts', [
+        'title' => 'Wpis z autorem',
+        'author_id' => $this->admin->id,
+    ]);
 });
 
 test('admin can update a news post', function () {

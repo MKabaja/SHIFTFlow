@@ -20,10 +20,10 @@ class NewsPostResource extends JsonResource
             'title' => $this->title,
             'content' => $this->content,
             'is_important' => $this->is_important,
-            'author' => $this->whenLoaded('author', fn () => [
+            'author' => $this->whenLoaded('author', fn () => $this->author ? [
                 'id' => $this->author->id,
                 'name' => $this->author->name,
-            ]),
+            ] : null),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];
