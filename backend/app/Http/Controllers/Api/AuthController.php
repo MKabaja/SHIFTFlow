@@ -11,7 +11,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\JwtBlacklistService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -49,18 +49,19 @@ class AuthController extends Controller
         }
         $token = JWTAuth::fromUser($user);
 
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => config('jwt.ttl') * 60,
-            'user' => [
-                'id' => $user->id,
-                'login' => $user->login,
-                'name' => $user->name,
-                'role' => $user->role,
-            ],
+        $cookie = cookie(
+            'jwt_token',
+            $token,
+            config('jwt.ttl'),
+            '/',
+            null,
+            app()->environment('production'),
+            true,
+            false,
+            'Lax'
+        );
 
-        ]);
+        return response()->json(['user' => new UserResource($user)])->withCookie($cookie);
     }
 
     public function loginPin(LoginPinRequest $request): JsonResponse
@@ -89,26 +90,19 @@ class AuthController extends Controller
 
         $token = JWTAuth::fromUser($user);
 
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => config('jwt.ttl') * 60,
-            'user' => [
-                'id' => $user->id,
-                'login' => $user->login,
-                'name' => $user->name,
-                'role' => $user->role,
-            ],
-        ]);
-    }
+        $cookie = cookie(
+            'jwt_token',
+            $token,
+            config('jwt.ttl'),
+            '/',
+            null,
+            app()->environment('production'),
+            true,
+            false,
+            'Lax'
+        );
 
-    public function me(Request $request): JsonResponse
-    {
-        $user = $request->user();
-        $user->load('positions');
-
-        return UserResource::make($user)->response();
-
+        return response()->json(['user' => new UserResource($user)])->withCookie($cookie);
     }
 
     public function logout(): JsonResponse
@@ -121,7 +115,8 @@ class AuthController extends Controller
         $tokenInfo = $this->getTokenInfo();
         $this->jwtBlacklistService->setBlacklist($tokenInfo['jti'], $tokenInfo['ttl']);
 
-        return response()->json(['message' => 'Logged out successfully'], 200);
+        return response()->json(['message' => 'Logged out successfully'], 200)
+            ->withCookie(Cookie::forget('jwt_token'));
 
     }
 

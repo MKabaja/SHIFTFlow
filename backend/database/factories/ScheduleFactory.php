@@ -57,11 +57,4 @@ class ScheduleFactory extends Factory
             'published_at' => now()->format('Y-m-d H:i:s'),
         ]);
     }
-
-    public function inProgress(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'in_progress',
-        ]);
-    }
 }

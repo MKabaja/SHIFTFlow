@@ -12,7 +12,7 @@
         "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "predis/predis": "^3.4",
+        "predis/predis": "^3.5",
         "tymon/jwt-auth": "^2.2"
     },
     "require-dev": {
@@ -41,7 +41,14 @@
         }
     },
     "scripts": {
-        "pint": "vendor/bin/pint",
+        "lint": "php vendor/bin/pint",
+        "analyse": "php vendor/bin/phpstan analyse --memory-limit=512M",
+        "test_pest": "php vendor/bin/pest",
+        "check": [
+            "@lint",
+            "@analyse",
+            "@test_pest"
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",

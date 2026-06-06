@@ -29,6 +29,7 @@ class UserResource extends JsonResource
             'break_limit' => round($this->min_break_minutes / 60, 1),
 
             'contract_type' => $this->contract_type,
+            'locale' => $this->locale,
 
             'positions' => PositionResource::collection($this->whenLoaded('positions')),
 

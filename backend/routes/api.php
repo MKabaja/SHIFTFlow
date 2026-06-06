@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AvailabilityController;
 use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\MeController;
+use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\PositionController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\ShiftController;
@@ -23,10 +25,9 @@ Route::prefix('auth')
                 Route::post('/login-pin', 'loginPin');
             });
 
-        Route::middleware(['auth:api', 'jwt.blacklist']) // Protect logout and me routes
+        Route::middleware(['auth:api', 'jwt.blacklist']) // Protect logout route
             ->group(function () {
 
-                Route::get('/me', 'me');
                 Route::post('/logout', 'logout');
             });
     });
@@ -49,16 +50,22 @@ Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager,employee']) 
         Route::get('/', 'index');
 
     });
-// Schedule Crud + Batch
-Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager'])
+// Schedules — read (all roles; employee sees only published — filtered in controller)
+Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager,employee'])
     ->prefix('schedules')
     ->controller(ScheduleController::class)
     ->group(function () {
         Route::get('/', 'index');
+        Route::get('/{schedule}', 'show');
+    });
+// Schedules — write (admin, manager only)
+Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin,manager'])
+    ->prefix('schedules')
+    ->controller(ScheduleController::class)
+    ->group(function () {
         Route::post('/', 'store');
         Route::match(['put', 'patch'], '/{schedule}', 'update');
         Route::delete('/{schedule}', 'destroy');
-        Route::get('/{schedule}', 'show');
         Route::post('/{schedule}/shifts/batch', 'addShiftsBatch');
         Route::post('/{schedule}/publish', 'publish');
     });
@@ -93,6 +100,35 @@ Route::middleware(['auth:api', 'jwt.blacklist',  'role:admin'])
         Route::match(['put', 'patch'], '/{employee}', 'update');
         Route::delete('/{employee}', 'destroy');
         Route::get('/{employee}', 'show');
+    });
+
+// News — read (all authenticated roles)
+Route::middleware(['auth:api', 'jwt.blacklist'])
+    ->prefix('news')
+    ->controller(NewsController::class)
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{newsPost}', 'show');
+    });
+// News — write (admin only)
+Route::middleware(['auth:api', 'jwt.blacklist', 'role:admin'])
+    ->prefix('news')
+    ->controller(NewsController::class)
+    ->group(function () {
+        Route::post('/', 'store');
+        Route::match(['put', 'patch'], '/{newsPost}', 'update');
+        Route::delete('/{newsPost}', 'destroy');
+    });
+
+// Me — password & PIN changes
+Route::middleware(['auth:api', 'jwt.blacklist'])
+    ->prefix('me')
+    ->controller(MeController::class)
+    ->group(function () {
+        Route::get('/', 'me');
+        Route::patch('/locale', 'changeLocale');
+        Route::middleware('role:admin,manager')->patch('/password', 'changePassword');
+        Route::middleware('role:employee')->patch('/pin', 'changePin');
     });
 
 // Availabilities

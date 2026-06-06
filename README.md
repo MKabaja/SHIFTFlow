@@ -2,7 +2,7 @@
 
 [![PHP](https://img.shields.io/badge/PHP-8.2-8892BF?logo=php&logoColor=white)](https://php.net)
 [![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)](https://laravel.com)
-[![Tests](https://img.shields.io/badge/tests-122%20passing-brightgreen)](#running-tests)
+[![Tests](https://img.shields.io/badge/tests-177%20passing-brightgreen)](#running-tests)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level%206-blue)](https://phpstan.org)
 
 REST API for managing employee shift schedules at Wieliczka Salt Mine. · [Try it live ↓](#testing-the-api)
@@ -40,7 +40,7 @@ The current version is a fully tested REST API. A React SPA frontend is planned 
 | ---------- | -------------------------------------------------------------------------------- |
 | `admin`    | Full access — manages employees, positions, schedules, and availabilities        |
 | `manager`  | Creates and publishes schedules, adds shifts, reads positions and availabilities |
-| `employee` | Reads own shifts from published schedules, manages own availability              |
+| `employee` | Reads published schedules and news posts, manages own availability              |
 
 ---
 
@@ -158,7 +158,7 @@ erDiagram
     text description "nullable"
     tinyint month
     year year
-    enum status "draft|published|in_progress"
+    enum status "draft|published"
     timestamp published_at "nullable"
     bigint created_by FK "nullable"
     timestamps created_at
@@ -241,7 +241,7 @@ curl -X POST http://localhost:8000/api/auth/login \
   -d '{"login":"admin","password":"password"}'
 ```
 
-A successful response returns a JWT token in `access_token`. Use it as `Authorization: Bearer <token>` on all subsequent requests.
+A successful response returns `{"user": {...}}` and sets a `jwt_token` httpOnly cookie. Postman stores the cookie automatically — no manual token handling needed.
 
 ---
 
@@ -286,6 +286,7 @@ Root `.env` (Docker Compose level):
 | `DB_USERNAME`          | MySQL user                                                 |
 | `DB_PASSWORD`          | Must match root `.env`                                     |
 | `REDIS_HOST`           | `redis` inside Docker                                      |
+| `FRONTEND_URL`         | Allowed CORS origin — `http://localhost:5173` for local dev (not needed in production where frontend and backend share the same domain) |
 | `DEFAULT_EMPLOYEE_PIN` | PIN assigned to all CSV-imported accounts (default `1234`) |
 
 ---
@@ -305,7 +306,7 @@ Root `.env` (Docker Compose level):
 
 ## API Reference
 
-All authenticated endpoints require `Authorization: Bearer {token}`.
+All authenticated endpoints require the `jwt_token` httpOnly cookie (set automatically on login). No manual token handling needed.
 Base URL: `http://localhost:8000/api`
 
 ---
@@ -316,8 +317,7 @@ Base URL: `http://localhost:8000/api`
 | ------ | ----------------- | ------ | ---------------------------------- |
 | POST   | `/auth/login`     | —      | JWT login for admin/manager        |
 | POST   | `/auth/login-pin` | —      | PIN login for employee             |
-| GET    | `/auth/me`        | Bearer | Return current user data           |
-| POST   | `/auth/logout`    | Bearer | Invalidate token (Redis blacklist) |
+| POST   | `/auth/logout`    | Cookie | Invalidate token (Redis blacklist) |
 
 ---
 
@@ -330,14 +330,13 @@ Base URL: `http://localhost:8000/api`
 | `login`    | string | ✓        | —           |
 | `password` | string | ✓        | min 6 chars |
 
+Sets `jwt_token` httpOnly cookie (SameSite=Lax, Secure in production). Cookie is handled automatically by Postman and browsers.
+
 **Response 200:**
 
 ```json
 {
-	"access_token": "eyJ...",
-	"token_type": "bearer",
-	"expires_in": 32400,
-	"user": { "id": 1, "login": "admin", "name": "Admin User", "role": "admin" }
+	"user": { "id": 1, "login": "admin", "name": "Admin User", "role": "admin", "locale": "pl", "is_active": true }
 }
 ```
 
@@ -354,13 +353,36 @@ Base URL: `http://localhost:8000/api`
 | `login` | string  | ✓        | —                |
 | `pin`   | numeric | ✓        | exactly 4 digits |
 
-**Response 200:** same shape as `/auth/login`
+Sets `jwt_token` httpOnly cookie. **Response 200:** same shape as `/auth/login`
 
 **Errors:** `401` Wrong credentials | `403` Account inactive | `422` Validation failed
 
 ---
 
-#### `GET /auth/me`
+#### `POST /auth/logout`
+
+**Response 200:** `{ "message": "Logged out successfully" }`
+
+The `jti` claim is stored in Redis with TTL equal to the token's remaining lifetime. Re-using the token after logout returns `401`.
+
+**Errors:** `401` No token provided
+
+---
+
+### Me
+
+**Auth:** All authenticated users (role restrictions per endpoint).
+
+| Method | Path               | Auth             | Description                      |
+| ------ | ------------------ | ---------------- | -------------------------------- |
+| GET    | `/me`              | All              | Return current user data         |
+| PATCH  | `/me/password`     | Admin, Manager   | Change password                  |
+| PATCH  | `/me/pin`          | Employee only    | Change PIN                       |
+| PATCH  | `/me/locale`       | All              | Change language preference       |
+
+---
+
+#### `GET /me`
 
 **Response 200:**
 
@@ -372,6 +394,7 @@ Base URL: `http://localhost:8000/api`
 		"email": "tnowak@example.com",
 		"login": "tnowak",
 		"role": "employee",
+		"locale": "pl",
 		"is_active": true,
 		"hourly_rate": 25,
 		"monthly_hour_limit": 160,
@@ -395,29 +418,140 @@ Base URL: `http://localhost:8000/api`
 
 ---
 
-#### `POST /auth/logout`
+#### `PATCH /me/password`
 
-**Response 200:** `{ "message": "Logged out successfully" }`
+**Auth:** Admin and Manager only.
 
-The `jti` claim is stored in Redis with TTL equal to the token's remaining lifetime. Re-using the token after logout returns `401`.
+**Request:**
 
-**Errors:** `401` No token provided
+| Field                       | Type   | Required | Notes                          |
+| --------------------------- | ------ | -------- | ------------------------------ |
+| `current_password`          | string | ✓        | must match current password    |
+| `new_password`              | string | ✓        | min 8 chars, confirmed         |
+| `new_password_confirmation` | string | ✓        | must match `new_password`      |
+
+**Response 200:** `{ "message": "Password changed successfully." }`
+
+**Errors:** `422` Validation failed (wrong current password, mismatch)
+
+---
+
+#### `PATCH /me/pin`
+
+**Auth:** Employee only.
+
+If the employee has no PIN set yet, `current_pin` is not required (first-time setup).
+
+**Request:**
+
+| Field                  | Type    | Required      | Notes            |
+| ---------------------- | ------- | ------------- | ---------------- |
+| `current_pin`          | numeric | if PIN is set | exactly 4 digits |
+| `new_pin`              | numeric | ✓             | exactly 4 digits |
+| `new_pin_confirmation` | numeric | ✓             | must match `new_pin` |
+
+**Response 200:** `{ "message": "PIN changed successfully." }`
+
+**Errors:** `403` if role is not employee | `422` Wrong current PIN or mismatch
+
+---
+
+#### `PATCH /me/locale`
+
+**Request:**
+
+| Field    | Type   | Required | Notes          |
+| -------- | ------ | -------- | -------------- |
+| `locale` | string | ✓        | `pl` or `en`   |
+
+**Response 200:** `{ "message": "Locale changed successfully." }`
+
+---
+
+### News
+
+**Auth:** All authenticated users can read. Admin only for write.
+
+| Method | Path           | Description                        |
+| ------ | -------------- | ---------------------------------- |
+| GET    | `/news`        | List news posts (paginated)        |
+| GET    | `/news/{id}`   | Get single news post               |
+| POST   | `/news`        | Create news post (admin only)      |
+| PATCH  | `/news/{id}`   | Update news post (admin only)      |
+| DELETE | `/news/{id}`   | Delete news post (admin only)      |
+
+---
+
+#### `GET /news`
+
+**Query parameters:**
+
+| Param    | Type   | Notes                      |
+| -------- | ------ | -------------------------- |
+| `search` | string | search by title or content |
+
+**Response 200:** Paginated (20/page). Each item:
+
+```json
+{
+	"id": 1,
+	"title": "Zmiana grafiku lipiec",
+	"content": "Treść ogłoszenia...",
+	"is_important": false,
+	"author": {
+		"id": 1,
+		"name": "Admin User"
+	},
+	"created_at": "2026-06-01T10:00:00+00:00",
+	"updated_at": "2026-06-01T10:00:00+00:00"
+}
+```
+
+---
+
+#### `POST /news`
+
+**Request:**
+
+| Field          | Type    | Required | Notes           |
+| -------------- | ------- | -------- | --------------- |
+| `title`        | string  | ✓        | max 255         |
+| `content`      | string  | ✓        | min 10 chars    |
+| `is_important` | boolean | —        | default `false` |
+
+`author_id` is set automatically to the authenticated user.
+
+**Response 201:** News post object + `message: "News post created successfully"`.
+
+---
+
+#### `PATCH /news/{id}`
+
+Same fields as create, all optional.
+
+**Response 200:** Updated news post + `message: "News post updated successfully"`.
+
+---
+
+#### `DELETE /news/{id}`
+
+**Response 200:** `{ "message": "News post deleted successfully" }`
 
 ---
 
 ### Schedules
 
-**Auth:** Admin or Manager
+**Read:** All roles — employees see published schedules only. **Write:** Admin or Manager.
 
-| Method | Path                           | Description                          |
-| ------ | ------------------------------ | ------------------------------------ |
-| GET    | `/schedules`                   | List schedules (paginated)           |
-| POST   | `/schedules`                   | Create schedule                      |
-| GET    | `/schedules/{id}`              | Get schedule with shifts             |
-| PATCH  | `/schedules/{id}`              | Update name / description            |
-| DELETE | `/schedules/{id}`              | Delete schedule (cascades to shifts) |
-| POST   | `/schedules/{id}/shifts/batch` | Add shifts in bulk                   |
-| POST   | `/schedules/{id}/publish`      | Publish draft schedule               |
+| Method | Path                           | Description                                           |
+| ------ | ------------------------------ | ----------------------------------------------------- |
+| GET    | `/schedules`                   | List schedules — employees see published only         |
+| POST   | `/schedules`                   | Create schedule                                       |
+| GET    | `/schedules/{id}`              | Get schedule — employees get 403 on drafts            |
+| PATCH  | `/schedules/{id}`              | Update name / description                             |
+| DELETE | `/schedules/{id}`              | Delete schedule (cascades to shifts)                  |
+| POST   | `/schedules/{id}/shifts/batch` | Add shifts in bulk                                    |
+| POST   | `/schedules/{id}/publish`      | Publish draft schedule                                |
 
 ---
 
@@ -989,13 +1123,12 @@ Validators are injected as an ordered array into `ValidationService` via `AppSer
 - **Account deactivation** — `is_active` checked on both login flows; inactive accounts return `403` before token is issued
 - **JWT secret rotation** — the original secret was committed in an early version of the repo; a new secret was generated and all active tokens were invalidated (commit `b57ddd5`)
 - **`APP_DEBUG=false`** — set as default in `backend/.env.example`; stack traces are never exposed in production
-- **CORS** — currently allows all origins (`*`); planned restriction to the frontend domain after first deployment
+- **CORS** — restricted to `FRONTEND_URL` env var (`config/cors.php`, paths `api/*`, `supports_credentials: true`). On production (Hetzner) the frontend and backend share the same domain — CORS only matters for local development (`localhost:5173` ↔ Laravel)
 
 ---
 
 ## Known Issues
 
-- **CORS wildcard** — `*` is acceptable during development, must be restricted to the frontend domain before any public deployment
 - **CSV import performance** — measured with real data: ~100 rows take ~10 seconds, ~300 rows exceed the request timeout. Root cause: `EmployeeRepository::saveMany()` runs one `updateOrCreate` query per row in a loop (N+1 writes), no batching.
 
 ---
@@ -1004,7 +1137,6 @@ Validators are injected as an ordered array into `ValidationService` via `AppSer
 
 - **CSV import rewrite** — replace N+1 loop with `DB::upsert()`, dispatch to a queued Job via Laravel Horizon for files above ~50 rows; refactor `EmployeesCsvExtractor` to auto-detect file structure instead of requiring a fixed column template
 - **Reports module** — planned after React SPA frontend requirements are defined
-- **Restrict CORS** — lock `ALLOWED_ORIGINS` to the frontend domain after deployment
 - **React SPA frontend** — planned as a separate repository; all required API fields are documented in `docs/SHIFTFLOW_API.postman_collection.json`
 
 ---
@@ -1015,7 +1147,7 @@ Validators are injected as an ordered array into `ValidationService` via `AppSer
 docker compose exec app php artisan test
 ```
 
-122 tests, 19 test files. Feature tests run against a real MySQL `shiftflow_test` database — no SQLite, no mocks. Unit tests cover individual shift validators, `LoginGeneratorService`, and `TimeHelper`.
+177 tests, 443 assertions. Feature tests run against a real MySQL `shiftflow_test` database — no SQLite, no mocks. Unit tests cover individual shift validators, `LoginGeneratorService`, and `TimeHelper`.
 
 Static analysis — PHPStan level 6 via Larastan, zero errors, no suppression baseline:
 

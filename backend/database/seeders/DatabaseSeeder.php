@@ -64,6 +64,7 @@ class DatabaseSeeder extends Seeder
             PositionSeeder::class,
             ScheduleSeeder::class,
             ShiftSeeder::class,
+            NewsPostSeeder::class,
         ]);
     }
 }
