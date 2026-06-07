@@ -25,7 +25,7 @@ services:
         container_name: shiftflow_db
         restart: unless-stopped
         ports:
-            - '3306:3306'
+            - '127.0.0.1:3306:3306'
         environment:
             MYSQL_DATABASE: shiftflow_db
             MYSQL_USER: shiftflow_user
@@ -42,7 +42,7 @@ services:
         container_name: shiftflow_redis
         restart: unless-stopped
         ports:
-            - ${FORWARD_REDIS_PORT:-6379}:6379
+            - 127.0.0.1:${FORWARD_REDIS_PORT:-6379}:6379
         healthcheck:
             test: ['CMD', 'redis-cli', 'ping']
             timeout: 5s
