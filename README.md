@@ -9,6 +9,15 @@ REST API for managing employee shift schedules at Wieliczka Salt Mine. · [Try i
 
 ---
 
+## Live Deployment
+
+| Service                | URL                                                             |
+| ----------------------- | ---------------------------------------------------------------- |
+| Backend API (Hetzner)   | [shiftflow-api.duckdns.org](https://shiftflow-api.duckdns.org)   |
+| Frontend (React SPA)    | [shiftflow.duckdns.org](https://shiftflow.duckdns.org) — 🚧 in progress, nothing deployed yet |
+
+---
+
 ## About the Project
 
 Wieliczka Salt Mine handles tourist traffic through a team of employees working across 27 specialised positions — ticket booths, parking wardens, tram operators, guides, and more. Every month, a manager is responsible for building a schedule that covers all positions while respecting each employee's availability, contract limits, and required rest periods.
@@ -17,7 +26,7 @@ Until now, that work was done entirely in Excel — manually, one shift at a tim
 
 The system gives managers a structured way to create and publish monthly schedules, import employees from a CSV export of their existing spreadsheet, and enforce business rules automatically — shift conflicts, position permissions, hour limits, and minimum breaks are all validated on the server before a shift is saved. Employees can log in to view their own shifts from published schedules and declare their availability for upcoming months.
 
-The current version is a fully tested REST API. A React SPA frontend is planned as the next phase, which will let managers build schedules visually in the browser rather than through API calls.
+The current version is a fully tested REST API. A React SPA frontend is in progress at [shiftflow.duckdns.org](https://shiftflow.duckdns.org) (nothing deployed there yet), which will let managers build schedules visually in the browser rather than through API calls.
 
 ---
 
@@ -300,7 +309,7 @@ Root `.env` (Docker Compose level):
 | Collection                                                                                 | Base URL                             |
 | ------------------------------------------------------------------------------------------ | ------------------------------------ |
 | [`docs/SHIFTFLOW_API.postman_collection.json`](docs/SHIFTFLOW_API.postman_collection.json) | `http://localhost:8000` (local)      |
-| [`docs/LIVEPREVIEW.postman_collection.json`](docs/LIVEPREVIEW.postman_collection.json)     | `http://204.168.235.115:8000` (live) |
+| [`docs/LIVEPREVIEW.postman_collection.json`](docs/LIVEPREVIEW.postman_collection.json)     | `https://shiftflow-api.duckdns.org` (live) |
 
 ## Demo credentials: `admin` / `password` — see [Demo Accounts](#demo-accounts) for the full list.
 
