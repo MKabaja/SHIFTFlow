@@ -21,8 +21,9 @@ test('login succeeds with valid credentials', function () {
 
     $response
         ->assertOk()
-        ->assertJsonStructure(['user'])
-        ->assertJsonPath('user.login', $manager->login);
+        ->assertJsonStructure(['data' => ['id', 'name', 'login', 'role', 'locale', 'positions']])
+        ->assertJsonPath('data.login', $manager->login)
+        ->assertJsonIsArray('data.positions');
 
     expect($response->getCookie('jwt_token', false))->not->toBeNull();
 });

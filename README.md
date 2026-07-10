@@ -250,7 +250,7 @@ curl -X POST http://localhost:8000/api/auth/login \
   -d '{"login":"admin","password":"password"}'
 ```
 
-A successful response returns `{"user": {...}}` and sets a `jwt_token` httpOnly cookie. Postman stores the cookie automatically — no manual token handling needed.
+A successful response returns `{"data": {...}}` (the full user, identical in shape to `GET /me`) and sets a `jwt_token` httpOnly cookie. Postman stores the cookie automatically — no manual token handling needed.
 
 ---
 
@@ -339,13 +339,28 @@ Base URL: `http://localhost:8000/api`
 | `login`    | string | ✓        | —           |
 | `password` | string | ✓        | min 6 chars |
 
-Sets `jwt_token` httpOnly cookie (SameSite=Lax, Secure in production). Cookie is handled automatically by Postman and browsers.
+Sets `jwt_token` httpOnly cookie (host-only, SameSite=Lax, Secure in production). Cookie is handled automatically by Postman and browsers.
 
-**Response 200:**
+**Response 200:** the full user resource, **identical in shape to `GET /me`** (includes `positions[]`):
 
 ```json
 {
-	"user": { "id": 1, "login": "admin", "name": "Admin User", "role": "admin", "locale": "pl", "is_active": true }
+	"data": {
+		"id": 1,
+		"name": "Admin User",
+		"email": "admin@example.com",
+		"login": "admin",
+		"role": "admin",
+		"is_active": true,
+		"hourly_rate": null,
+		"monthly_hour_limit": 0,
+		"quarter_hour_limit": 0,
+		"break_limit": 0,
+		"contract_type": "employment_contract",
+		"locale": "pl",
+		"positions": [],
+		"created_at": "2026-06-18T17:28:11+00:00"
+	}
 }
 ```
 
@@ -1156,7 +1171,7 @@ Validators are injected as an ordered array into `ValidationService` via `AppSer
 docker compose exec app php artisan test
 ```
 
-177 tests, 443 assertions. Feature tests run against a real MySQL `shiftflow_test` database — no SQLite, no mocks. Unit tests cover individual shift validators, `LoginGeneratorService`, and `TimeHelper`.
+177 tests, 465 assertions. Feature tests run against a real MySQL `shiftflow_test` database — no SQLite, no mocks. Unit tests cover individual shift validators, `LoginGeneratorService`, and `TimeHelper`.
 
 Static analysis — PHPStan level 6 via Larastan, zero errors, no suppression baseline:
 

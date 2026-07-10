@@ -23,7 +23,10 @@ test('login sets httpOnly cookie', function () {
 
     expect($cookie)->not->toBeNull()
         ->and($cookie->isHttpOnly())->toBeTrue()
-        ->and($cookie->getValue())->not->toBeEmpty();
+        ->and($cookie->getValue())->not->toBeEmpty()
+        ->and($cookie->getSameSite())->toBe('lax')     // CSRF mitigation
+        ->and($cookie->getDomain())->toBeNull()        // host-only: no Domain attribute
+        ->and($cookie->isSecure())->toBeFalse();       // http locally; Secure only on prod
 });
 
 test('me works with cookie auth', function () {

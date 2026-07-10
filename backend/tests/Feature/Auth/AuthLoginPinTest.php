@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Position;
 use App\Models\User;
 
 beforeEach(function () {
@@ -9,10 +10,12 @@ beforeEach(function () {
     $this->pin = '2222';
 });
 
-test('login pin succeeds with valid pin', function () {
+test('login pin succeeds with valid pin and returns full user resource', function () {
     /** @var \Tests\TestCase $this */
     /** @var User $employee */
     $employee = User::factory()->employee()->withPin($this->pin)->create();
+    $position = Position::factory()->create();
+    $employee->positions()->attach($position->id);
 
     $response = $this->postJson('/api/auth/login-pin', [
         'login' => $employee->login,
@@ -21,8 +24,9 @@ test('login pin succeeds with valid pin', function () {
 
     $response
         ->assertOk()
-        ->assertJsonStructure(['user'])
-        ->assertJsonPath('user.role', 'employee');
+        ->assertJsonStructure(['data' => ['id', 'name', 'login', 'role', 'locale', 'positions' => [['id', 'name', 'description', 'color']]]])
+        ->assertJsonPath('data.role', 'employee')
+        ->assertJsonPath('data.positions.0.id', $position->id);
 
     expect($response->getCookie('jwt_token', false))->not->toBeNull();
 });
