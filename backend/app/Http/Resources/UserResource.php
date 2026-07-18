@@ -23,10 +23,10 @@ class UserResource extends JsonResource
             'role' => $this->role,
             'is_active' => (bool) $this->is_active,
 
-            'hourly_rate' => $this->hourly_rate ? (float) $this->hourly_rate : null,
-            'monthly_hour_limit' => round($this->max_minutes_per_month / 60, 1),
-            'quarter_hour_limit' => round($this->max_minutes_per_quarter / 60, 1),
-            'break_limit' => round($this->min_break_minutes / 60, 1),
+            'hourly_rate' => $this->hourly_rate !== null ? (float) $this->hourly_rate : null,
+            'monthly_hour_limit' => $this->minutesToHours($this->max_minutes_per_month),
+            'quarter_hour_limit' => $this->minutesToHours($this->max_minutes_per_quarter),
+            'break_limit' => $this->minutesToHours($this->min_break_minutes),
 
             'contract_type' => $this->contract_type,
             'locale' => $this->locale,
@@ -35,5 +35,10 @@ class UserResource extends JsonResource
 
             'created_at' => $this->created_at?->toIso8601String(),
         ];
+    }
+
+    private function minutesToHours(?int $minutes): ?float
+    {
+        return $minutes !== null ? round($minutes / 60, 1) : null;
     }
 }
