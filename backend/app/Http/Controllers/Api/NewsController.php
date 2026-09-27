@@ -5,28 +5,34 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IndexNewsPostRequest;
 use App\Http\Requests\StoreNewsPostRequest;
 use App\Http\Requests\UpdateNewsPostRequest;
 use App\Http\Resources\NewsPostResource;
 use App\Models\NewsPost;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(IndexNewsPostRequest $request): JsonResponse
     {
         $this->authorize('viewAny', NewsPost::class);
 
-        $search = $request->query('search');
+        /** @var string|null $search */
+        $search = $request->validated('search');
+
+        /** @var int|null $perPage */
+        $perPage = $request->validated('per_page');
 
         $newsPosts = NewsPost::with('author')
             ->when($search, function ($query) use ($search) {
                 $query->where('title', 'like', "%{$search}%")
                     ->orWhere('content', 'like', "%{$search}%");
             })
+            ->orderByDesc('is_important')
             ->latest()
-            ->paginate(20);
+            ->orderByDesc('id')
+            ->paginate($perPage ?? 20);
 
         return NewsPostResource::collection($newsPosts)
             ->response();
