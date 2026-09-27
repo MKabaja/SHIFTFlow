@@ -156,3 +156,66 @@ test('content must be at least 10 characters', function () {
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['content']);
 });
+
+test('an important older post is returned before a newer regular post', function () {
+    /** @var \Tests\TestCase $this */
+    $regular = NewsPost::factory()->byUser($this->admin)->create([
+        'is_important' => false,
+        'created_at' => now(),
+    ]);
+    $important = NewsPost::factory()->byUser($this->admin)->create([
+        'is_important' => true,
+        'created_at' => now()->subDays(2),
+    ]);
+
+    $response = $this->getJson('/api/news')->assertOk();
+
+    expect($response->json('data.0.id'))->toBe($important->id);
+    expect($response->json('data.1.id'))->toBe($regular->id);
+});
+
+test('posts with the same importance and created_at fall back to id as tie-breaker', function () {
+    /** @var \Tests\TestCase $this */
+    $now = now();
+    $first = NewsPost::factory()->byUser($this->admin)->create(['created_at' => $now]);
+    $second = NewsPost::factory()->byUser($this->admin)->create(['created_at' => $now]);
+
+    $response = $this->getJson('/api/news')->assertOk();
+
+    expect($response->json('data.0.id'))->toBe($second->id);
+    expect($response->json('data.1.id'))->toBe($first->id);
+});
+
+test('per_page limits the results and is reported in meta', function () {
+    /** @var \Tests\TestCase $this */
+    NewsPost::factory()->count(15)->byUser($this->admin)->create();
+
+    $this->getJson('/api/news?per_page=10')
+        ->assertOk()
+        ->assertJsonCount(10, 'data')
+        ->assertJsonPath('meta.per_page', 10);
+});
+
+test('news index defaults to 20 per page without per_page param', function () {
+    /** @var \Tests\TestCase $this */
+    NewsPost::factory()->count(25)->byUser($this->admin)->create();
+
+    $this->getJson('/api/news')
+        ->assertOk()
+        ->assertJsonCount(20, 'data')
+        ->assertJsonPath('meta.per_page', 20);
+});
+
+test('per_page must be at least 1', function () {
+    /** @var \Tests\TestCase $this */
+    $this->getJson('/api/news?per_page=0')
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['per_page']);
+});
+
+test('per_page must not exceed 50', function () {
+    /** @var \Tests\TestCase $this */
+    $this->getJson('/api/news?per_page=51')
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['per_page']);
+});
