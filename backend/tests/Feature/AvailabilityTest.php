@@ -100,7 +100,7 @@ test('employee cannot view other users availability', function () {
     /** @var User $otherUser */
     $otherUser = User::factory()->employee()->create();
 
-    $this->getJson("/api/availabilities?user_id={$otherUser->id}")
+    $this->getJson("/api/availabilities?year=2026&month=2&user_id={$otherUser->id}")
         ->assertForbidden();
 });
 
@@ -113,9 +113,9 @@ test('admin can list availabilities of all users', function () {
     Availability::factory()->forUser($other->id)->forDate('2026-02-11')->unavailable()->create();
 
     $this->actingAsAdmin()
-        ->getJson('/api/availabilities')
+        ->getJson('/api/availabilities?year=2026&month=2')
         ->assertOk()
-        ->assertJsonPath('meta.total', 2);
+        ->assertJsonCount(2, 'data');
 });
 
 test('manager can list availabilities of all users', function () {
@@ -127,9 +127,9 @@ test('manager can list availabilities of all users', function () {
     Availability::factory()->forUser($other->id)->forDate('2026-02-11')->unavailable()->create();
 
     $this->actingAsManager()
-        ->getJson('/api/availabilities')
+        ->getJson('/api/availabilities?year=2026&month=2')
         ->assertOk()
-        ->assertJsonPath('meta.total', 2);
+        ->assertJsonCount(2, 'data');
 });
 
 test('manager cannot create availability', function () {
