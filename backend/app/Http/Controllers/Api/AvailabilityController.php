@@ -5,26 +5,31 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IndexAvailabilityRequest;
 use App\Http\Requests\StoreAvailabilityRequest;
 use App\Http\Resources\AvailabilityResource;
 use App\Models\Availability;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class AvailabilityController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(IndexAvailabilityRequest $request): JsonResponse
     {
         $this->authorize('viewAny', Availability::class);
 
         $user = $request->user();
-        $requestedUserId = $request->query('user_id');
+        $requestedUserId = $request->validated('user_id');
 
         if ($requestedUserId && $user->role === 'employee') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        $monthStart = Carbon::create($request->integer('year'), $request->integer('month'))->startOfMonth();
+        $monthEnd = $monthStart->copy()->endOfMonth();
+
         $availabilities = Availability::query()
+            ->whereBetween('date', [$monthStart->toDateString(), $monthEnd->toDateString()])
 
             ->when($user
                 ->role === 'employee', fn ($q) => $q
@@ -35,7 +40,9 @@ class AvailabilityController extends Controller
                 && in_array($user->role, ['admin', 'manager']),
                 fn ($q) => $q->where('user_id', $requestedUserId)
             )
-            ->paginate(20);
+            ->orderBy('date')
+            ->orderBy('user_id')
+            ->get();
 
         return AvailabilityResource::collection($availabilities)
             ->response();
