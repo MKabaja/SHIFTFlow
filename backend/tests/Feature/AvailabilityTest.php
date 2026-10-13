@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 use App\Models\Availability;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 
 beforeEach(function () {
     /** @var \Tests\TestCase $this */
+    $this->travelTo(Carbon::parse('2026-10-15'));
     $this->actingAsEmployee();
     $this->seedPositions();
 });
@@ -14,7 +16,7 @@ beforeEach(function () {
 test('employee can declare their own availability', function () {
     /** @var \Tests\TestCase $this */
     $this->postJson('/api/availabilities', [
-        'date' => '2026-01-15',
+        'date' => '2026-10-20',
         'is_available' => true,
         'notes' => 'Chętnie przyjdę',
     ])
@@ -23,7 +25,7 @@ test('employee can declare their own availability', function () {
 
     $this->assertDatabaseHas('availabilities', [
         'user_id' => $this->employee->id,
-        'date' => '2026-01-15',
+        'date' => '2026-10-20',
         'is_available' => true,
     ]);
 });
@@ -35,14 +37,14 @@ test('employee cannot declare availability for another user', function () {
 
     $this->postJson('/api/availabilities', [
         'user_id' => $otherUser->id,
-        'date' => '2026-01-16',
+        'date' => '2026-10-21',
         'is_available' => true,
     ])
         ->assertStatus(201);
 
     $this->assertDatabaseHas('availabilities', [
         'user_id' => $this->employee->id,
-        'date' => '2026-01-16',
+        'date' => '2026-10-21',
     ]);
 
     $this->assertDatabaseMissing('availabilities', [
@@ -58,7 +60,7 @@ test('admin can declare availability for an employee', function () {
     $this->actingAsAdmin()
         ->postJson('/api/availabilities', [
             'user_id' => $employee->id,
-            'date' => '2026-01-20',
+            'date' => '2026-10-22',
             'is_available' => false,
             'notes' => 'Urlop',
         ])
@@ -75,12 +77,12 @@ test('availability is updated if exists for the same date', function () {
     /** @var \Tests\TestCase $this */
     Availability::create([
         'user_id' => $this->employee->id,
-        'date' => '2026-01-15',
+        'date' => '2026-10-20',
         'is_available' => true,
     ]);
 
     $this->postJson('/api/availabilities', [
-        'date' => '2026-01-15',
+        'date' => '2026-10-20',
         'is_available' => false,
     ])
         ->assertStatus(200);
@@ -90,7 +92,7 @@ test('availability is updated if exists for the same date', function () {
 
     $this->assertDatabaseHas('availabilities', [
         'user_id' => $this->employee->id,
-        'date' => '2026-01-15',
+        'date' => '2026-10-20',
         'is_available' => false,
     ]);
 });
@@ -140,7 +142,7 @@ test('manager cannot create availability', function () {
     $this->actingAsManager()
         ->postJson('/api/availabilities', [
             'user_id' => $employee->id,
-            'date' => '2026-03-01',
+            'date' => '2026-10-23',
             'is_available' => true,
         ])
         ->assertForbidden();
